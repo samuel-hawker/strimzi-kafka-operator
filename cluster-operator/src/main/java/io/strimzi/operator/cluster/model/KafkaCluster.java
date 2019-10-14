@@ -1304,6 +1304,10 @@ public class KafkaCluster extends AbstractModel {
                                 .withNewLabelSelector()
                                     .addToMatchLabels(Labels.STRIMZI_CLUSTER_LABEL, cluster)
                                     .addToMatchLabels(Labels.STRIMZI_NAME_LABEL, name)
+                                    // I guess we don't actually want to match on these?
+                                    .addToMatchLabels(Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME)
+                                    .addToMatchLabels(Labels.KUBERNETES_INSTANCE_LABEL, cluster)
+                                    .addToMatchLabels(Labels.KUBERNETES_MANAGED_BY_LABEL, "kafka-operator")
                                 .endLabelSelector()
                             .endPodAffinityTerm()
                         .endPreferredDuringSchedulingIgnoredDuringExecution()
