@@ -196,7 +196,6 @@ public abstract class AbstractModel {
                             .withKubernetesName()
                             .withKubernetesInstance(cluster)
                             .withKubernetesManagedBy();
-
         this.validLoggerFields = getDefaultLogConfig().asMap();
     }
 

@@ -87,12 +87,8 @@ public class ModelUtils {
      * @return  Map with label definition
      */
     public static String defaultResourceLabels(String cluster) {
-        return String.format("%s=%s,%s=%s,%s=%s,%s=%s",
-                Labels.STRIMZI_CLUSTER_LABEL, cluster,
-                Labels.KUBERNETES_NAME_LABEL, cluster,
-                Labels.KUBERNETES_INSTANCE_LABEL, cluster,
-                Labels.KUBERNETES_MANAGED_BY_LABEL, cluster
-                );
+        return String.format("%s=%s",Labels.STRIMZI_CLUSTER_LABEL, cluster);
+
     }
 
     /**

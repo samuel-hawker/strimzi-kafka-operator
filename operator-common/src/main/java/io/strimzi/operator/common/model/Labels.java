@@ -205,8 +205,7 @@ public class Labels {
     }
 
     /**
-     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
-     * @param instance The instance to add.     * 
+     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.    * 
      * @return A new instance with the given kubernetes labels added.
      */
     public Labels withKubernetesManagedBy() {
