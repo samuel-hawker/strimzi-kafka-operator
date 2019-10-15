@@ -87,8 +87,8 @@ public class ModelUtils {
      * @return  Map with label definition
      */
     public static String defaultResourceLabels(String cluster) {
-        return String.format("%s=%s",
-                Labels.STRIMZI_CLUSTER_LABEL, cluster);
+        return String.format("%s=%s", Labels.STRIMZI_CLUSTER_LABEL, cluster);
+
     }
 
     /**

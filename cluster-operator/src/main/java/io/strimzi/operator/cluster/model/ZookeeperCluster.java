@@ -57,6 +57,8 @@ import static java.util.Arrays.asList;
 
 public class ZookeeperCluster extends AbstractModel {
 
+    protected static final String ZOOKEEPER_OPERATOR_NAME = "zookeeper-operator";
+
     protected static final int CLIENT_PORT = 2181;
     protected static final String CLIENT_PORT_NAME = "clients";
     protected static final int CLUSTERING_PORT = 2888;
@@ -143,7 +145,7 @@ public class ZookeeperCluster extends AbstractModel {
      */
     private ZookeeperCluster(String namespace, String cluster, Labels labels) {
 
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, ZOOKEEPER_OPERATOR_NAME);
         this.name = zookeeperClusterName(cluster);
         this.serviceName = serviceName(cluster);
         this.headlessServiceName = headlessServiceName(cluster);

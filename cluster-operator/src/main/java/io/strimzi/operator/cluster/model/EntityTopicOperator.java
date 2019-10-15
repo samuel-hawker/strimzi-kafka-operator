@@ -35,6 +35,7 @@ import static java.util.Collections.singletonList;
  * Represents the Topic Operator deployment
  */
 public class EntityTopicOperator extends AbstractModel {
+    protected static final String ENTITY_TOPIC_OPERATOR_NAME = "entity-topic-operator";
 
     protected static final String TOPIC_OPERATOR_CONTAINER_NAME = "topic-operator";
     private static final String NAME_SUFFIX = "-entity-topic-operator";
@@ -74,7 +75,7 @@ public class EntityTopicOperator extends AbstractModel {
      * @param labels
      */
     protected EntityTopicOperator(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, ENTITY_TOPIC_OPERATOR_NAME);
         this.name = topicOperatorName(cluster);
         this.readinessPath = "/";
         this.readinessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;

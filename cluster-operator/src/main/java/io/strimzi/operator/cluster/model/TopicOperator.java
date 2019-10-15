@@ -96,7 +96,7 @@ public class TopicOperator extends AbstractModel {
      */
     protected TopicOperator(String namespace, String cluster, Labels labels) {
 
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, TOPIC_OPERATOR_NAME);
         this.name = topicOperatorName(cluster);
         this.replicas = io.strimzi.api.kafka.model.TopicOperatorSpec.DEFAULT_REPLICAS;
         this.readinessPath = "/";
@@ -201,8 +201,7 @@ public class TopicOperator extends AbstractModel {
     }
 
     protected static String defaultTopicConfigMapLabels(String cluster) {
-        return String.format("%s=%s",
-                Labels.STRIMZI_CLUSTER_LABEL, cluster);
+        return String.format("%s=%s", Labels.STRIMZI_CLUSTER_LABEL, cluster);
     }
 
     public static String secretName(String cluster) {

@@ -136,7 +136,7 @@ public class ModelUtilsTest {
 
     private class Model extends AbstractModel   {
         public Model()  {
-            super("", "", Labels.EMPTY);
+            super("", "", Labels.EMPTY, "");
         }
 
         @Override
