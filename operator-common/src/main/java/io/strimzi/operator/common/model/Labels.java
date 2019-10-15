@@ -197,7 +197,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
-     * @param instance The instance to add.     * 
+     * @param instance The instance to add.
      * @return A new instance with the given kubernetes labels added.
      */
     public Labels withKubernetesInstance(String instance) {
@@ -205,12 +205,13 @@ public class Labels {
     }
 
     /**
-     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.    * 
-     * @return A new instance with the given kubernetes labels added.
+     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     * @param operatorName The name of the operator managing this resource
+     * @return A new instance with the given operator that is managing this resourse.
      */
-    public Labels withKubernetesManagedBy() {
+    public Labels withKubernetesManagedBy(String operatorName) {
         // Make configurable?
-        return with(Labels.KUBERNETES_MANAGED_BY_LABEL, "kafka-operator");
+        return with(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
     }
 
     /**

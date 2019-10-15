@@ -125,7 +125,11 @@ public class KafkaMirrorMakerClusterTest {
         return TestUtils.map(Labels.STRIMZI_CLUSTER_LABEL, this.cluster,
                 "my-user-label", "cromulent",
                 Labels.STRIMZI_KIND_LABEL, KafkaMirrorMaker.RESOURCE_KIND,
-                Labels.STRIMZI_NAME_LABEL, name);
+                Labels.STRIMZI_NAME_LABEL, name,
+                Labels.KUBERNETES_MANAGED_BY_LABEL, Labels.CLUSTER_OPERATOR, 
+                Labels.KUBERNETES_NAME, "strimzi",
+                Labels.KUBERNETES_NAME, this.cluster
+                );
     }
 
     private Map<String, String> expectedSelectorLabels()    {

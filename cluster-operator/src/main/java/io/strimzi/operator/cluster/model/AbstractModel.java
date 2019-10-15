@@ -186,16 +186,17 @@ public abstract class AbstractModel {
     /**
      * Constructor
      *
-     * @param namespace Kubernetes/OpenShift namespace where cluster resources are going to be created
-     * @param cluster   overall cluster name
+     * @param namespace    Kubernetes/OpenShift namespace where cluster resources are going to be created
+     * @param cluster      overall cluster name
+     * @param operatorName overall cluster name
      */
-    protected AbstractModel(String namespace, String cluster, Labels labels) {
+    protected AbstractModel(String namespace, String cluster, Labels labels, String operatorName) {
         this.cluster = cluster;
         this.namespace = namespace;
         this.labels = labels.withCluster(cluster)
                             .withKubernetesName()
                             .withKubernetesInstance(cluster)
-                            .withKubernetesManagedBy();
+                            .withKubernetesManagedBy(operatorName);
         this.validLoggerFields = getDefaultLogConfig().asMap();
     }
 
