@@ -188,7 +188,7 @@ public class Labels {
     }
     
     /**
-     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     * The same labels as this instance, but with the application name {@code strimzi} for the {@code app.kubernetes.io/name} key.
      * @return A new instance with the given kubernetes kubernetes application name added.
      */
     public Labels withKubernetesName() {
@@ -196,17 +196,17 @@ public class Labels {
     }
 
     /**
-     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     * The same labels as this instance, but with the given {@code instance} for the {@code app.kubernetes.io/instance} key.
      * @param instance The instance to add.
-     * @return A new instance with the given kubernetes labels added.
+     * @return A new instance with the given kubernetes application instance added.
      */
     public Labels withKubernetesInstance(String instance) {
         return with(Labels.KUBERNETES_INSTANCE_LABEL, instance);
     }
 
     /**
-     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
-     * @param operatorName The name of the operator managing this resource
+     * The same labels as this instance, but with the given {@code operatorName} for the {@code app.kubernetes.io/managed-by} key.
+     * @param operatorName The name of the operator managing this resource.
      * @return A new instance with the given operator that is managing this resourse.
      */
     public Labels withKubernetesManagedBy(String operatorName) {
