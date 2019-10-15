@@ -154,7 +154,14 @@ public class KafkaClusterTest {
     }
 
     private Map<String, String> expectedLabels()    {
-        return TestUtils.map(Labels.STRIMZI_CLUSTER_LABEL, cluster, "my-user-label", "cromulent", Labels.STRIMZI_NAME_LABEL, KafkaCluster.kafkaClusterName(cluster), Labels.STRIMZI_KIND_LABEL, Kafka.RESOURCE_KIND);
+        return TestUtils.map(
+            Labels.STRIMZI_CLUSTER_LABEL, cluster,
+            "my-user-label", "cromulent",
+            Labels.STRIMZI_NAME_LABEL, KafkaCluster.kafkaClusterName(cluster),
+            Labels.STRIMZI_KIND_LABEL, Kafka.RESOURCE_KIND,
+            Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME,
+            Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
+            Labels.KUBERNETES_MANAGED_BY_LABEL, KafkaCluster.KAFKA_OPERATOR_NAME);
     }
 
     private Map<String, String> expectedSelectorLabels()    {

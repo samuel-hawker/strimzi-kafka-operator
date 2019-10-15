@@ -42,6 +42,9 @@ import java.util.List;
 import java.util.Map;
 
 public class KafkaMirrorMakerCluster extends AbstractModel {
+
+    protected static final String KAFKA_MIRROR_MAKER_OPERATOR_NAME = "kafka-mirror-maker-operator";    
+
     protected static final String TLS_CERTS_VOLUME_MOUNT_CONSUMER = "/opt/kafka/consumer-certs/";
     protected static final String PASSWORD_VOLUME_MOUNT_CONSUMER = "/opt/kafka/consumer-password/";
     protected static final String TLS_CERTS_VOLUME_MOUNT_PRODUCER = "/opt/kafka/producer-certs/";
@@ -114,7 +117,7 @@ public class KafkaMirrorMakerCluster extends AbstractModel {
      * @param labels    labels to add to the cluster
      */
     protected KafkaMirrorMakerCluster(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, KAFKA_MIRROR_MAKER_OPERATOR_NAME);
         this.name = KafkaMirrorMakerResources.deploymentName(cluster);
         this.serviceName = KafkaMirrorMakerResources.serviceName(cluster);
         this.ancillaryConfigName = KafkaMirrorMakerResources.metricsAndLogConfigMapName(cluster);

@@ -56,6 +56,8 @@ import static io.strimzi.operator.cluster.model.ModelUtils.createHttpProbe;
 
 public class KafkaConnectCluster extends AbstractModel {
 
+    protected static final String KAFKA_CONNECT_OPERATOR_NAME = "kafka-connect-operator";
+
     // Port configuration
     public static final int REST_API_PORT = 8083;
     protected static final String REST_API_PORT_NAME = "rest-api";
@@ -109,7 +111,7 @@ public class KafkaConnectCluster extends AbstractModel {
      * @param labels    labels to add to the cluster
      */
     protected KafkaConnectCluster(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, KAFKA_CONNECT_OPERATOR_NAME);
         this.name = KafkaConnectResources.deploymentName(cluster);
         this.serviceName = KafkaConnectResources.serviceName(cluster);
         this.ancillaryConfigName = KafkaConnectResources.metricsAndLogConfigMapName(cluster);

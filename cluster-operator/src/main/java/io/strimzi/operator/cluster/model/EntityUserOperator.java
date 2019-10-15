@@ -35,6 +35,7 @@ import static java.util.Collections.singletonList;
  * Represents the User Operator deployment
  */
 public class EntityUserOperator extends AbstractModel {
+    protected static final String ENTITY_USER_OPERATOR_NAME = "entity-user-operator";
 
     protected static final String USER_OPERATOR_CONTAINER_NAME = "user-operator";
     private static final String NAME_SUFFIX = "-entity-user-operator";
@@ -73,7 +74,7 @@ public class EntityUserOperator extends AbstractModel {
      * @param labels
      */
     protected EntityUserOperator(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, ENTITY_USER_OPERATOR_NAME);
         this.name = userOperatorName(cluster);
         this.readinessPath = "/";
         this.livenessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;

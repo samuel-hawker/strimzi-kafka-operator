@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public class KafkaBridgeCluster extends AbstractModel {
+    protected static final String KAFKA_BRIDGE_OPERATOR_NAME = "kafka-bridge-operator";
 
     // Port configuration
     public static final int DEFAULT_REST_API_PORT = 8080;
@@ -114,7 +115,7 @@ public class KafkaBridgeCluster extends AbstractModel {
      * @param labels    labels to add to the cluster
      */
     protected KafkaBridgeCluster(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, KAFKA_BRIDGE_OPERATOR_NAME);
         this.name = KafkaBridgeResources.deploymentName(cluster);
         this.serviceName = KafkaBridgeResources.serviceName(cluster);
         this.ancillaryConfigName = KafkaBridgeResources.metricsAndLogConfigMapName(cluster);

@@ -102,6 +102,8 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class KafkaCluster extends AbstractModel {
+    protected static final String KAFKA_OPERATOR_NAME = "kafka-operator";
+
     protected static final String INIT_NAME = "kafka-init";
     protected static final String INIT_VOLUME_NAME = "rack-volume";
     protected static final String INIT_VOLUME_MOUNT = "/opt/kafka/init";
@@ -244,7 +246,7 @@ public class KafkaCluster extends AbstractModel {
      * @param labels    labels to add to the cluster
      */
     private KafkaCluster(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, KAFKA_OPERATOR_NAME);
         this.name = kafkaClusterName(cluster);
         this.serviceName = serviceName(cluster);
         this.headlessServiceName = headlessServiceName(cluster);

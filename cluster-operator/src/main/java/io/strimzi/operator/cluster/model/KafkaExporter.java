@@ -34,6 +34,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class KafkaExporter extends AbstractModel {
+    protected static final String KAFKA_EXPORTER_OPERATOR_NAME = "kafka-exporter-operator";
+
     // Configuration for mounting certificates
     protected static final String KAFKA_EXPORTER_CERTS_VOLUME_NAME = "kafka-exporter-certs";
     protected static final String KAFKA_EXPORTER_CERTS_VOLUME_MOUNT = "/etc/kafka-exporter/kafka-exporter-certs/";
@@ -70,7 +72,7 @@ public class KafkaExporter extends AbstractModel {
      * @param labels    labels to add to the kafkaCluster
      */
     protected KafkaExporter(String namespace, String kafkaCluster, Labels labels) {
-        super(namespace, kafkaCluster, labels);
+        super(namespace, kafkaCluster, labels, KAFKA_EXPORTER_OPERATOR_NAME);
         this.name = KafkaExporterResources.deploymentName(kafkaCluster);
         this.serviceName = KafkaExporterResources.serviceName(kafkaCluster);
         this.replicas = 1;

@@ -37,6 +37,8 @@ import java.util.Map;
  * Represents the Entity Operator deployment
  */
 public class EntityOperator extends AbstractModel {
+    protected static final String ENTITY_OPERATOR_NAME = "entity-operator";
+
     protected static final String TLS_SIDECAR_NAME = "tls-sidecar";
     protected static final String TLS_SIDECAR_EO_CERTS_VOLUME_NAME = "eo-certs";
     protected static final String TLS_SIDECAR_EO_CERTS_VOLUME_MOUNT = "/etc/tls-sidecar/eo-certs/";
@@ -62,7 +64,7 @@ public class EntityOperator extends AbstractModel {
      * @param labels
      */
     protected EntityOperator(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster, labels, ENTITY_OPERATOR_NAME);
         this.name = entityOperatorName(cluster);
         this.replicas = EntityOperatorSpec.DEFAULT_REPLICAS;
         this.zookeeperConnect = defaultZookeeperConnect(cluster);
