@@ -186,6 +186,33 @@ public class Labels {
     public Labels withCluster(String cluster) {
         return with(STRIMZI_CLUSTER_LABEL, cluster);
     }
+    
+    /**
+     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     * @return A new instance with the given kubernetes kubernetes application name added.
+     */
+    public Labels withKubernetesName() {
+        return with(Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME);
+    }
+
+    /**
+     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     * @param instance The instance to add.     * 
+     * @return A new instance with the given kubernetes labels added.
+     */
+    public Labels withKubernetesInstance(String instance) {
+        return with(Labels.KUBERNETES_INSTANCE_LABEL, instance);
+    }
+
+    /**
+     * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     * @param instance The instance to add.     * 
+     * @return A new instance with the given kubernetes labels added.
+     */
+    public Labels withKubernetesManagedBy() {
+        // Make configurable?
+        return with(Labels.KUBERNETES_MANAGED_BY_LABEL, "kafka-operator");
+    }
 
     /**
      * The same labels as this instance, but with the given {@code name} for the {@code strimzi.io/name} key.
