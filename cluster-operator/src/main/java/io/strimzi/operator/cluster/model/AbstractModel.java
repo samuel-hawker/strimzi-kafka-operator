@@ -79,6 +79,8 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractModel {
 
+    protected static final String STRIMZI_CLUSTER_OPERATOR_NAME = "strimzi-cluster-operator";
+
     protected static final Logger log = LogManager.getLogger(AbstractModel.class.getName());
 
     protected static final String DEFAULT_JVM_XMS = "128M";
@@ -178,13 +180,16 @@ public abstract class AbstractModel {
     /**
      * Constructor
      *
-     * @param namespace Kubernetes/OpenShift namespace where cluster resources are going to be created
-     * @param cluster   overall cluster name
+     * @param namespace    Kubernetes/OpenShift namespace where cluster resources are going to be created
+     * @param cluster      overall cluster name
      */
     protected AbstractModel(String namespace, String cluster, Labels labels) {
         this.cluster = cluster;
         this.namespace = namespace;
-        this.labels = labels.withCluster(cluster);
+        this.labels = labels.withCluster(cluster)
+                            .withKubernetesName()
+                            .withKubernetesInstance(cluster)
+                            .withKubernetesManagedBy(STRIMZI_CLUSTER_OPERATOR_NAME);
     }
 
     public Labels getLabels() {
