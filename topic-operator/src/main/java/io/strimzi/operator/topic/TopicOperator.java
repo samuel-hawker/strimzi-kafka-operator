@@ -351,6 +351,8 @@ class TopicOperator {
         }
     }
 
+    protected static final String KAFKA_TOPIC_OPERATOR_NAME = "strimzi-kafka-topic-operator";
+
     public TopicOperator(Vertx vertx, Kafka kafka,
                          K8s k8s,
                          TopicStore topicStore,
@@ -360,6 +362,15 @@ class TopicOperator {
         this.kafka = kafka;
         this.k8s = k8s;
         this.vertx = vertx;
+        // Map<String, String> labelMap = labels.labels();
+        // labelMap.put(
+        //     io.strimzi.operator.common.model.Labels.KUBERNETES_NAME_LABEL,
+        //     io.strimzi.operator.common.model.Labels.KUBERNETES_NAME);
+        // labelMap.put(
+        //     io.strimzi.operator.common.model.Labels.KUBERNETES_MANAGED_BY_LABEL,
+        //     KAFKA_TOPIC_OPERATOR_NAME);
+        // this.labels = new Labels(labelMap);
+        labels.fromString(io.strimzi.operator.common.model.Labels.KUBERNETES_NAME_LABEL + "=" + io.strimzi.operator.common.model.Labels.KUBERNETES_NAME);
         this.labels = labels;
         this.topicStore = topicStore;
         this.namespace = namespace;

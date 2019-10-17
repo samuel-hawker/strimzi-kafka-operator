@@ -143,6 +143,19 @@ public class Session extends AbstractVerticle {
         this.kafka = new KafkaImpl(adminClient, vertx);
         LOGGER.debug("Using Kafka {}", kafka);
         Labels labels = config.get(Config.LABELS);
+        // Map<String, String> labelMap = tempLabels.labels();
+        // if (!labelMap.containsKey(io.strimzi.operator.common.model.Labels.KUBERNETES_NAME_LABEL)) {
+        //     labelMap.put(
+        //         io.strimzi.operator.common.model.Labels.KUBERNETES_NAME_LABEL,
+        //         io.strimzi.operator.common.model.Labels.KUBERNETES_NAME);
+        // }
+        // labelMap.put(
+        //     io.strimzi.operator.common.model.Labels.KUBERNETES_NAME_LABEL,
+        //     io.strimzi.operator.common.model.Labels.KUBERNETES_NAME);
+        // labelMap.put(
+        //     io.strimzi.operator.common.model.Labels.KUBERNETES_MANAGED_BY_LABEL,
+        //     KAFKA_TOPIC_OPERATOR_NAME);
+        // Labels labels = new Labels(labelMap);
 
         String namespace = config.get(Config.NAMESPACE);
         LOGGER.debug("Using namespace {}", namespace);
