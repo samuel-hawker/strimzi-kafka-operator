@@ -130,6 +130,8 @@ It must have the value `persistent-claim` for the type `PersistentClaimStorage`.
 |string
 |selector     1.2+<.<|Specifies a specific persistent volume to use. It contains key:value pairs representing labels for selecting such a volume.
 |map
+|expression   1.2+<.<|Specifies a specific persistent volume to given a list of pod selector requirements. This is a list of requirements made by specifying a key, list of values and an operator that relates the key and values. Valid operators include In, NotIn, Exists, and DoesNotExist.
+|xref:type-MatchExpression-{context}[`MatchExpression`]
 |deleteClaim  1.2+<.<|Specifies if the persistent volume claim has to be deleted when the cluster is un-deployed.
 |boolean
 |class        1.2+<.<|The storage class to use for dynamic volume allocation.
@@ -138,6 +140,23 @@ It must have the value `persistent-claim` for the type `PersistentClaimStorage`.
 |integer
 |overrides    1.2+<.<|Overrides for individual brokers. The `overrides` field allows to specify a different configuration for different brokers.
 |xref:type-PersistentClaimStorageOverride-{context}[`PersistentClaimStorageOverride`] array
+|====
+
+[id='type-MatchExpression-{context}']
+### `MatchExpression` schema reference
+
+Used in: xref:type-PersistentClaimStorage-{context}[`PersistentClaimStorage`]
+
+
+[options="header"]
+|====
+|Property         |Description
+|key       1.2+<.<|The key the match expressions selects on.
+|string
+|operator  1.2+<.<|The operator used for the match expression.Possible values are: In, NotIn, Exists, and DoesNotExist.
+|string
+|values    1.2+<.<|The values accepted for the specified key. The values set must be non-empty in the case of the operator value being In or NotIn. 
+|string array
 |====
 
 [id='type-PersistentClaimStorageOverride-{context}']

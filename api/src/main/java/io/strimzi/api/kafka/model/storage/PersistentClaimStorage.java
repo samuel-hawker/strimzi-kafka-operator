@@ -7,6 +7,7 @@ package io.strimzi.api.kafka.model.storage;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import io.strimzi.crdgenerator.annotations.Description;
 import io.strimzi.crdgenerator.annotations.Minimum;
 import io.sundr.builder.annotations.Buildable;
@@ -23,7 +24,7 @@ import java.util.Map;
         generateBuilderPackage = false,
         builderPackage = "io.fabric8.kubernetes.api.builder"
 )
-@JsonPropertyOrder({"type", "size", "storageClass", "selector", "deleteClaim"})
+@JsonPropertyOrder({"type", "size", "storageClass", "selector", "expression", "deleteClaim"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @EqualsAndHashCode
 public class PersistentClaimStorage extends SingleVolumeStorage {
@@ -33,6 +34,7 @@ public class PersistentClaimStorage extends SingleVolumeStorage {
     private String size;
     private String storageClass;
     private Map<String, String> selector;
+    private MatchExpression expression;
     private boolean deleteClaim;
     private List<PersistentClaimStorageOverride> overrides;
 
@@ -85,6 +87,17 @@ public class PersistentClaimStorage extends SingleVolumeStorage {
 
     public void setSelector(Map<String, String> selector) {
         this.selector = selector;
+    }
+
+    @Description("Specifies a specific persistent volume to given a list of pod selector requirements. " +
+        "This is a list of requirements made by specifying a key, list of values and an operator that relates the key and values. " + 
+        "Valid operators include In, NotIn, Exists, and DoesNotExist.")
+    public MatchExpression getExpression() {
+        return expression;
+    }
+
+    public void setExpression(MatchExpression expression) {
+        this.expression = expression;
     }
 
     @Description("Specifies if the persistent volume claim has to be deleted when the cluster is un-deployed.")
