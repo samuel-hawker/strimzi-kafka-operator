@@ -57,6 +57,8 @@ spec:
                     expression:
                       type: object
                       properties:
+                        empty:
+                          type: boolean
                         key:
                           type: string
                         operator:
@@ -102,6 +104,8 @@ spec:
                           expression:
                             type: object
                             properties:
+                              empty:
+                                type: boolean
                               key:
                                 type: string
                               operator:
@@ -1354,6 +1358,8 @@ spec:
                     expression:
                       type: object
                       properties:
+                        empty:
+                          type: boolean
                         key:
                           type: string
                         operator:

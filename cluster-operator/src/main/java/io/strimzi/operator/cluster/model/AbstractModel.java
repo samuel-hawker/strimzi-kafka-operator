@@ -55,13 +55,10 @@ import io.fabric8.kubernetes.api.model.policy.PodDisruptionBudgetBuilder;
 import io.strimzi.api.kafka.model.ContainerEnvVar;
 import io.strimzi.api.kafka.model.ExternalLogging;
 import io.strimzi.api.kafka.model.InlineLogging;
-import io.strimzi.api.kafka.model.storage.JbodStorage;
 import io.strimzi.api.kafka.model.JvmOptions;
 import io.strimzi.api.kafka.model.KafkaResources;
 import io.strimzi.api.kafka.model.Logging;
-import io.strimzi.api.kafka.model.storage.PersistentClaimStorage;
-import io.strimzi.api.kafka.model.storage.PersistentClaimStorageOverride;
-import io.strimzi.api.kafka.model.storage.Storage;
+import io.strimzi.api.kafka.model.storage.*;
 import io.strimzi.operator.common.Annotations;
 import io.strimzi.operator.common.model.Labels;
 import io.vertx.core.json.JsonObject;
@@ -595,6 +592,10 @@ public abstract class AbstractModel {
         if (storage.getSelector() != null && !storage.getSelector().isEmpty()) {
             selector = new LabelSelector(null, storage.getSelector());
         }
+        MatchExpression expressions = null;
+        if (storage.getExpression() != null && !storage.getExpression().isEmpty()) {
+            expression = new MatchExpression(storage.getExpression());
+        }
 
         PersistentVolumeClaim pvc = new PersistentVolumeClaimBuilder()
                 .withNewMetadata()
@@ -607,6 +608,7 @@ public abstract class AbstractModel {
                     .endResources()
                     .withStorageClassName(storage.getStorageClass())
                     .withSelector(selector)
+                    .withExpression(expression)
                 .endSpec()
                 .build();
 

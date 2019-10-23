@@ -31,17 +31,22 @@ import lombok.EqualsAndHashCode;
         builderPackage = "io.fabric8.kubernetes.api.builder"
 )
 @EqualsAndHashCode
-class MatchExpression implements Serializable, UnknownPropertyPreserving {
+public class MatchExpression implements Serializable, UnknownPropertyPreserving {
     private String key;
     private List<String> values;
     private String operator;
     private Map<String, Object> additionalProperties = new HashMap<>(0);
 
-
     public MatchExpression(String key, List<String> values, String operator) {
         this.key = key;
         this.values = values;
         this.operator = operator;
+    }
+
+    public MatchExpression(MatchExpression matchExpression) {
+        this.key = matchExpression.key;
+        this.values = matchExpression.values;
+        this.operator = matchExpression.operator;
     }
 
     @Description("The key the match expressions selects on")
@@ -84,5 +89,11 @@ class MatchExpression implements Serializable, UnknownPropertyPreserving {
             this.additionalProperties = new HashMap<>();
         }
         this.additionalProperties.put(name, value);
+    }
+
+    public boolean isEmpty() {
+        return this.key != null &&
+            this.values != null &&
+            this.operator != null;
     }
 }
