@@ -5,11 +5,22 @@ ARG KAFKA_VERSION
 ARG THIRD_PARTY_LIBS
 ARG strimzi_version
 
-RUN yum -y install gettext nmap-ncat stunnel net-tools bind-utils && yum clean all -y
+RUN microdnf -y install gettext nmap-ncat net-tools bind-utils tar && microdnf clean all -y
+# stunnel
+RUN microdnf -y install make gcc openssl-devel \
+    && curl -LO https://www.stunnel.org/downloads/stunnel-5.55.tar.gz \
+    && tar xvfz stunnel-5.55.tar.gz \
+    && cd stunnel-5.55 \
+    && ./configure \
+    && make \
+    && make install \
+    && cd .. \
+    && rm -rf stunnel-5.55
 
 # Add kafka user with UID 1001
 # The user is in the group 0 to have access to the mounted volumes and storage
-RUN useradd -r -m -u 1001 -g 0 kafka
+# THIS COULD BE A PROBLEM
+# RUN adduser -r -m -u 1001 -g 0 kafka
 
 #####
 # Add Kafka
@@ -47,7 +58,7 @@ COPY ./exporter-scripts $KAFKA_EXPORTER_HOME
 
 #####
 # Add Strimzi agents
-#####
+##
 COPY ./tmp/kafka-agent.jar ${KAFKA_HOME}/libs/
 COPY ./tmp/mirror-maker-agent.jar ${KAFKA_HOME}/libs/
 COPY ./tmp/tracing-agent.jar ${KAFKA_HOME}/libs/
