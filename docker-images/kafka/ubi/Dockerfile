@@ -14,6 +14,7 @@ RUN microdnf -y install make gcc openssl-devel \
     && ./configure \
     && make \
     && make install \
+    && cp /usr/local/bin/stunnel /usr/bin/stunnel \
     && cd .. \
     && rm -rf stunnel-5.55 \
     && microdnf remove make gcc openssl-devel
