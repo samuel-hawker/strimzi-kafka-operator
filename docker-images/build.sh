@@ -46,7 +46,7 @@ function build {
     
     local targets=$*
     local tag="${DOCKER_TAG:-latest}"
-    local java_version="${JAVA_VERSION:-1.8.0}"
+    local java_version="${JAVA_VERSION:-1.8.0_sr5fp40}"
 
     # Base images
     for image in $base_images
