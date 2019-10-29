@@ -5,7 +5,7 @@ ARG KAFKA_VERSION
 ARG THIRD_PARTY_LIBS
 ARG strimzi_version
 
-RUN microdnf -y install gettext nmap-ncat net-tools bind-utils tar && microdnf clean all -y
+RUN microdnf -y install gettext nmap-ncat net-tools bind-utils && microdnf clean all -y
 # stunnel
 RUN microdnf -y install make gcc openssl-devel \
     && curl -LO https://www.stunnel.org/downloads/stunnel-5.55.tar.gz \

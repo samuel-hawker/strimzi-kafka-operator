@@ -3,7 +3,7 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal AS builder
 ARG JAVA_VARIANT=jre
 ARG B_ARCH=s390x
 ARG JAVA_VERSION=1.8.0_sr5fp40
-RUN microdnf install gzip tar; \
+RUN microdnf install -y gzip tar; \
     set -eux; \
     JAVA_ARCH=${B_ARCH}; \
     if [ "${JAVA_ARCH}" = "amd64" ] ; then JAVA_ARCH='x86_64'; fi; \
@@ -33,7 +33,7 @@ ARG JAVA_VERSION
 COPY --from=builder /java/ /opt/ibm/java/
 
 RUN microdnf -y update \
-    && microdnf -y install hostname openssl \
+    && microdnf -y install hostname openssl tar vi which \
     && microdnf -y clean all
 
 ENV JAVA_HOME=/opt/ibm/java/jre \
