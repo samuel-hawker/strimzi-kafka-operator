@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
+import io.fabric8.kubernetes.api.model.LabelSelectorRequirement;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
@@ -58,7 +59,10 @@ import io.strimzi.api.kafka.model.InlineLogging;
 import io.strimzi.api.kafka.model.JvmOptions;
 import io.strimzi.api.kafka.model.KafkaResources;
 import io.strimzi.api.kafka.model.Logging;
-import io.strimzi.api.kafka.model.storage.*;
+import io.strimzi.api.kafka.model.storage.JbodStorage;
+import io.strimzi.api.kafka.model.storage.PersistentClaimStorage;
+import io.strimzi.api.kafka.model.storage.PersistentClaimStorageOverride;
+import io.strimzi.api.kafka.model.storage.Storage;
 import io.strimzi.operator.common.Annotations;
 import io.strimzi.operator.common.model.Labels;
 import io.vertx.core.json.JsonObject;
@@ -589,13 +593,18 @@ public abstract class AbstractModel {
         requests.put("storage", new Quantity(storage.getSize(), null));
 
         LabelSelector selector = null;
+        Map<String, String> matchLabels = null;
+        List<LabelSelectorRequirement> matchExpressions = null;
         if (storage.getSelector() != null && !storage.getSelector().isEmpty()) {
-            selector = new LabelSelector(null, storage.getSelector());
+            matchLabels = storage.getSelector();
         }
-        MatchExpression expressions = null;
         if (storage.getExpression() != null && !storage.getExpression().isEmpty()) {
-            expression = new MatchExpression(storage.getExpression());
+            matchExpressions = storage.getExpression();
         }
+        if (matchLabels != null || matchExpressions != null) {
+            selector =  new LabelSelector(matchExpressions, matchLabels);
+        }
+
 
         PersistentVolumeClaim pvc = new PersistentVolumeClaimBuilder()
                 .withNewMetadata()
@@ -608,7 +617,6 @@ public abstract class AbstractModel {
                     .endResources()
                     .withStorageClassName(storage.getStorageClass())
                     .withSelector(selector)
-                    .withExpression(expression)
                 .endSpec()
                 .build();
 
@@ -620,8 +628,16 @@ public abstract class AbstractModel {
         requests.put("storage", new Quantity(storage.getSize(), null));
 
         LabelSelector selector = null;
+        Map<String, String> matchLabels = null;
+        List<LabelSelectorRequirement> matchExpressions = null;
         if (storage.getSelector() != null && !storage.getSelector().isEmpty()) {
-            selector = new LabelSelector(null, storage.getSelector());
+            matchLabels = storage.getSelector();
+        }
+        if (storage.getExpression() != null && !storage.getExpression().isEmpty()) {
+            matchExpressions = storage.getExpression();
+        }
+        if (matchLabels != null || matchExpressions != null) {
+            selector =  new LabelSelector(matchExpressions, matchLabels);
         }
 
         String storageClass = storage.getStorageClass();

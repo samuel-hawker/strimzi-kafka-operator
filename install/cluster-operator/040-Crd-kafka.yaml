@@ -55,18 +55,18 @@ spec:
                     deleteClaim:
                       type: boolean
                     expression:
-                      type: object
-                      properties:
-                        empty:
-                          type: boolean
-                        key:
-                          type: string
-                        operator:
-                          type: string
-                        values:
-                          type: array
-                          items:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
                             type: string
+                          operator:
+                            type: string
+                          values:
+                            type: array
+                            items:
+                              type: string
                     id:
                       type: integer
                       minimum: 0
@@ -102,18 +102,18 @@ spec:
                           deleteClaim:
                             type: boolean
                           expression:
-                            type: object
-                            properties:
-                              empty:
-                                type: boolean
-                              key:
-                                type: string
-                              operator:
-                                type: string
-                              values:
-                                type: array
-                                items:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                key:
                                   type: string
+                                operator:
+                                  type: string
+                                values:
+                                  type: array
+                                  items:
+                                    type: string
                           id:
                             type: integer
                             minimum: 0
@@ -1356,18 +1356,18 @@ spec:
                     deleteClaim:
                       type: boolean
                     expression:
-                      type: object
-                      properties:
-                        empty:
-                          type: boolean
-                        key:
-                          type: string
-                        operator:
-                          type: string
-                        values:
-                          type: array
-                          items:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
                             type: string
+                          operator:
+                            type: string
+                          values:
+                            type: array
+                            items:
+                              type: string
                     id:
                       type: integer
                       minimum: 0

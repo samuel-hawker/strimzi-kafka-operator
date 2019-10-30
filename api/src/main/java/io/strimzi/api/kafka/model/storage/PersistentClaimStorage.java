@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.fabric8.kubernetes.api.model.LabelSelectorRequirement;
 import io.strimzi.crdgenerator.annotations.Description;
 import io.strimzi.crdgenerator.annotations.Minimum;
 import io.sundr.builder.annotations.Buildable;
@@ -34,7 +35,7 @@ public class PersistentClaimStorage extends SingleVolumeStorage {
     private String size;
     private String storageClass;
     private Map<String, String> selector;
-    private MatchExpression expression;
+    private List<LabelSelectorRequirement> expression;
     private boolean deleteClaim;
     private List<PersistentClaimStorageOverride> overrides;
 
@@ -92,11 +93,11 @@ public class PersistentClaimStorage extends SingleVolumeStorage {
     @Description("Specifies a specific persistent volume to given a list of pod selector requirements. " +
         "This is a list of requirements made by specifying a key, list of values and an operator that relates the key and values. " + 
         "Valid operators include In, NotIn, Exists, and DoesNotExist.")
-    public MatchExpression getExpression() {
+    public List<LabelSelectorRequirement> getExpression() {
         return expression;
     }
 
-    public void setExpression(MatchExpression expression) {
+    public void setExpression(List<LabelSelectorRequirement> expression) {
         this.expression = expression;
     }
 
