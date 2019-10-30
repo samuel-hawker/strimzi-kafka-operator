@@ -4,11 +4,8 @@ metadata:
   name: my-cluster
 spec:
   kafka:
-    image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/kafka-s390x:ubi
-    tlsSidecar:
-      image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/kafka-s390x:ubi
     version: 2.3.0
-    replicas: 1
+    replicas: 3
     listeners:
       plain: {}
       tls: {}
@@ -20,14 +17,9 @@ spec:
     storage:
       type: ephemeral
   zookeeper:
-    image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/kafka-s390x:ubi
-    tlsSidecar:
-      image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/kafka-s390x:ubi
-    replicas: 1
+    replicas: 3
     storage:
       type: ephemeral
   entityOperator:
-    topicOperator:
-      image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/operator-s390x:ubi
-    userOperator:
-      image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/operator-s390x:ubi
+    topicOperator: {}
+    userOperator: {}

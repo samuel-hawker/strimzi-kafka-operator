@@ -8,7 +8,6 @@ if [ "$STRIMZI_TLS_ENABLED" = "true" ]; then
     if [ -z "$STRIMZI_TRUSTSTORE_LOCATION" ] && [ -z "$STRIMZI_KEYSTORE_LOCATION" ]; then
         # Generate temporary keystore password
         export CERTS_STORE_PASSWORD=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c32)
-        echo "CERTS_STORE_PASSWORD=${CERTS_STORE_PASSWORD}"
 
         mkdir -p /tmp/topic-operator
 
