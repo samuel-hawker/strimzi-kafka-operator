@@ -100,7 +100,15 @@ If `JAVA_VERSION` environment variable is set, a profile in the parent pom.xml w
 
 #### Alternate Docker base image
 
-The docker images can be built with an alternate container OS version by adding the environment variable `ALTERNATE_BASE`.  When this environment variable is set, for each component the build will look for a Dockerfile in the subdirectory named by `ALTERNATE_BASE`.  For example, to build docker images based on alpine, use `ALTERNATE_BASE=alpine make docker_build`.  Alternate docker images are an experimental feature not supported by the core Strimzi team.
+The docker images can be built with an alternate container OS version by adding the environment variable `ALTERNATE_BASE`.
+When this environment variable is set, for each component the build will look for a Dockerfile in the subdirectory named by `ALTERNATE_BASE`.
+For example, to build docker images based on alpine, use `ALTERNATE_BASE=alpine make docker_build`.
+Alternate docker images are an experimental feature not supported by the core Strimzi team.
+
+Currently the default base image is `centos:7`.
+Alternate bases that are provided but not supported are:
+ - `ALTERNATE_BASE=ubi` will build the images based on the RedHat Universal Base Image 8 Minimal. 
+
 
 ## Building Strimzi
 
