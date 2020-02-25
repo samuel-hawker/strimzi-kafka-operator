@@ -172,7 +172,6 @@ public abstract class TopicOperatorBaseIT {
         adminClient = AdminClient.create(p);
 
         kubeClient = kubeClient().getClient();
-        Crds.registerCustomKinds();
         LOGGER.info("Using namespace {}", NAMESPACE);
         startTopicOperator();
 

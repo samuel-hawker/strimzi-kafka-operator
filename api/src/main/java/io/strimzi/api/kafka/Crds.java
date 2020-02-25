@@ -14,63 +14,45 @@ import io.fabric8.kubernetes.client.CustomResourceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.internal.KubernetesDeserializer;
-import io.strimzi.api.kafka.model.Constants;
 import io.strimzi.api.kafka.model.DoneableKafka;
 import io.strimzi.api.kafka.model.DoneableKafkaBridge;
 import io.strimzi.api.kafka.model.DoneableKafkaConnect;
 import io.strimzi.api.kafka.model.DoneableKafkaConnectS2I;
+import io.strimzi.api.kafka.model.DoneableKafkaConnector;
 import io.strimzi.api.kafka.model.DoneableKafkaMirrorMaker;
 import io.strimzi.api.kafka.model.DoneableKafkaMirrorMaker2;
 import io.strimzi.api.kafka.model.DoneableKafkaTopic;
 import io.strimzi.api.kafka.model.DoneableKafkaUser;
-import io.strimzi.api.kafka.model.DoneableKafkaConnector;
-import io.strimzi.api.kafka.model.KafkaBridge;
 import io.strimzi.api.kafka.model.Kafka;
+import io.strimzi.api.kafka.model.KafkaBridge;
 import io.strimzi.api.kafka.model.KafkaConnect;
 import io.strimzi.api.kafka.model.KafkaConnectS2I;
+import io.strimzi.api.kafka.model.KafkaConnector;
 import io.strimzi.api.kafka.model.KafkaMirrorMaker;
 import io.strimzi.api.kafka.model.KafkaMirrorMaker2;
 import io.strimzi.api.kafka.model.KafkaTopic;
 import io.strimzi.api.kafka.model.KafkaUser;
-import io.strimzi.api.kafka.model.KafkaConnector;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static io.strimzi.api.kafka.model.Constants.CRD_KIND;
-import static java.util.Collections.singletonList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * "Static" information about the CRDs defined in this package
  */
 public class Crds {
 
-    @SuppressWarnings("unchecked")
-    private static final Class<? extends CustomResource>[] CRDS = new Class[] {
-        Kafka.class,
-        KafkaConnect.class,
-        KafkaConnectS2I.class,
-        KafkaTopic.class,
-        KafkaUser.class,
-        KafkaMirrorMaker.class,
-        KafkaBridge.class,
-        KafkaConnector.class,
-        KafkaMirrorMaker2.class
-    };
+    public static final String CRD_KIND = "CustomResourceDefinition";
+    public static final String STRIMZI_CATEGORY = "strimzi";
 
-    private Crds() {
+    private static final Map<String, CustomResourceDefinition> CRDS = new HashMap<>();
+    static {
+        for (CrdProvider provider : ServiceLoader.load(CrdProvider.class)) {
+            CRDS.putAll(provider.crds());
+        }
     }
 
-    /**
-     * Register custom resource kinds with {@link KubernetesDeserializer} so Fabric8 knows how to deserialize them.
-     */
-    public static void registerCustomKinds() {
-        for (Class<? extends CustomResource> crdClass : CRDS) {
-            for (String version : apiVersions(crdClass)) {
-                KubernetesDeserializer.registerCustomKind(version, kind(crdClass), crdClass);
-            }
-        }
+    private Crds() {
     }
 
     private static CustomResourceDefinition crd(Class<? extends CustomResource> cls) {
@@ -240,7 +222,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafka() {
-        return crd(Kafka.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#Kafka");
     }
 
     public static MixedOperation<Kafka, KafkaList, DoneableKafka, Resource<Kafka, DoneableKafka>> kafkaOperation(KubernetesClient client) {
@@ -248,11 +230,11 @@ public class Crds {
     }
 
     public static MixedOperation<Kafka, KafkaList, DoneableKafka, Resource<Kafka, DoneableKafka>> kafkaV1Alpha1Operation(KubernetesClient client) {
-        return client.customResources(crd(Kafka.class, Constants.V1ALPHA1), Kafka.class, KafkaList.class, DoneableKafka.class);
+        return client.customResources(CRDS.get("kafka.strimzi.io/v1alpha1#Kafka"), Kafka.class, KafkaList.class, DoneableKafka.class);
     }
 
     public static CustomResourceDefinition kafkaConnect() {
-        return crd(KafkaConnect.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaConnect");
     }
 
     public static MixedOperation<KafkaConnect, KafkaConnectList, DoneableKafkaConnect, Resource<KafkaConnect, DoneableKafkaConnect>> kafkaConnectOperation(KubernetesClient client) {
@@ -260,7 +242,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaConnector() {
-        return crd(KafkaConnector.class);
+        return CRDS.get("kafka.strimzi.io/v1alpha1#KafkaConnector");
     }
 
     public static MixedOperation<KafkaConnector, KafkaConnectorList, DoneableKafkaConnector, Resource<KafkaConnector, DoneableKafkaConnector>> kafkaConnectorOperation(KubernetesClient client) {
@@ -268,7 +250,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaConnectS2I() {
-        return crd(KafkaConnectS2I.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaConnectS2I");
     }
 
     public static <D extends CustomResourceDoneable<T>, T extends CustomResource> MixedOperation<KafkaConnectS2I, KafkaConnectS2IList, DoneableKafkaConnectS2I, Resource<KafkaConnectS2I, DoneableKafkaConnectS2I>> kafkaConnectS2iOperation(KubernetesClient client) {
@@ -276,7 +258,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaTopic() {
-        return crd(KafkaTopic.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaTopic");
     }
 
     public static MixedOperation<KafkaTopic, KafkaTopicList, DoneableKafkaTopic, Resource<KafkaTopic, DoneableKafkaTopic>> topicOperation(KubernetesClient client) {
@@ -284,7 +266,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaUser() {
-        return crd(KafkaUser.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaUser");
     }
 
     public static MixedOperation<KafkaUser, KafkaUserList, DoneableKafkaUser, Resource<KafkaUser, DoneableKafkaUser>> kafkaUserOperation(KubernetesClient client) {
@@ -292,7 +274,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaMirrorMaker() {
-        return crd(KafkaMirrorMaker.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaMirrorMaker");
     }
 
     public static MixedOperation<KafkaMirrorMaker, KafkaMirrorMakerList, DoneableKafkaMirrorMaker, Resource<KafkaMirrorMaker, DoneableKafkaMirrorMaker>> mirrorMakerOperation(KubernetesClient client) {
@@ -300,7 +282,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaBridge() {
-        return crd(KafkaBridge.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaBridge");
     }
 
     public static MixedOperation<KafkaBridge, KafkaBridgeList, DoneableKafkaBridge, Resource<KafkaBridge, DoneableKafkaBridge>> kafkaBridgeOperation(KubernetesClient client) {
@@ -308,7 +290,7 @@ public class Crds {
     }
 
     public static CustomResourceDefinition kafkaMirrorMaker2() {
-        return crd(KafkaMirrorMaker2.class);
+        return CRDS.get("kafka.strimzi.io/v1beta1#KafkaMirrorMaker2");
     }
 
     public static MixedOperation<KafkaMirrorMaker2, KafkaMirrorMaker2List, DoneableKafkaMirrorMaker2, Resource<KafkaMirrorMaker2, DoneableKafkaMirrorMaker2>> kafkaMirrorMaker2Operation(KubernetesClient client) {
@@ -331,21 +313,4 @@ public class Crds {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends CustomResource> List<String> apiVersions(Class<T> cls) {
-        try {
-            String group = (String) cls.getField("RESOURCE_GROUP").get(null);
-
-            List<String> versions;
-            try {
-                versions = singletonList(group + "/" + (String) cls.getField("VERSION").get(null));
-            } catch (NoSuchFieldException e) {
-                versions = ((List<String>) cls.getField("VERSIONS").get(null)).stream().map(v ->
-                        group + "/" + v).collect(Collectors.toList());
-            }
-            return versions;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

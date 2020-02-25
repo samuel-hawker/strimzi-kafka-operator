@@ -66,10 +66,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ExtendWith(TestExecutionWatcher.class)
 public abstract class BaseST implements TestSeparator {
 
-    static {
-        Crds.registerCustomKinds();
-    }
-
     protected KubeClusterResource cluster = KubeClusterResource.getInstance();
     protected static final String CLUSTER_NAME = "my-cluster";
     protected static final String KAFKA_CLIENTS_NAME = CLUSTER_NAME + "-" + Constants.KAFKA_CLIENTS;

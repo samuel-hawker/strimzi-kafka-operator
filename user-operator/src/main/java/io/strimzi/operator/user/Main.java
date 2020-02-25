@@ -37,15 +37,6 @@ import java.util.Map;
 public class Main {
     private static final Logger log = LogManager.getLogger(Main.class.getName());
 
-    static {
-        try {
-            Crds.registerCustomKinds();
-        } catch (Error | RuntimeException t) {
-            log.error("Failed to register CRDs", t);
-            throw t;
-        }
-    }
-
     public static void main(String[] args) {
         log.info("UserOperator {} is starting", Main.class.getPackage().getImplementationVersion());
         UserOperatorConfig config = UserOperatorConfig.fromMap(System.getenv());
