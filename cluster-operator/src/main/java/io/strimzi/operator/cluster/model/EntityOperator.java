@@ -38,6 +38,8 @@ import java.util.Map;
  * Represents the Entity Operator deployment
  */
 public class EntityOperator extends AbstractModel {
+    protected static final String COMPONENT = "entity-operator";
+
     protected static final String TLS_SIDECAR_NAME = "tls-sidecar";
     protected static final String TLS_SIDECAR_EO_CERTS_VOLUME_NAME = "eo-certs";
     protected static final String TLS_SIDECAR_EO_CERTS_VOLUME_MOUNT = "/etc/tls-sidecar/eo-certs/";
@@ -227,6 +229,7 @@ public class EntityOperator extends AbstractModel {
                 .build();
 
         return createDeployment(
+                COMPONENT,
                 updateStrategy,
                 Collections.emptyMap(),
                 annotations,

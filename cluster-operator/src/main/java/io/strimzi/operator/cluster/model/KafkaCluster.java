@@ -112,6 +112,8 @@ import static java.util.Collections.singletonMap;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class KafkaCluster extends AbstractModel {
+    protected static final String COMPONENT = "kafka";
+
     protected static final String INIT_NAME = "kafka-init";
     protected static final String INIT_VOLUME_NAME = "rack-volume";
     protected static final String INIT_VOLUME_MOUNT = "/opt/kafka/init";
@@ -1267,6 +1269,7 @@ public class KafkaCluster extends AbstractModel {
         stsAnnotations.put(ANNO_STRIMZI_IO_STORAGE, ModelUtils.encodeStorageToJson(storage));
 
         return createStatefulSet(
+                COMPONENT,
                 stsAnnotations,
                 emptyMap(),
                 getVolumes(isOpenShift),

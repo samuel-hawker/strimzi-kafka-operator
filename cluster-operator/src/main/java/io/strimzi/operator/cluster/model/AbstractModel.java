@@ -273,6 +273,17 @@ public abstract class AbstractModel {
         return labels.withName(name).withUserLabels(userLabels).toMap();
     }
 
+    protected Map<String, String> getLabelsWithNameAndComponent(String component, Map<String, String> userLabels) {
+        return getLabelsWithNameAndComponent(name, component, userLabels);
+    }
+
+    protected Map<String, String> getLabelsWithNameAndComponent(String name, String component, Map<String, String> userLabels) {
+        return labels.withName(name)
+                .withKubernetesComponent(component)
+                .withUserLabels(userLabels)
+                .toMap();
+    }
+
     protected Map<String, String> getLabelsWithNameAndDiscovery(String name) {
         return labels.withName(name).withDiscovery().toMap();
     }
@@ -280,6 +291,7 @@ public abstract class AbstractModel {
     protected Map<String, String> getLabelsWithNameAndDiscovery(String name, Map<String, String> userLabels) {
         return labels.withName(name).withDiscovery().withUserLabels(userLabels).toMap();
     }
+
 
     /**
      * @return Whether metrics are enabled.
@@ -734,6 +746,7 @@ public abstract class AbstractModel {
     }
 
     protected StatefulSet createStatefulSet(
+            String component,
             Map<String, String> stsAnnotations,
             Map<String, String> podAnnotations,
             List<Volume> volumes,
@@ -757,7 +770,7 @@ public abstract class AbstractModel {
         StatefulSet statefulSet = new StatefulSetBuilder()
                 .withNewMetadata()
                     .withName(name)
-                    .withLabels(getLabelsWithName(templateStatefulSetLabels))
+                    .withLabels(getLabelsWithNameAndComponent(component, templateStatefulSetLabels))
                     .withNamespace(namespace)
                     .withAnnotations(mergeLabelsOrAnnotations(stsAnnotations, templateStatefulSetAnnotations))
                     .withOwnerReferences(createOwnerReference())
@@ -771,7 +784,7 @@ public abstract class AbstractModel {
                     .withNewTemplate()
                         .withNewMetadata()
                             .withName(name)
-                            .withLabels(getLabelsWithName(templatePodLabels))
+                            .withLabels(getLabelsWithNameAndComponent(component, templatePodLabels))
                             .withAnnotations(mergeLabelsOrAnnotations(podAnnotations, templatePodAnnotations))
                         .endMetadata()
                         .withNewSpec()
@@ -796,6 +809,7 @@ public abstract class AbstractModel {
     }
 
     protected Deployment createDeployment(
+            String component,
             DeploymentStrategy updateStrategy,
             Map<String, String> deploymentAnnotations,
             Map<String, String> podAnnotations,
@@ -808,7 +822,7 @@ public abstract class AbstractModel {
         Deployment dep = new DeploymentBuilder()
                 .withNewMetadata()
                     .withName(name)
-                    .withLabels(getLabelsWithName(templateDeploymentLabels))
+                    .withLabels(getLabelsWithNameAndComponent(component, templateDeploymentLabels))
                     .withNamespace(namespace)
                     .withAnnotations(mergeLabelsOrAnnotations(deploymentAnnotations, templateDeploymentAnnotations))
                     .withOwnerReferences(createOwnerReference())
@@ -819,7 +833,7 @@ public abstract class AbstractModel {
                     .withSelector(new LabelSelectorBuilder().withMatchLabels(getSelectorLabelsAsMap()).build())
                     .withNewTemplate()
                         .withNewMetadata()
-                            .withLabels(getLabelsWithName(templatePodLabels))
+                            .withLabels(getLabelsWithNameAndComponent(component, templatePodLabels))
                             .withAnnotations(mergeLabelsOrAnnotations(podAnnotations, templatePodAnnotations))
                         .endMetadata()
                         .withNewSpec()

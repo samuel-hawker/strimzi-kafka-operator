@@ -135,7 +135,8 @@ public class ZookeeperClusterTest {
             Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME,
             Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
             Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
-            Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);
+            Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME,
+            Labels.KUBERNETES_COMPONENT_LABEL, ZookeeperCluster.COMPONENT);
     }
 
     @Test
