@@ -131,6 +131,7 @@ public class KafkaConnectCluster extends AbstractModel {
         this.mountPath = "/var/lib/kafka";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";
         this.logAndMetricsConfigMountPath = "/opt/kafka/custom-config/";
+        setComponent(COMPONENT);
     }
 
     public static KafkaConnectCluster fromCrd(KafkaConnect kafkaConnect, KafkaVersion.Lookup versions) {
@@ -408,7 +409,6 @@ public class KafkaConnectCluster extends AbstractModel {
                 .build();
 
         return createDeployment(
-                COMPONENT,
                 updateStrategy,
                 Collections.emptyMap(),
                 annotations,

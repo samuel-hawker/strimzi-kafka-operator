@@ -69,6 +69,8 @@ public class EntityOperator extends AbstractModel {
         this.name = entityOperatorName(cluster);
         this.replicas = EntityOperatorSpec.DEFAULT_REPLICAS;
         this.zookeeperConnect = defaultZookeeperConnect(cluster);
+
+        setComponent(COMPONENT);
     }
 
     protected void setTlsSidecar(TlsSidecar tlsSidecar) {
@@ -229,7 +231,6 @@ public class EntityOperator extends AbstractModel {
                 .build();
 
         return createDeployment(
-                COMPONENT,
                 updateStrategy,
                 Collections.emptyMap(),
                 annotations,
