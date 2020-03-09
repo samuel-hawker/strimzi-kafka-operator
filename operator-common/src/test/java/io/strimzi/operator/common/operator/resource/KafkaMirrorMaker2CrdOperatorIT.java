@@ -6,6 +6,7 @@ package io.strimzi.operator.common.operator.resource;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.strimzi.api.kafka.Crds;
 import io.strimzi.api.kafka.KafkaMirrorMaker2List;
 import io.strimzi.api.kafka.model.DoneableKafkaMirrorMaker2;
@@ -16,8 +17,9 @@ import io.strimzi.operator.KubernetesVersion;
 import io.strimzi.operator.PlatformFeaturesAvailability;
 import io.strimzi.test.k8s.KubeClusterResource;
 import io.strimzi.test.k8s.cluster.KubeCluster;
-import io.strimzi.test.k8s.exceptions.NoClusterException;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.logging.log4j.LogManager;
@@ -27,17 +29,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
-
 import static io.strimzi.test.k8s.KubeClusterResource.cmdKubeClient;
 import static io.strimzi.test.k8s.KubeClusterResource.kubeClient;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * The main purpose of the Integration Tests for the operators is to test them against a real Kubernetes cluster.
@@ -62,11 +61,8 @@ public class KafkaMirrorMaker2CrdOperatorIT {
         cluster = KubeClusterResource.getInstance();
         cluster.setTestNamespace(namespace);
 
-        try {
-            KubeCluster.bootstrap();
-        } catch (NoClusterException e) {
-            assumeTrue(false, e.getMessage());
-        }
+        assertDoesNotThrow(() -> KubeCluster.bootstrap(), "Could not bootstrap server");
+
         vertx = Vertx.vertx();
         client = new DefaultKubernetesClient();
         kafkaMirrorMaker2Operator = new CrdOperator(vertx, client, KafkaMirrorMaker2.class, KafkaMirrorMaker2List.class, DoneableKafkaMirrorMaker2.class);
@@ -108,8 +104,8 @@ public class KafkaMirrorMaker2CrdOperatorIT {
         return new KafkaMirrorMaker2Builder()
                 .withApiVersion(KafkaMirrorMaker2.RESOURCE_GROUP + "/" + KafkaMirrorMaker2.V1ALPHA1)
                 .withNewMetadata()
-                .withName(RESOURCE_NAME)
-                .withNamespace(namespace)
+                    .withName(RESOURCE_NAME)
+                    .withNamespace(namespace)
                 .endMetadata()
                 .withNewSpec()
                 .endSpec()
@@ -119,86 +115,47 @@ public class KafkaMirrorMaker2CrdOperatorIT {
     }
 
     @Test
-    public void testUpdateStatus(VertxTestContext context) throws InterruptedException, ExecutionException, TimeoutException {
+    public void testUpdateStatus(VertxTestContext context) {
+        Checkpoint async = context.checkpoint();
+
         log.info("Getting Kubernetes version");
-        CountDownLatch versionAsync = new CountDownLatch(1);
-        AtomicReference<PlatformFeaturesAvailability> pfa = new AtomicReference<>();
-        PlatformFeaturesAvailability.create(vertx, client).setHandler(pfaRes -> {
-            if (pfaRes.succeeded())    {
-                pfa.set(pfaRes.result());
-                versionAsync.countDown();
-            } else {
-                context.failNow(pfaRes.cause());
-            }
-        });
-        if (!versionAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
+        PlatformFeaturesAvailability.create(vertx, client)
+            .setHandler(context.succeeding(pfa -> context.verify(() -> {
+                assertThat("Kubernetes version : " + pfa.getKubernetesVersion() + " is too old",
+                        pfa.getKubernetesVersion().compareTo(KubernetesVersion.V1_11), is(not(lessThan(0))));
+            })))
 
-        if (pfa.get().getKubernetesVersion().compareTo(KubernetesVersion.V1_11) < 0) {
-            log.info("Kubernetes {} is too old", pfa.get().getKubernetesVersion());
-            return;
-        }
+            .compose(pfa -> {
+                log.info("Creating resource");
+                return kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, getResource());
+            })
+            .setHandler(context.succeeding())
+            .compose(rrCreated -> {
+                KafkaMirrorMaker2 newStatus = new KafkaMirrorMaker2Builder(kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME))
+                        .withNewStatus()
+                        .withConditions(new ConditionBuilder()
+                                .withType("Ready")
+                                .withStatus("True")
+                                .build())
+                        .endStatus()
+                        .build();
 
-        log.info("Creating resource");
-        CountDownLatch createAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, getResource()).setHandler(res -> {
-            if (res.succeeded())    {
-                createAsync.countDown();
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!createAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
+                log.info("Updating resource status");
+                return kafkaMirrorMaker2Operator.updateStatusAsync(newStatus);
+            })
+            .setHandler(context.succeeding())
 
-        KafkaMirrorMaker2 withStatus = new KafkaMirrorMaker2Builder(kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME))
-                .withNewStatus()
-                .withConditions(new ConditionBuilder()
-                        .withType("Ready")
-                        .withStatus("True")
-                        .build())
-                .endStatus()
-                .build();
+            .compose(rrModified -> kafkaMirrorMaker2Operator.getAsync(namespace, RESOURCE_NAME))
+            .setHandler(context.succeeding(modifiedKafkaMirrorMaker2 -> context.verify(() -> {
+                assertThat(modifiedKafkaMirrorMaker2.getStatus().getConditions().get(0).getType(), is("Ready"));
+                assertThat(modifiedKafkaMirrorMaker2.getStatus().getConditions().get(0).getStatus(), is("True"));
+            })))
 
-        log.info("Updating resource status");
-        CountDownLatch updateStatusAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.updateStatusAsync(withStatus).setHandler(res -> {
-            if (res.succeeded())    {
-                kafkaMirrorMaker2Operator.getAsync(namespace, RESOURCE_NAME).setHandler(res2 -> {
-                    if (res2.succeeded())    {
-                        KafkaMirrorMaker2 updated = res2.result();
-
-                        context.verify(() -> assertThat(updated.getStatus().getConditions().get(0).getType(), is("Ready")));
-                        context.verify(() -> assertThat(updated.getStatus().getConditions().get(0).getStatus(), is("True")));
-
-                        updateStatusAsync.countDown();
-                    } else {
-                        context.failNow(res.cause());
-                    }
-                });
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!updateStatusAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
-
-        log.info("Deleting resource");
-        CountDownLatch deleteAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, null).setHandler(res -> {
-            if (res.succeeded()) {
-                deleteAsync.countDown();
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!deleteAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
-        context.completeNow();
+            .compose(rrModified -> {
+                log.info("Deleting resource");
+                return kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, null);
+            })
+            .setHandler(context.succeeding(rrDeleted ->  async.flag()));
     }
 
     /**
@@ -207,72 +164,44 @@ public class KafkaMirrorMaker2CrdOperatorIT {
      * @param context
      */
     @Test
-    public void testUpdateStatusWhileResourceDeleted(VertxTestContext context) throws InterruptedException, ExecutionException, TimeoutException {
+    public void testUpdateStatusWhileResourceDeletedThrowsNullPointerException(VertxTestContext context) {
+        Checkpoint async = context.checkpoint();
+
         log.info("Getting Kubernetes version");
-        CountDownLatch versionAsync = new CountDownLatch(1);
-        AtomicReference<PlatformFeaturesAvailability> pfa = new AtomicReference<>();
-        PlatformFeaturesAvailability.create(vertx, client).setHandler(pfaRes -> {
-            if (pfaRes.succeeded())    {
-                pfa.set(pfaRes.result());
-                versionAsync.countDown();
-            } else {
-                context.failNow(pfaRes.cause());
-            }
-        });
-        if (!versionAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
+        PlatformFeaturesAvailability.create(vertx, client)
+            .setHandler(context.succeeding(pfa -> context.verify(() -> {
+                assertThat("Kubernetes version : " + pfa.getKubernetesVersion() + " is too old",
+                        pfa.getKubernetesVersion().compareTo(KubernetesVersion.V1_11), is(not(lessThan(0))));
+            })))
+            .compose(pfa -> {
+                log.info("Creating resource");
+                return kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, getResource());
+            })
+            .setHandler(context.succeeding())
 
-        if (pfa.get().getKubernetesVersion().compareTo(KubernetesVersion.V1_11) < 0) {
-            log.info("Kubernetes {} is too old", pfa.get().getKubernetesVersion());
-            return;
-        }
+            .compose(rr -> {
+                log.info("Deleting resource");
+                return kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, null);
+            })
+            .setHandler(context.succeeding())
 
-        log.info("Creating resource");
-        CountDownLatch createAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, getResource()).setHandler(res -> {
-            if (res.succeeded())    {
-                createAsync.countDown();
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!createAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
+            .compose(v -> {
+                KafkaMirrorMaker2 newStatus = new KafkaMirrorMaker2Builder(kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME))
+                        .withNewStatus()
+                            .withConditions(new ConditionBuilder()
+                                    .withType("Ready")
+                                    .withStatus("True")
+                                    .build())
+                        .endStatus()
+                        .build();
 
-        KafkaMirrorMaker2 withStatus = new KafkaMirrorMaker2Builder(kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME))
-                .withNewStatus()
-                .withConditions(new ConditionBuilder()
-                        .withType("Ready")
-                        .withStatus("True")
-                        .build())
-                .endStatus()
-                .build();
-
-        log.info("Deleting resource");
-        CountDownLatch deleteAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, null).setHandler(res -> {
-            if (res.succeeded()) {
-                deleteAsync.countDown();
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!deleteAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
-
-        log.info("Updating resource status");
-        CountDownLatch updateStatusAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.updateStatusAsync(withStatus).setHandler(res -> {
-            context.verify(() -> assertThat(res.succeeded(), is(false)));
-            updateStatusAsync.countDown();
-        });
-        if (!updateStatusAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
-        context.completeNow();
+                log.info("Updating resource status");
+                return kafkaMirrorMaker2Operator.updateStatusAsync(newStatus);
+            })
+            .setHandler(context.failing(e -> context.verify(() -> {
+                assertThat(e, instanceOf(NullPointerException.class));
+                async.flag();
+            })));
     }
 
     /**
@@ -281,81 +210,58 @@ public class KafkaMirrorMaker2CrdOperatorIT {
      * @param context
      */
     @Test
-    public void testUpdateStatusWhileResourceUpdated(VertxTestContext context) throws InterruptedException, ExecutionException, TimeoutException {
+    public void testUpdateStatusThrowsKubernetesExceptionIfResourceUpdatedPrior(VertxTestContext context) {
+        Checkpoint async = context.checkpoint();
+
+        Promise updateFailed = Promise.promise();
+
         log.info("Getting Kubernetes version");
-        CountDownLatch versionAsync = new CountDownLatch(1);
-        AtomicReference<PlatformFeaturesAvailability> pfa = new AtomicReference<>();
-        PlatformFeaturesAvailability.create(vertx, client).setHandler(pfaRes -> {
-            if (pfaRes.succeeded())    {
-                pfa.set(pfaRes.result());
-                versionAsync.countDown();
-            } else {
-                context.failNow(pfaRes.cause());
-            }
-        });
-        if (!versionAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
+        PlatformFeaturesAvailability.create(vertx, client)
+            .setHandler(context.succeeding(pfa -> context.verify(() -> {
+                assertThat("Kubernetes version : " + pfa.getKubernetesVersion() + " is too old",
+                        pfa.getKubernetesVersion().compareTo(KubernetesVersion.V1_11), is(not(lessThan(0))));
+            })))
+            .compose(pfa -> {
+                log.info("Creating resource");
+                return kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, getResource());
+            })
+            .setHandler(context.succeeding())
+            .compose(rr -> {
+                KafkaMirrorMaker2 currentKafkaMirrorMaker2 = kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME);
 
-        if (pfa.get().getKubernetesVersion().compareTo(KubernetesVersion.V1_11) < 0) {
-            log.info("Kubernetes {} is too old", pfa.get().getKubernetesVersion());
-            return;
-        }
+                KafkaMirrorMaker2 updated = new KafkaMirrorMaker2Builder(currentKafkaMirrorMaker2)
+                        .editSpec()
+                        .withNewLivenessProbe().withInitialDelaySeconds(14).endLivenessProbe()
+                        .endSpec()
+                        .build();
 
-        log.info("Creating resource");
-        CountDownLatch createAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, getResource()).setHandler(res -> {
-            if (res.succeeded())    {
-                createAsync.countDown();
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!createAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
+                KafkaMirrorMaker2 newStatus = new KafkaMirrorMaker2Builder(currentKafkaMirrorMaker2)
+                        .withNewStatus()
+                        .withConditions(new ConditionBuilder()
+                                .withType("Ready")
+                                .withStatus("True")
+                                .build())
+                        .endStatus()
+                        .build();
 
-        KafkaMirrorMaker2 withStatus = new KafkaMirrorMaker2Builder(kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME))
-                .withNewStatus()
-                .withConditions(new ConditionBuilder()
-                        .withType("Ready")
-                        .withStatus("True")
-                        .build())
-                .endStatus()
-                .build();
+                log.info("Updating resource (mocking an update due to some other reason)");
+                kafkaMirrorMaker2Operator.operation().inNamespace(namespace).withName(RESOURCE_NAME).patch(updated);
 
-        log.info("Updating resource");
-        KafkaMirrorMaker2 updated = new KafkaMirrorMaker2Builder(kafkaMirrorMaker2Operator.get(namespace, RESOURCE_NAME))
-                .editSpec()
-                .withNewLivenessProbe().withInitialDelaySeconds(14).endLivenessProbe()
-                .endSpec()
-                .build();
+                log.info("Updating resource status after underlying resource has changed");
+                return kafkaMirrorMaker2Operator.updateStatusAsync(newStatus);
+            })
+            .setHandler(context.failing(e -> context.verify(() -> {
+                assertThat("Exception was not KubernetesClientException, it was : " + e.toString(),
+                        e, instanceOf(KubernetesClientException.class));
+                updateFailed.complete();
+            })));
 
-        kafkaMirrorMaker2Operator.operation().inNamespace(namespace).withName(RESOURCE_NAME).patch(updated);
+        updateFailed.future().compose(v -> {
+            log.info("Deleting resource");
+            return kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, null);
+        })
+        .setHandler(context.succeeding(v -> async.flag()));
 
-        log.info("Updating resource status");
-        CountDownLatch updateStatusAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.updateStatusAsync(withStatus).setHandler(res -> {
-            context.verify(() -> assertThat(res.succeeded(), is(false)));
-            updateStatusAsync.countDown();
-        });
-        if (!updateStatusAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
-
-        log.info("Deleting resource");
-        CountDownLatch deleteAsync = new CountDownLatch(1);
-        kafkaMirrorMaker2Operator.reconcile(namespace, RESOURCE_NAME, null).setHandler(res -> {
-            if (res.succeeded()) {
-                deleteAsync.countDown();
-            } else {
-                context.failNow(res.cause());
-            }
-        });
-        if (!deleteAsync.await(60, TimeUnit.SECONDS)) {
-            context.failNow(new Throwable("Test timeout"));
-        }
-        context.completeNow();
     }
 }
 

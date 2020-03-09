@@ -259,7 +259,6 @@ public class KafkaConnectS2ICrdOperatorIT {
                 return kafkaConnectS2IOperator.updateStatusAsync(newStatus);
             })
             .setHandler(context.failing(e -> context.verify(() -> {
-                System.out.println("please");
                 assertThat("Exception was not KubernetesClientException, it was : " + e.toString(),
                         e, instanceOf(KubernetesClientException.class));
                 updateFailed.complete();
