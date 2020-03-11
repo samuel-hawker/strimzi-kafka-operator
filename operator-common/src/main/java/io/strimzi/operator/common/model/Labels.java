@@ -62,13 +62,36 @@ public class Labels {
      */
     public static final String STRIMZI_DISCOVERY_LABEL = STRIMZI_DOMAIN + "discovery";
 
+    /**
+     * The name of the application
+     * https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
+     */
     public static final String KUBERNETES_NAME_LABEL = KUBERNETES_DOMAIN + "name";
-    public static final String KUBERNETES_INSTANCE_LABEL = KUBERNETES_DOMAIN + "instance";
-    public static final String KUBERNETES_PART_OF_LABEL = KUBERNETES_DOMAIN + "part-of";
-    public static final String KUBERNETES_MANAGED_BY_LABEL = KUBERNETES_DOMAIN + "managed-by";
-    public static final String KUBERNETES_COMPONENT_LABEL = KUBERNETES_DOMAIN + "component";
 
-    public static final String KUBERNETES_NAME = "strimzi";
+    /**
+     * A unique name identifying the instance of an application
+     * https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
+     */
+    public static final String KUBERNETES_INSTANCE_LABEL = KUBERNETES_DOMAIN + "instance";
+
+    /**
+     * The name of a higher level application this one is part of
+     * https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
+     */
+    public static final String KUBERNETES_PART_OF_LABEL = KUBERNETES_DOMAIN + "part-of";
+    public static final String APPLICATION_NAME = "strimzi";
+
+    /**
+     * The tool being used to manage the operation of an application
+     * https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
+     */
+    public static final String KUBERNETES_MANAGED_BY_LABEL = KUBERNETES_DOMAIN + "managed-by";
+
+    /**
+     * The component within the architecture
+     * https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
+     */
+    public static final String KUBERNETES_COMPONENT_LABEL = KUBERNETES_DOMAIN + "component";
 
     /**
      * Used to identify individual pods
@@ -218,26 +241,26 @@ public class Labels {
      * The same labels as this instance, but with the application name {@code strimzi} for the {@code app.kubernetes.io/name} key.
      * @return A new instance with the given kubernetes application name added.
      */
-    public Labels withKubernetesName() {
-        return with(Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME);
+    public Labels withKubernetesName(String name) {
+        return with(Labels.KUBERNETES_NAME_LABEL, name);
     }
 
     /**
      * The same labels as this instance, but with the given {@code instance} for the {@code app.kubernetes.io/instance} key.
-     * @param instance The instance to add.
+     * @param instanceName The instance to add.
      * @return A new instance with the given kubernetes application instance added.
      */
-    public Labels withKubernetesInstance(String instance) {
-        return with(Labels.KUBERNETES_INSTANCE_LABEL, getOrValidInstanceLabelValue(instance));
+    public Labels withKubernetesInstance(String instanceName) {
+        return with(Labels.KUBERNETES_INSTANCE_LABEL, getOrValidInstanceLabelValue(instanceName));
     }
 
     /**
      * The same labels as this instance, but with the given {@code part-of} for the {@code app.kubernetes.io/part-of} key.
-     * @param partof The partof label to add.
+     * @param instanceName The instance used to generate the unique label to add composed with the application name.
      * @return A new instance with the given kubernetes application part-of label added.
      */
-    public Labels withKubernetesPartOf(String partof) {
-        return with(Labels.KUBERNETES_PART_OF_LABEL, getOrValidInstanceLabelValue(partof));
+    public Labels withKubernetesPartOf(String instanceName) {
+        return with(Labels.KUBERNETES_PART_OF_LABEL, getOrValidInstanceLabelValue(APPLICATION_NAME + "-" + instanceName));
     }
 
     /**
@@ -274,19 +297,19 @@ public class Labels {
     /**
      * The same labels as this instance, but with the given {@code operatorName} for the {@code app.kubernetes.io/managed-by} key.
      * @param operatorName The name of the operator managing this resource.
-     * @return A new instance with the given operator that is managing this resourse.
+     * @return A new instance with the given operator that is managing this resource.
      */
     public Labels withKubernetesManagedBy(String operatorName) {
         return with(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
     }
 
     /**
-     * The same labels as this instance, but with the given {@code component} for the {@code app.kubernetes.io/component} key.
-     * @param component The component os Strimzi.
-     * @return A new instance with the given kubernetes component this is.
+     * The same labels as this instance, but with the given {@code componentArchitecture} for the {@code app.kubernetes.io/component} key.
+     * @param componentArchitecture The architecture of the Strimzi component.
+     * @return A new instance with the given architecture of this kubernetes component.
      */
-    public Labels withKubernetesComponent(String component) {
-        return with(Labels.KUBERNETES_COMPONENT_LABEL, component);
+    public Labels withKubernetesComponent(String componentArchitecture) {
+        return with(Labels.KUBERNETES_COMPONENT_LABEL, componentArchitecture);
     }
 
     /**
