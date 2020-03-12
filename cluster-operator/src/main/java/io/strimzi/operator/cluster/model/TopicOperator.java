@@ -45,6 +45,7 @@ import static java.util.Collections.singletonList;
 @SuppressWarnings("deprecation")
 public class TopicOperator extends AbstractModel {
     protected static final String COMPONENT = "topic-operator";
+    protected static final String COMPONENT_ARCHITECTURE = "operator";
 
     protected static final String TOPIC_OPERATOR_NAME = "topic-operator";
     private static final String NAME_SUFFIX = "-topic-operator";
@@ -102,6 +103,8 @@ public class TopicOperator extends AbstractModel {
         this.readinessProbeOptions = READINESS_PROBE_OPTIONS;
         this.livenessPath = "/";
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         // create a default configuration
         this.kafkaBootstrapServers = defaultBootstrapServers(cluster);
@@ -115,8 +118,6 @@ public class TopicOperator extends AbstractModel {
         this.ancillaryConfigName = metricAndLogConfigsName(cluster);
         this.logAndMetricsConfigVolumeName = "topic-operator-metrics-and-logging";
         this.logAndMetricsConfigMountPath = "/opt/topic-operator/custom-config/";
-
-        setComponent(COMPONENT);
     }
 
 

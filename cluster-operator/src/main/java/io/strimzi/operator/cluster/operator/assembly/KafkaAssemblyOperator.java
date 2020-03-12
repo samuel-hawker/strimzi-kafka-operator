@@ -535,7 +535,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             Labels caLabels = Labels.fromResource(kafkaAssembly)
                     .withKind(reconciliation.kind())
                     .withCluster(reconciliation.name())
-                    .withKubernetesName()
+                    .withKubernetesName(Labels.APPLICATION_NAME)
                     .withKubernetesInstance(reconciliation.name())
                     .withKubernetesPartOf(reconciliation.name())
                     .withKubernetesManagedBy(AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);
@@ -3044,7 +3044,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             Labels labels = Labels.fromResource(kafkaAssembly)
                     .withKind(reconciliation.kind())
                     .withCluster(reconciliation.name())
-                    .withKubernetesName()
+                    .withKubernetesName(Labels.APPLICATION_NAME)
                     .withKubernetesInstance(reconciliation.name())
                     .withKubernetesPartOf(reconciliation.name())
                     .withKubernetesManagedBy(AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);

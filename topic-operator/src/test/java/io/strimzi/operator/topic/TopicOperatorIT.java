@@ -365,6 +365,7 @@ public class TopicOperatorIT extends TopicOperatorBaseIT {
         }
 
         // 2. Stop TO
+
         stopTopicOperator();
 
         // 3. Modify topic A in kubernetes and topic Z in Kafka

@@ -45,6 +45,8 @@ import java.util.Map;
 
 public class KafkaBridgeCluster extends AbstractModel {
     public static final String COMPONENT = "kafka-bridge";
+    public static final String COMPONENT_ARCHITECTURE = "data-transfer";
+
 
     // Port configuration
     public static final int DEFAULT_REST_API_PORT = 8080;
@@ -130,11 +132,12 @@ public class KafkaBridgeCluster extends AbstractModel {
         this.livenessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.readinessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_BRIDGE_METRICS_ENABLED;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/bridge";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";
         this.logAndMetricsConfigMountPath = "/opt/strimzi/custom-config/";
-        setComponent(COMPONENT);
     }
 
     public static KafkaBridgeCluster fromCrd(KafkaBridge kafkaBridge, KafkaVersion.Lookup versions) {

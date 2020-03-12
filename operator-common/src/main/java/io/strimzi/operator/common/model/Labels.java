@@ -239,11 +239,15 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the application name {@code strimzi} for the {@code app.kubernetes.io/name} key.
+     * @param name The kubernetes name to add.
      * @return A new instance with the given kubernetes application name added.
      */
     public Labels withKubernetesName(String name) {
         return with(Labels.KUBERNETES_NAME_LABEL, name);
     }
+//    public Labels withKubernetesName() {
+//        return with(Labels.KUBERNETES_NAME_LABEL, APPLICATION_NAME);
+//    }
 
     /**
      * The same labels as this instance, but with the given {@code instance} for the {@code app.kubernetes.io/instance} key.

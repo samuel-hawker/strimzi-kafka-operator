@@ -63,6 +63,7 @@ import static io.strimzi.operator.cluster.model.ModelUtils.createHttpProbe;
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity"})
 public class KafkaConnectCluster extends AbstractModel {
     protected static final String COMPONENT = "kafka-connect";
+    protected static final String COMPONENT_ARCHITECTURE = "data-transfer";
 
     // Port configuration
     public static final int REST_API_PORT = 8083;
@@ -131,7 +132,8 @@ public class KafkaConnectCluster extends AbstractModel {
         this.mountPath = "/var/lib/kafka";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";
         this.logAndMetricsConfigMountPath = "/opt/kafka/custom-config/";
-        setComponent(COMPONENT);
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
     }
 
     public static KafkaConnectCluster fromCrd(KafkaConnect kafkaConnect, KafkaVersion.Lookup versions) {

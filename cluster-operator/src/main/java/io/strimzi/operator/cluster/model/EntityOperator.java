@@ -39,6 +39,8 @@ import java.util.Map;
  */
 public class EntityOperator extends AbstractModel {
     protected static final String COMPONENT = "entity-operator";
+    protected static final String COMPONENT_ARCHITECTURE = "operator";
+
 
     protected static final String TLS_SIDECAR_NAME = "tls-sidecar";
     protected static final String TLS_SIDECAR_EO_CERTS_VOLUME_NAME = "eo-certs";
@@ -69,8 +71,8 @@ public class EntityOperator extends AbstractModel {
         this.name = entityOperatorName(cluster);
         this.replicas = EntityOperatorSpec.DEFAULT_REPLICAS;
         this.zookeeperConnect = defaultZookeeperConnect(cluster);
-
-        setComponent(COMPONENT);
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
     }
 
     protected void setTlsSidecar(TlsSidecar tlsSidecar) {

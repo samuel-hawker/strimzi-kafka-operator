@@ -118,6 +118,8 @@ public abstract class AbstractModel {
 
     // Name of the component
     protected String component;
+    // Architecture of the component
+    protected String componentArchitecture;
 
 
     protected String readinessPath;
@@ -196,10 +198,12 @@ public abstract class AbstractModel {
         this.cluster = cluster;
         this.namespace = namespace;
         this.labels = labels.withCluster(cluster)
-                            .withKubernetesName()
-                            .withKubernetesInstance(cluster)
-                            .withKubernetesPartOf(cluster)
-                            .withKubernetesManagedBy(STRIMZI_CLUSTER_OPERATOR_NAME);
+                // Default Kubernetes name is Strimzi as this is parent application
+                //  Some components belong to sub-applications and this will be overridden
+                .withKubernetesName(Labels.APPLICATION_NAME)
+                .withKubernetesInstance(cluster)
+                .withKubernetesPartOf(cluster)
+                .withKubernetesManagedBy(STRIMZI_CLUSTER_OPERATOR_NAME);
     }
 
     public Labels getLabels() {
@@ -220,6 +224,14 @@ public abstract class AbstractModel {
 
     public void setComponent(String component) {
         this.component = component;
+    }
+
+    public String getComponentArchitecture() {
+        return componentArchitecture;
+    }
+
+    public void setComponentArchitecture(String componentArchitecture) {
+        this.componentArchitecture = componentArchitecture;
     }
 
     protected void setImage(String image) {
@@ -285,13 +297,14 @@ public abstract class AbstractModel {
         return labels.withName(name).withUserLabels(userLabels).toMap();
     }
 
-    protected Map<String, String> getLabelsWithNameAndComponent(Map<String, String> userLabels) {
-        return getLabelsWithNameAndComponent(name, userLabels);
+    protected Map<String, String> getLabelsWithNameForComponent(Map<String, String> userLabels) {
+        return getLabelsWithNameForComponent(name, userLabels);
     }
 
-    protected Map<String, String> getLabelsWithNameAndComponent(String name, Map<String, String> userLabels) {
+    protected Map<String, String> getLabelsWithNameForComponent(String name, Map<String, String> userLabels) {
         return labels.withName(name)
-                .withKubernetesComponent(component)
+                .withKubernetesName(component)
+                .withKubernetesComponent(componentArchitecture)
                 .withUserLabels(userLabels)
                 .toMap();
     }
@@ -758,7 +771,6 @@ public abstract class AbstractModel {
     }
 
     protected StatefulSet createStatefulSet(
-            String component,
             Map<String, String> stsAnnotations,
             Map<String, String> podAnnotations,
             List<Volume> volumes,
@@ -782,7 +794,7 @@ public abstract class AbstractModel {
         StatefulSet statefulSet = new StatefulSetBuilder()
                 .withNewMetadata()
                     .withName(name)
-                    .withLabels(getLabelsWithNameAndComponent(templateStatefulSetLabels))
+                    .withLabels(getLabelsWithNameForComponent(templateStatefulSetLabels))
                     .withNamespace(namespace)
                     .withAnnotations(mergeLabelsOrAnnotations(stsAnnotations, templateStatefulSetAnnotations))
                     .withOwnerReferences(createOwnerReference())
@@ -796,7 +808,7 @@ public abstract class AbstractModel {
                     .withNewTemplate()
                         .withNewMetadata()
                             .withName(name)
-                            .withLabels(getLabelsWithNameAndComponent(component, templatePodLabels))
+                            .withLabels(getLabelsWithNameForComponent(templatePodLabels))
                             .withAnnotations(mergeLabelsOrAnnotations(podAnnotations, templatePodAnnotations))
                         .endMetadata()
                         .withNewSpec()
@@ -833,7 +845,7 @@ public abstract class AbstractModel {
         Deployment dep = new DeploymentBuilder()
                 .withNewMetadata()
                     .withName(name)
-                    .withLabels(getLabelsWithNameAndComponent(templateDeploymentLabels))
+                    .withLabels(getLabelsWithNameForComponent(templateDeploymentLabels))
                     .withNamespace(namespace)
                     .withAnnotations(mergeLabelsOrAnnotations(deploymentAnnotations, templateDeploymentAnnotations))
                     .withOwnerReferences(createOwnerReference())
@@ -844,7 +856,7 @@ public abstract class AbstractModel {
                     .withSelector(new LabelSelectorBuilder().withMatchLabels(getSelectorLabelsAsMap()).build())
                     .withNewTemplate()
                         .withNewMetadata()
-                            .withLabels(getLabelsWithNameAndComponent(templatePodLabels))
+                            .withLabels(getLabelsWithNameForComponent(templatePodLabels))
                             .withAnnotations(mergeLabelsOrAnnotations(podAnnotations, templatePodAnnotations))
                         .endMetadata()
                         .withNewSpec()

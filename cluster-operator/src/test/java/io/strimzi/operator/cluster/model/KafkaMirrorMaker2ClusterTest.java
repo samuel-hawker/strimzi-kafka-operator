@@ -125,7 +125,8 @@ public class KafkaMirrorMaker2ClusterTest {
                 "my-user-label", "cromulent",
                 Labels.STRIMZI_NAME_LABEL, name,
                 Labels.STRIMZI_KIND_LABEL, KafkaMirrorMaker2.RESOURCE_KIND,
-                Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME,
+                Labels.KUBERNETES_NAME_LABEL, KafkaMirrorMaker2Cluster.COMPONENT,
+                Labels.KUBERNETES_COMPONENT_LABEL, KafkaMirrorMaker2Cluster.COMPONENT_ARCHITECTURE,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
                 Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
                 Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);

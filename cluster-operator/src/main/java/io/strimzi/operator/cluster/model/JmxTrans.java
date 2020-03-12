@@ -45,6 +45,7 @@ import java.util.Map;
  */
 public class JmxTrans extends AbstractModel {
     private static final String COMPONENT = "jmx-trans";
+    private static final String COMPONENT_ARCHITECTURE = "log-transfer";
 
     // Configuration defaults
     private static final String STRIMZI_DEFAULT_JMXTRANS_IMAGE = "STRIMZI_DEFAULT_JMXTRANS_IMAGE";
@@ -85,6 +86,8 @@ public class JmxTrans extends AbstractModel {
         this.readinessPath = "/metrics";
         this.livenessPath = "/metrics";
         this.readinessProbeOptions = READINESS_PROBE_OPTIONS;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/kafka";
 
@@ -93,8 +96,6 @@ public class JmxTrans extends AbstractModel {
 
         // Metrics must be enabled as JmxTrans is all about gathering JMX metrics from the Kafka brokers and pushing it to remote sources.
         this.isMetricsEnabled = true;
-
-        setComponent(COMPONENT);
     }
 
     public static JmxTrans fromCrd(Kafka kafkaAssembly, KafkaVersion.Lookup versions) {

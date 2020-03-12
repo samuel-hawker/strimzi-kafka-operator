@@ -123,10 +123,10 @@ public class LabelsTest {
         Labels start = Labels.forCluster("my-cluster");
 
         Map userLabels = new HashMap<String, String>(5);
-        userLabels.put(Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME);
+        userLabels.put(Labels.KUBERNETES_NAME_LABEL, "kafka");
         userLabels.put("key1", "value1");
         userLabels.put(Labels.KUBERNETES_INSTANCE_LABEL, "my-cluster");
-        userLabels.put(Labels.KUBERNETES_PART_OF_LABEL, "my-cluster");
+        userLabels.put(Labels.KUBERNETES_PART_OF_LABEL, "strimzi-my-cluster");
         userLabels.put("key2", "value2");
         userLabels.put(Labels.KUBERNETES_MANAGED_BY_LABEL, "my-operator");
         String validLabelContainingKubernetesDomainSubstring = "foo/" + Labels.KUBERNETES_DOMAIN;
@@ -187,9 +187,9 @@ public class LabelsTest {
     @Test
     public void testFromResourceWithLabels()   {
         Map<String, String> userLabels = new HashMap<String, String>(5);
-        userLabels.put(Labels.KUBERNETES_NAME_LABEL, Labels.KUBERNETES_NAME);
+        userLabels.put(Labels.KUBERNETES_NAME_LABEL, "some-app");
         userLabels.put(Labels.KUBERNETES_INSTANCE_LABEL, "my-cluster");
-        userLabels.put(Labels.KUBERNETES_PART_OF_LABEL, "my-cluster");
+        userLabels.put(Labels.KUBERNETES_PART_OF_LABEL, "strimzi-my-cluster");
         userLabels.put(Labels.KUBERNETES_MANAGED_BY_LABEL, "my-operator");
         userLabels.put("key1", "value1");
         userLabels.put("key2", "value2");
@@ -218,6 +218,30 @@ public class LabelsTest {
         expectedLabels.put("key2", "value2");
 
         Labels l = Labels.fromResource(kafka);
+        assertThat(l.toMap(), is(expectedLabels));
+    }
+
+    @Test
+    public void testWithKubernetesLabelsCorrect() {
+        String instance = "my-cluster";
+        String operatorName  = "my-operator";
+        String appName = "an-app";
+        String appArchitecture = "app-architecture";
+
+        Map<String, String> expectedLabels = new HashMap<>();
+        expectedLabels.put(Labels.KUBERNETES_NAME_LABEL, appName);
+        expectedLabels.put(Labels.KUBERNETES_INSTANCE_LABEL, instance);
+        expectedLabels.put(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
+        expectedLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, appArchitecture);
+        expectedLabels.put(Labels.KUBERNETES_PART_OF_LABEL, Labels.APPLICATION_NAME + "-" + instance);
+
+        Labels l = Labels.EMPTY
+            .withKubernetesName(appName)
+            .withKubernetesInstance(instance)
+            .withKubernetesManagedBy(operatorName)
+            .withKubernetesComponent(appArchitecture)
+            .withKubernetesPartOf(instance);
+
         assertThat(l.toMap(), is(expectedLabels));
     }
 

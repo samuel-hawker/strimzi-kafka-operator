@@ -112,7 +112,10 @@ import static java.util.Collections.singletonMap;
 
 @SuppressWarnings("checkstyle:ClassDataAbstractionCoupling")
 public class KafkaCluster extends AbstractModel {
+    // Name of component kafka
     protected static final String COMPONENT = "kafka";
+    // Kafka is a streaming platform
+    protected static final String COMPONENT_ARCHITECTURE = "streaming-platform";
 
     protected static final String INIT_NAME = "kafka-init";
     protected static final String INIT_VOLUME_NAME = "rack-volume";
@@ -270,6 +273,8 @@ public class KafkaCluster extends AbstractModel {
         this.livenessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.readinessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_METRICS_ENABLED;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         setZookeeperConnect(ZookeeperCluster.serviceName(cluster) + ":2181");
 
@@ -279,7 +284,6 @@ public class KafkaCluster extends AbstractModel {
         this.logAndMetricsConfigMountPath = "/opt/kafka/custom-config/";
 
         this.initImage = System.getenv().getOrDefault(ClusterOperatorConfig.STRIMZI_DEFAULT_KAFKA_INIT_IMAGE, "strimzi/operator:latest");
-        setComponent(COMPONENT);
     }
 
     public static String kafkaClusterName(String cluster) {
@@ -1270,7 +1274,6 @@ public class KafkaCluster extends AbstractModel {
         stsAnnotations.put(ANNO_STRIMZI_IO_STORAGE, ModelUtils.encodeStorageToJson(storage));
 
         return createStatefulSet(
-                COMPONENT,
                 stsAnnotations,
                 emptyMap(),
                 getVolumes(isOpenShift),

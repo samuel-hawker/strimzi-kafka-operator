@@ -40,6 +40,7 @@ import java.util.Map;
 
 public class KafkaMirrorMakerCluster extends AbstractModel {
     protected static final String COMPONENT = "kafka-mirror-maker";
+    protected static final String COMPONENT_ARCHITECTURE = "data-replication";
 
     protected static final String TLS_CERTS_VOLUME_MOUNT_CONSUMER = "/opt/kafka/consumer-certs/";
     protected static final String PASSWORD_VOLUME_MOUNT_CONSUMER = "/opt/kafka/consumer-password/";
@@ -123,12 +124,12 @@ public class KafkaMirrorMakerCluster extends AbstractModel {
         this.livenessPath = "/";
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_MIRRORMAKER_METRICS_ENABLED;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/kafka";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";
         this.logAndMetricsConfigMountPath = "/opt/kafka/custom-config/";
-
-        setComponent(COMPONENT);
     }
 
     public static KafkaMirrorMakerCluster fromCrd(KafkaMirrorMaker kafkaMirrorMaker, KafkaVersion.Lookup versions) {

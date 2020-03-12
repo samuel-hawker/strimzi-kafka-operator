@@ -56,7 +56,10 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 
 public class ZookeeperCluster extends AbstractModel {
+    // Name of component zookeeper
     protected static final String COMPONENT = "zookeeper";
+    // Kafka is a streaming platform
+    protected static final String COMPONENT_ARCHITECTURE = "coordination-server";
 
     protected static final int CLIENT_PORT = 2181;
     protected static final String CLIENT_PORT_NAME = "clients";
@@ -161,13 +164,13 @@ public class ZookeeperCluster extends AbstractModel {
         this.livenessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.isMetricsEnabled = DEFAULT_ZOOKEEPER_METRICS_ENABLED;
         this.isSnapshotCheckEnabled = DEFAULT_ZOOKEEPER_SNAPSHOT_CHECK_ENABLED;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/zookeeper";
 
         this.logAndMetricsConfigVolumeName = "zookeeper-metrics-and-logging";
         this.logAndMetricsConfigMountPath = "/opt/kafka/custom-config/";
-
-        setComponent(COMPONENT);
     }
 
     public static ZookeeperCluster fromCrd(Kafka kafkaAssembly, KafkaVersion.Lookup versions) {
@@ -453,7 +456,6 @@ public class ZookeeperCluster extends AbstractModel {
     public StatefulSet generateStatefulSet(boolean isOpenShift, ImagePullPolicy imagePullPolicy, List<LocalObjectReference> imagePullSecrets) {
 
         return createStatefulSet(
-                COMPONENT,
                 Collections.singletonMap(ANNO_STRIMZI_IO_STORAGE, ModelUtils.encodeStorageToJson(storage)),
                 Collections.emptyMap(),
                 getVolumes(isOpenShift),

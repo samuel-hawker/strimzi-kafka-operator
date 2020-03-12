@@ -148,7 +148,7 @@ public class ResourceUtils {
                     .withName(NAME)
                     .withNamespace(NAMESPACE)
                     .withLabels(Labels.userLabels(LABELS)
-                        .withKubernetesName()
+                        .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                         .withKubernetesInstance(NAME)
                         .withKubernetesPartOf(NAME)
                         .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)

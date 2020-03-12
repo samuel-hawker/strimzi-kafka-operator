@@ -114,7 +114,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                     is(Labels.userLabels(user.getMetadata().getLabels())
                             .withKind(KafkaUser.RESOURCE_KIND)
-                            .withKubernetesName()
+                            .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
@@ -452,7 +452,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                             is(Labels.userLabels(user.getMetadata().getLabels())
                             .withKind(KafkaUser.RESOURCE_KIND)
-                            .withKubernetesName()
+                            .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
@@ -535,7 +535,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getNamespace(), is(user.getMetadata().getNamespace())));
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                     is(Labels.userLabels(user.getMetadata().getLabels())
-                            .withKubernetesName()
+                            .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
@@ -742,7 +742,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getNamespace(), is(user.getMetadata().getNamespace())));
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                     is(Labels.userLabels(user.getMetadata().getLabels())
-                            .withKubernetesName()
+                            .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
@@ -826,7 +826,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getNamespace(), is(user.getMetadata().getNamespace())));
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                     is(Labels.userLabels(user.getMetadata().getLabels())
-                            .withKubernetesName()
+                            .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)

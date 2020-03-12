@@ -35,6 +35,8 @@ import java.util.List;
 
 public class KafkaExporter extends AbstractModel {
     protected static final String COMPONENT = "kafka-exporter";
+    protected static final String COMPONENT_ARCHITECTURE = "stream-platform-logging";
+
 
     // Configuration for mounting certificates
     protected static final String KAFKA_EXPORTER_CERTS_VOLUME_NAME = "kafka-exporter-certs";
@@ -80,6 +82,8 @@ public class KafkaExporter extends AbstractModel {
         this.readinessProbeOptions = READINESS_PROBE_OPTIONS;
         this.livenessPath = "/metrics";
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
+        this.component = COMPONENT;
+        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         this.saramaLoggingEnabled = false;
         this.mountPath = "/var/lib/kafka";
@@ -87,7 +91,6 @@ public class KafkaExporter extends AbstractModel {
         // Kafka Exporter is all about metrics - they are always enabled
         this.isMetricsEnabled = true;
 
-        setComponent(COMPONENT);
     }
 
     public static KafkaExporter fromCrd(Kafka kafkaAssembly, KafkaVersion.Lookup versions) {
