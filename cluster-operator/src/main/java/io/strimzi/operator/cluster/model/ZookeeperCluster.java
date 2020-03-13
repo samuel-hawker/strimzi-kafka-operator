@@ -165,7 +165,7 @@ public class ZookeeperCluster extends AbstractModel {
         this.isMetricsEnabled = DEFAULT_ZOOKEEPER_METRICS_ENABLED;
         this.isSnapshotCheckEnabled = DEFAULT_ZOOKEEPER_SNAPSHOT_CHECK_ENABLED;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/zookeeper";
 

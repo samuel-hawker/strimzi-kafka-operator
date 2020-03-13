@@ -72,7 +72,7 @@ public class EntityOperator extends AbstractModel {
         this.replicas = EntityOperatorSpec.DEFAULT_REPLICAS;
         this.zookeeperConnect = defaultZookeeperConnect(cluster);
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
     }
 
     protected void setTlsSidecar(TlsSidecar tlsSidecar) {

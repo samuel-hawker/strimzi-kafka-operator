@@ -83,7 +83,7 @@ public class KafkaExporter extends AbstractModel {
         this.livenessPath = "/metrics";
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
 
         this.saramaLoggingEnabled = false;
         this.mountPath = "/var/lib/kafka";

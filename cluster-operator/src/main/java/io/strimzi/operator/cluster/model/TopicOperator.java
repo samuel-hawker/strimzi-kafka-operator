@@ -104,7 +104,7 @@ public class TopicOperator extends AbstractModel {
         this.livenessPath = "/";
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
 
         // create a default configuration
         this.kafkaBootstrapServers = defaultBootstrapServers(cluster);

@@ -87,7 +87,7 @@ public class JmxTrans extends AbstractModel {
         this.livenessPath = "/metrics";
         this.readinessProbeOptions = READINESS_PROBE_OPTIONS;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/kafka";
 

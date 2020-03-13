@@ -274,7 +274,7 @@ public class KafkaCluster extends AbstractModel {
         this.readinessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_METRICS_ENABLED;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
 
         setZookeeperConnect(ZookeeperCluster.serviceName(cluster) + ":2181");
 

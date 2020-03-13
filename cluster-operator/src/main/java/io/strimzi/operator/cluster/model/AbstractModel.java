@@ -116,10 +116,11 @@ public abstract class AbstractModel {
     // Number of replicas
     protected int replicas;
 
-    // Name of the component
+    // Name of the application that the class extending this one is deploying
+    protected String applicationName;
+    // Component within the architecture of the whole project
     protected String component;
-    // Architecture of the component
-    protected String componentArchitecture;
+
 
 
     protected String readinessPath;
@@ -218,20 +219,20 @@ public abstract class AbstractModel {
         this.replicas = replicas;
     }
 
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
     public String getComponent() {
         return component;
     }
 
     public void setComponent(String component) {
         this.component = component;
-    }
-
-    public String getComponentArchitecture() {
-        return componentArchitecture;
-    }
-
-    public void setComponentArchitecture(String componentArchitecture) {
-        this.componentArchitecture = componentArchitecture;
     }
 
     protected void setImage(String image) {
@@ -303,8 +304,8 @@ public abstract class AbstractModel {
 
     protected Map<String, String> getLabelsWithNameForComponent(String name, Map<String, String> userLabels) {
         return labels.withName(name)
-                .withKubernetesName(component)
-                .withKubernetesComponent(componentArchitecture)
+                .withKubernetesName(applicationName)
+                .withKubernetesComponent(component)
                 .withUserLabels(userLabels)
                 .toMap();
     }

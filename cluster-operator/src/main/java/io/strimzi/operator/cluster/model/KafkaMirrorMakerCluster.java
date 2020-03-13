@@ -125,7 +125,7 @@ public class KafkaMirrorMakerCluster extends AbstractModel {
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_MIRRORMAKER_METRICS_ENABLED;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
+        this.component = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/kafka";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";

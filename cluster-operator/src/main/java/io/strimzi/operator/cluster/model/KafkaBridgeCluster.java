@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 public class KafkaBridgeCluster extends AbstractModel {
-    public static final String COMPONENT = "kafka-bridge";
-    public static final String COMPONENT_ARCHITECTURE = "data-transfer";
+    public static final String APPLICATION = "kafka-bridge";
+    public static final String COMPONENT = "data-transfer";
 
 
     // Port configuration
@@ -132,8 +132,8 @@ public class KafkaBridgeCluster extends AbstractModel {
         this.livenessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.readinessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_BRIDGE_METRICS_ENABLED;
+        this.applicationName = APPLICATION;
         this.component = COMPONENT;
-        this.componentArchitecture = COMPONENT_ARCHITECTURE;
 
         this.mountPath = "/var/lib/bridge";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";
