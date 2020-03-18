@@ -225,7 +225,7 @@ public class TopicOperator extends AbstractModel {
             result = new TopicOperator(
                     namespace,
                     kafkaAssembly.getMetadata().getName(),
-                    Labels.fromResource(kafkaAssembly).withKind(kafkaAssembly.getKind()));
+                    Labels.fromResource(kafkaAssembly).withStrimziKind(kafkaAssembly.getKind()));
             io.strimzi.api.kafka.model.TopicOperatorSpec tcConfig = kafkaAssembly.getSpec().getTopicOperator();
 
             result.setOwnerReference(kafkaAssembly);

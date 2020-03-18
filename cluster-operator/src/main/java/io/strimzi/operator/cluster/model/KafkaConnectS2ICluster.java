@@ -60,7 +60,7 @@ public class KafkaConnectS2ICluster extends KafkaConnectCluster {
         KafkaConnectS2ISpec spec = kafkaConnectS2I.getSpec();
         KafkaConnectS2ICluster cluster = fromSpec(spec, versions, new KafkaConnectS2ICluster(kafkaConnectS2I.getMetadata().getNamespace(),
                 kafkaConnectS2I.getMetadata().getName(),
-                Labels.fromResource(kafkaConnectS2I).withKind(kafkaConnectS2I.getKind())));
+                Labels.fromResource(kafkaConnectS2I).withStrimziKind(kafkaConnectS2I.getKind())));
 
         cluster.setOwnerReference(kafkaConnectS2I);
         cluster.setInsecureSourceRepository(spec.isInsecureSourceRepository());
@@ -175,7 +175,7 @@ public class KafkaConnectS2ICluster extends KafkaConnectCluster {
                 .withNewMetadata()
                     .withName(KafkaConnectS2IResources.sourceImageStreamName(cluster))
                     .withNamespace(namespace)
-                    .withLabels(getLabelsWithName(KafkaConnectS2IResources.sourceImageStreamName(cluster)))
+                    .withLabels(getLabelsWithStrimziName(KafkaConnectS2IResources.sourceImageStreamName(cluster)))
                     .withOwnerReferences(createOwnerReference())
                 .endMetadata()
                 .withNewSpec()

@@ -125,7 +125,7 @@ public class KafkaMirrorMaker2ClusterTest {
                 "my-user-label", "cromulent",
                 Labels.STRIMZI_NAME_LABEL, name,
                 Labels.STRIMZI_KIND_LABEL, KafkaMirrorMaker2.RESOURCE_KIND,
-                Labels.KUBERNETES_NAME_LABEL, KafkaMirrorMaker2Cluster.COMPONENT,
+                Labels.KUBERNETES_NAME_LABEL, KafkaMirrorMaker2Cluster.APPLICATION_NAME,
                 Labels.KUBERNETES_COMPONENT_LABEL, KafkaMirrorMaker2Cluster.COMPONENT_ARCHITECTURE,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
                 Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
@@ -142,7 +142,7 @@ public class KafkaMirrorMaker2ClusterTest {
 
     private Map<String, String> expectedDeploymentLabels()    {
         Map<String, String> expectedDeploymentLabels = expectedLabels(KafkaMirrorMaker2Resources.deploymentName(cluster));
-        expectedDeploymentLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, KafkaMirrorMaker2Cluster.COMPONENT);
+        expectedDeploymentLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, KafkaMirrorMaker2Cluster.APPLICATION_NAME);
 
         return expectedDeploymentLabels;
     }

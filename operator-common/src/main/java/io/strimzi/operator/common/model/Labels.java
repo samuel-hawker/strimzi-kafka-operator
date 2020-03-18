@@ -4,9 +4,7 @@
  */
 package io.strimzi.operator.common.model;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
-import static java.util.Collections.unmodifiableMap;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +12,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static java.util.Collections.unmodifiableMap;
 
 /**
  * An immutable set of labels
@@ -125,7 +125,7 @@ public class Labels {
      * @return A {@code Labels} instance from the given map
      * @param userLabels The labels
      */
-    public static Labels userLabels(Map<String, String> userLabels) {
+    private static Labels userLabels(Map<String, String> userLabels) {
 
         if (userLabels == null) {
             return EMPTY;
@@ -223,7 +223,7 @@ public class Labels {
      * @param kind The kind to add.
      * @return A new instance with the given kind added.
      */
-    public Labels withKind(String kind) {
+    public Labels withStrimziKind(String kind) {
         return with(STRIMZI_KIND_LABEL, kind);
     }
 
@@ -233,7 +233,7 @@ public class Labels {
      * @param cluster The cluster to add.
      * @return A new instance with the given cluster added.
      */
-    public Labels withCluster(String cluster) {
+    public Labels withStrimziCluster(String cluster) {
         return with(STRIMZI_CLUSTER_LABEL, cluster);
     }
 
@@ -321,7 +321,7 @@ public class Labels {
      * @param name The name to add
      * @return A new instance with the given name added.
      */
-    public Labels withName(String name) {
+    public Labels withStrimziName(String name) {
         return with(STRIMZI_NAME_LABEL, name);
     }
 
@@ -329,7 +329,7 @@ public class Labels {
      * The same labels as this instance, but with "true" for the {@code strimzi.io/discovery} key.
      * @return A new instance with the given name added.
      */
-    public Labels withDiscovery() {
+    public Labels withStrimziDiscovery() {
         return with(STRIMZI_DISCOVERY_LABEL, "true");
     }
 
@@ -353,7 +353,7 @@ public class Labels {
      * @param cluster The cluster.
      * @return A singleton instance with the given {@code cluster} for the {@code strimzi.io/cluster} key.
      */
-    public static Labels forCluster(String cluster) {
+    public static Labels forStrimziCluster(String cluster) {
         return new Labels(singletonMap(STRIMZI_CLUSTER_LABEL, cluster));
     }
 
@@ -361,13 +361,14 @@ public class Labels {
      * @param kind The kind.
      * @return A singleton instance with the given {@code kind} for the {@code strimzi.io/kind} key.
      */
-    public static Labels forKind(String kind) {
+    public static Labels forStrimziKind(String kind) {
         return new Labels(singletonMap(STRIMZI_KIND_LABEL, kind));
     }
 
     /**
      * @return An instances containing just the strimzi.io labels present in this instance.
      */
+    // change this
     public Labels strimziSelectorLabels() {
         Map<String, String> newLabels = new HashMap<>(3);
 
@@ -397,5 +398,23 @@ public class Labels {
     @Override
     public String toString() {
         return "Labels" + labels;
+    }
+
+    /**
+     * @param resource
+     * @return The default Labels set
+     */
+    public static Labels generateDefaultLabels(HasMetadata resource, String applicationName, String managedBy) {
+        String instanceName = resource.getMetadata().getName();
+        return Labels.fromResource(resource)
+                .withStrimziKind(resource.getKind())
+
+                // clarify these defaults, these should be different...
+                .withStrimziName(Labels.APPLICATION_NAME)
+                .withKubernetesName(applicationName)
+
+                .withKubernetesInstance(instanceName)
+                .withKubernetesPartOf(instanceName)
+                .withKubernetesManagedBy(managedBy);
     }
 }

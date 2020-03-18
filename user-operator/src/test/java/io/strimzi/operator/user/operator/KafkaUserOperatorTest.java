@@ -113,7 +113,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getNamespace(), is(user.getMetadata().getNamespace())));
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                     is(Labels.userLabels(user.getMetadata().getLabels())
-                            .withKind(KafkaUser.RESOURCE_KIND)
+                            .withStrimziKind(KafkaUser.RESOURCE_KIND)
                             .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
@@ -451,7 +451,7 @@ public class KafkaUserOperatorTest {
             context.verify(() -> assertThat(captured.getMetadata().getNamespace(), is(user.getMetadata().getNamespace())));
             context.verify(() -> assertThat(captured.getMetadata().getLabels(),
                             is(Labels.userLabels(user.getMetadata().getLabels())
-                            .withKind(KafkaUser.RESOURCE_KIND)
+                            .withStrimziKind(KafkaUser.RESOURCE_KIND)
                             .withKubernetesName(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
@@ -539,7 +539,7 @@ public class KafkaUserOperatorTest {
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
-                            .withKind(KafkaUser.RESOURCE_KIND)
+                            .withStrimziKind(KafkaUser.RESOURCE_KIND)
                             .toMap())));
             context.verify(() -> assertThat(captured.getData().get("ca.crt"), is(userCert.getData().get("ca.crt"))));
             context.verify(() -> assertThat(captured.getData().get("user.crt"), is(userCert.getData().get("user.crt"))));
@@ -637,7 +637,7 @@ public class KafkaUserOperatorTest {
 
         when(mockCrdOps.listAsync(eq(ResourceUtils.NAMESPACE), eq(Optional.of(new LabelSelector(null, Labels.userLabels(ResourceUtils.LABELS).toMap()))))).thenReturn(
                 Future.succeededFuture(Arrays.asList(newTlsUser, newScramShaUser, existingTlsUser, existingScramShaUser)));
-        when(mockSecretOps.list(eq(ResourceUtils.NAMESPACE), eq(Labels.userLabels(ResourceUtils.LABELS).withKind(KafkaUser.RESOURCE_KIND)))).thenReturn(Arrays.asList(existingTlsUserSecret, existingScramShaUserSecret));
+        when(mockSecretOps.list(eq(ResourceUtils.NAMESPACE), eq(Labels.userLabels(ResourceUtils.LABELS).withStrimziKind(KafkaUser.RESOURCE_KIND)))).thenReturn(Arrays.asList(existingTlsUserSecret, existingScramShaUserSecret));
         when(aclOps.getUsersWithAcls()).thenReturn(new HashSet<String>(Arrays.asList("existing-tls-user", "second-deleted-user")));
         when(scramOps.list()).thenReturn(asList("existing-tls-user", "deleted-scram-sha-user"));
 
@@ -746,7 +746,7 @@ public class KafkaUserOperatorTest {
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
-                            .withKind(KafkaUser.RESOURCE_KIND)
+                            .withStrimziKind(KafkaUser.RESOURCE_KIND)
                             .toMap())));
 
             context.verify(() -> assertThat(scramPasswordCaptor.getValue(), is(new String(Base64.getDecoder().decode(captured.getData().get(KafkaUserModel.KEY_PASSWORD))))));
@@ -830,7 +830,7 @@ public class KafkaUserOperatorTest {
                             .withKubernetesInstance(ResourceUtils.NAME)
                             .withKubernetesPartOf(ResourceUtils.NAME)
                             .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
-                            .withKind(KafkaUser.RESOURCE_KIND)
+                            .withStrimziKind(KafkaUser.RESOURCE_KIND)
                             .toMap())));
             context.verify(() -> assertThat(new String(Base64.getDecoder().decode(captured.getData().get(KafkaUserModel.KEY_PASSWORD))), is(password)));
             context.verify(() -> assertThat(scramPasswordCaptor.getValue(), is(password)));

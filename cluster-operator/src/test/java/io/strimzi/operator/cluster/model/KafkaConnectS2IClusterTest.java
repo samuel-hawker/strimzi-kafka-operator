@@ -120,7 +120,7 @@ public class KafkaConnectS2IClusterTest {
             Labels.STRIMZI_CLUSTER_LABEL, cluster,
             Labels.STRIMZI_NAME_LABEL, name,
             Labels.STRIMZI_KIND_LABEL, KafkaConnectS2I.RESOURCE_KIND,
-            Labels.KUBERNETES_NAME_LABEL, KafkaConnectS2ICluster.COMPONENT,
+            Labels.KUBERNETES_NAME_LABEL, KafkaConnectS2ICluster.APPLICATION_NAME,
             Labels.KUBERNETES_COMPONENT_LABEL, KafkaConnectS2ICluster.COMPONENT_ARCHITECTURE,
             Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
             Labels.KUBERNETES_PART_OF_LABEL, this.cluster,

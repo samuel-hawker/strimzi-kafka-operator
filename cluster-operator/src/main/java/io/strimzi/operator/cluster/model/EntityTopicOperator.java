@@ -204,7 +204,7 @@ public class EntityTopicOperator extends AbstractModel {
                 result = new EntityTopicOperator(
                         namespace,
                         kafkaAssembly.getMetadata().getName(),
-                        Labels.fromResource(kafkaAssembly).withKind(kafkaAssembly.getKind()));
+                        Labels.fromResource(kafkaAssembly).withStrimziKind(kafkaAssembly.getKind()));
 
                 result.setOwnerReference(kafkaAssembly);
                 String image = topicOperatorSpec.getImage();

@@ -180,7 +180,7 @@ public class ZookeeperCluster extends AbstractModel {
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public static ZookeeperCluster fromCrd(Kafka kafkaAssembly, KafkaVersion.Lookup versions, Storage oldStorage) {
         ZookeeperCluster zk = new ZookeeperCluster(kafkaAssembly.getMetadata().getNamespace(), kafkaAssembly.getMetadata().getName(),
-                Labels.fromResource(kafkaAssembly).withKind(kafkaAssembly.getKind()));
+                Labels.fromResource(kafkaAssembly).withStrimziKind(kafkaAssembly.getKind()));
         zk.setOwnerReference(kafkaAssembly);
         ZookeeperClusterSpec zookeeperClusterSpec = kafkaAssembly.getSpec().getZookeeper();
 

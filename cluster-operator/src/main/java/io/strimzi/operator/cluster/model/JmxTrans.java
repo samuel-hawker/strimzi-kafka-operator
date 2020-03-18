@@ -111,7 +111,7 @@ public class JmxTrans extends AbstractModel {
             }
             result = new JmxTrans(kafkaAssembly.getMetadata().getNamespace(),
                     kafkaAssembly.getMetadata().getName(),
-                    Labels.fromResource(kafkaAssembly).withKind(kafkaAssembly.getKind()));
+                    Labels.fromResource(kafkaAssembly).withStrimziKind(kafkaAssembly.getKind()));
             result.isDeployed = true;
 
             if (kafkaAssembly.getSpec().getKafka().getJmxOptions().getAuthentication() instanceof KafkaJmxAuthenticationPassword) {

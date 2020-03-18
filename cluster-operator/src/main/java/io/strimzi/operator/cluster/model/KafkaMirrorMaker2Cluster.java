@@ -77,7 +77,7 @@ public class KafkaMirrorMaker2Cluster extends KafkaConnectCluster {
                                                    KafkaVersion.Lookup versions) {
         KafkaMirrorMaker2Cluster cluster = new KafkaMirrorMaker2Cluster(kafkaMirrorMaker2.getMetadata().getNamespace(),
                 kafkaMirrorMaker2.getMetadata().getName(),
-                Labels.fromResource(kafkaMirrorMaker2).withKind(kafkaMirrorMaker2.getKind()));
+                Labels.fromResource(kafkaMirrorMaker2).withStrimziKind(kafkaMirrorMaker2.getKind()));
         KafkaMirrorMaker2Spec spec = kafkaMirrorMaker2.getSpec();
         cluster.setOwnerReference(kafkaMirrorMaker2);
 

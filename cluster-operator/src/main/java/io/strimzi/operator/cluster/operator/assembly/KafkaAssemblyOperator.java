@@ -531,10 +531,10 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
          * and the current key is stored under the key {@code ca.key}.
          */
         Future<ReconciliationState> reconcileCas(Supplier<Date> dateSupplier) {
-            Labels selectorLabels = Labels.EMPTY.withKind(reconciliation.kind()).withCluster(reconciliation.name());
+            Labels selectorLabels = Labels.EMPTY.withStrimziKind(reconciliation.kind()).withStrimziCluster(reconciliation.name());
             Labels caLabels = Labels.fromResource(kafkaAssembly)
-                    .withKind(reconciliation.kind())
-                    .withCluster(reconciliation.name())
+                    .withStrimziKind(reconciliation.kind())
+                    .withStrimziCluster(reconciliation.name())
                     .withKubernetesName(Labels.APPLICATION_NAME)
                     .withKubernetesInstance(reconciliation.name())
                     .withKubernetesPartOf(reconciliation.name())
@@ -3042,8 +3042,8 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             oldCoSecret = clusterCa.clusterOperatorSecret();
 
             Labels labels = Labels.fromResource(kafkaAssembly)
-                    .withKind(reconciliation.kind())
-                    .withCluster(reconciliation.name())
+                    .withStrimziKind(reconciliation.kind())
+                    .withStrimziCluster(reconciliation.name())
                     .withKubernetesName(Labels.APPLICATION_NAME)
                     .withKubernetesInstance(reconciliation.name())
                     .withKubernetesPartOf(reconciliation.name())

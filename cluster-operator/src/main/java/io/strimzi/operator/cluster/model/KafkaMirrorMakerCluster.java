@@ -135,7 +135,7 @@ public class KafkaMirrorMakerCluster extends AbstractModel {
     public static KafkaMirrorMakerCluster fromCrd(KafkaMirrorMaker kafkaMirrorMaker, KafkaVersion.Lookup versions) {
         KafkaMirrorMakerCluster kafkaMirrorMakerCluster = new KafkaMirrorMakerCluster(kafkaMirrorMaker.getMetadata().getNamespace(),
                 kafkaMirrorMaker.getMetadata().getName(),
-                Labels.fromResource(kafkaMirrorMaker).withKind(kafkaMirrorMaker.getKind()));
+                Labels.fromResource(kafkaMirrorMaker).withStrimziKind(kafkaMirrorMaker.getKind()));
 
         KafkaMirrorMakerSpec spec = kafkaMirrorMaker.getSpec();
         kafkaMirrorMakerCluster.setReplicas(spec != null && spec.getReplicas() > 0 ? spec.getReplicas() : DEFAULT_REPLICAS);

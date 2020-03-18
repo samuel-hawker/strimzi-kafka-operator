@@ -115,7 +115,7 @@ public class KafkaConnectClusterTest {
                 "my-user-label", "cromulent",
                 Labels.STRIMZI_NAME_LABEL, name,
                 Labels.STRIMZI_KIND_LABEL, KafkaConnect.RESOURCE_KIND,
-                Labels.KUBERNETES_NAME_LABEL, KafkaConnectCluster.COMPONENT,
+                Labels.KUBERNETES_NAME_LABEL, KafkaConnectCluster.APPLICATION_NAME,
                 Labels.KUBERNETES_COMPONENT_LABEL, KafkaConnectCluster.COMPONENT_ARCHITECTURE,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
                 Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
@@ -124,7 +124,7 @@ public class KafkaConnectClusterTest {
 
     private Map<String, String> expectedDeploymentLabels(String name)    {
         Map<String, String> expectedDeploymentLabels = expectedLabels(name);
-        expectedDeploymentLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, KafkaConnectCluster.COMPONENT);
+        expectedDeploymentLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, KafkaConnectCluster.APPLICATION_NAME);
 
         return expectedDeploymentLabels;
     }

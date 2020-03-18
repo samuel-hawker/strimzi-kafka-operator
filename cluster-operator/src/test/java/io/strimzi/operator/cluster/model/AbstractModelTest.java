@@ -48,7 +48,7 @@ public class AbstractModelTest {
 
     private Map<String, String> getStringStringMap(String xmx, String xms, double dynamicFraction, long dynamicMax,
                                                    ResourceRequirements resources) {
-        AbstractModel am = new AbstractModel(null, null, Labels.forCluster("foo")) {
+        AbstractModel am = new AbstractModel(null, null, Labels.forStrimziCluster("foo")) {
             @Override
             protected String getDefaultLogConfigFileName() {
                 return "";
@@ -141,7 +141,7 @@ public class AbstractModelTest {
     }
 
     private String getPerformanceOptions(JvmOptions opts) {
-        AbstractModel am = new AbstractModel(null, null, Labels.forCluster("foo")) {
+        AbstractModel am = new AbstractModel(null, null, Labels.forStrimziCluster("foo")) {
             @Override
             protected String getDefaultLogConfigFileName() {
                 return "";
@@ -172,7 +172,7 @@ public class AbstractModelTest {
                 .endMetadata()
                 .build();
 
-        AbstractModel am = new AbstractModel(kafka.getMetadata().getNamespace(), kafka.getMetadata().getName(), Labels.forCluster("foo")) {
+        AbstractModel am = new AbstractModel(kafka.getMetadata().getNamespace(), kafka.getMetadata().getName(), Labels.forStrimziCluster("foo")) {
             @Override
             protected String getDefaultLogConfigFileName() {
                 return "";
@@ -195,7 +195,7 @@ public class AbstractModelTest {
 
     @Test
     public void testDetermineImagePullPolicy()  {
-        AbstractModel am = new AbstractModel("my-namespace", "my-cluster", Labels.forCluster("my-cluster")) {
+        AbstractModel am = new AbstractModel("my-namespace", "my-cluster", Labels.forStrimziCluster("my-cluster")) {
             @Override
             protected String getDefaultLogConfigFileName() {
                 return "";

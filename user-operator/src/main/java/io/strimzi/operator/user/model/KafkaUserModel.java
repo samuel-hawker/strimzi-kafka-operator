@@ -102,7 +102,7 @@ public class KafkaUserModel {
                                          Secret userSecret) {
         KafkaUserModel result = new KafkaUserModel(kafkaUser.getMetadata().getNamespace(),
                 kafkaUser.getMetadata().getName(),
-                Labels.fromResource(kafkaUser).withKind(kafkaUser.getKind()));
+                Labels.fromResource(kafkaUser).withStrimziKind(kafkaUser.getKind()));
         result.setOwnerReference(kafkaUser);
         result.setAuthentication(kafkaUser.getSpec().getAuthentication());
 

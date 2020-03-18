@@ -99,7 +99,7 @@ public class LabelsTest {
 
     @Test
     public void testWithUserLabels()   {
-        Labels start = Labels.forCluster("my-cluster");
+        Labels start = Labels.forStrimziCluster("my-cluster");
 
         // null user labels
         Labels nullLabels = start.withUserLabels(null);
@@ -120,7 +120,7 @@ public class LabelsTest {
 
     @Test
     public void testWithUserLabelsFiltersKubernetesDomainLabels()   {
-        Labels start = Labels.forCluster("my-cluster");
+        Labels start = Labels.forStrimziCluster("my-cluster");
 
         Map userLabels = new HashMap<String, String>(5);
         userLabels.put(Labels.KUBERNETES_NAME_LABEL, "kafka");

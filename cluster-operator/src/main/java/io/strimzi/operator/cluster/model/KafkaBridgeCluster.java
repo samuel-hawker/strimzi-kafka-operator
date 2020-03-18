@@ -122,7 +122,7 @@ public class KafkaBridgeCluster extends AbstractModel {
      * @param labels    labels to add to the cluster
      */
     protected KafkaBridgeCluster(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+        super(namespace, cluster);
         this.name = KafkaBridgeResources.deploymentName(cluster);
         this.serviceName = KafkaBridgeResources.serviceName(cluster);
         this.ancillaryConfigName = KafkaBridgeResources.metricsAndLogConfigMapName(cluster);
@@ -143,7 +143,7 @@ public class KafkaBridgeCluster extends AbstractModel {
     public static KafkaBridgeCluster fromCrd(KafkaBridge kafkaBridge, KafkaVersion.Lookup versions) {
 
         KafkaBridgeCluster kafkaBridgeCluster = new KafkaBridgeCluster(kafkaBridge.getMetadata().getNamespace(),
-                kafkaBridge.getMetadata().getName(), Labels.fromResource(kafkaBridge).withKind(kafkaBridge.getKind()));
+                kafkaBridge.getMetadata().getName(), Labels.fromResource(kafkaBridge).withStrimziKind(kafkaBridge.getKind()));
 
         KafkaBridgeSpec spec = kafkaBridge.getSpec();
         kafkaBridgeCluster.tracing = spec.getTracing();

@@ -27,16 +27,13 @@ import io.strimzi.api.kafka.model.Probe;
 import io.strimzi.api.kafka.model.ProbeBuilder;
 import io.strimzi.api.kafka.model.template.KafkaExporterTemplate;
 import io.strimzi.operator.cluster.ClusterOperatorConfig;
-import io.strimzi.operator.common.model.Labels;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class KafkaExporter extends AbstractModel {
-    protected static final String COMPONENT = "kafka-exporter";
-    protected static final String COMPONENT_ARCHITECTURE = "stream-platform-logging";
-
+    protected static final String APPLICATION_NAME = "kafka-exporter";
 
     // Configuration for mounting certificates
     protected static final String KAFKA_EXPORTER_CERTS_VOLUME_NAME = "kafka-exporter-certs";
@@ -73,8 +70,8 @@ public class KafkaExporter extends AbstractModel {
      * @param kafkaCluster kafkaCluster name
      * @param labels    labels to add to the kafkaCluster
      */
-    protected KafkaExporter(String namespace, String kafkaCluster, Labels labels) {
-        super(namespace, kafkaCluster, labels);
+    protected KafkaExporter(String namespace, String kafkaCluster) {
+        super(namespace, kafkaCluster);
         this.name = KafkaExporterResources.deploymentName(kafkaCluster);
         this.serviceName = KafkaExporterResources.serviceName(kafkaCluster);
         this.replicas = 1;
@@ -82,8 +79,7 @@ public class KafkaExporter extends AbstractModel {
         this.readinessProbeOptions = READINESS_PROBE_OPTIONS;
         this.livenessPath = "/metrics";
         this.livenessProbeOptions = READINESS_PROBE_OPTIONS;
-        this.component = COMPONENT;
-        this.component = COMPONENT_ARCHITECTURE;
+        this.applicationName = APPLICATION_NAME;
 
         this.saramaLoggingEnabled = false;
         this.mountPath = "/var/lib/kafka";
@@ -95,8 +91,9 @@ public class KafkaExporter extends AbstractModel {
 
     public static KafkaExporter fromCrd(Kafka kafkaAssembly, KafkaVersion.Lookup versions) {
         KafkaExporter kafkaExporter = new KafkaExporter(kafkaAssembly.getMetadata().getNamespace(),
-                kafkaAssembly.getMetadata().getName(),
-                Labels.fromResource(kafkaAssembly).withKind(kafkaAssembly.getKind()));
+                kafkaAssembly.getMetadata().getName());
+
+        kafkaExporter.setDefaultLabels(kafkaAssembly);
 
         KafkaExporterSpec spec = kafkaAssembly.getSpec().getKafkaExporter();
         if (spec != null) {

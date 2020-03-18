@@ -152,7 +152,7 @@ public class ResourceUtils {
                         .withKubernetesInstance(NAME)
                         .withKubernetesPartOf(NAME)
                         .withKubernetesManagedBy(KafkaUserModel.KAFKA_USER_OPERATOR_NAME)
-                        .withKind(KafkaUser.RESOURCE_KIND)
+                        .withStrimziKind(KafkaUser.RESOURCE_KIND)
                         .toMap())
                 .endMetadata()
                 .addToData("ca.crt", Base64.getEncoder().encodeToString("clients-ca-crt".getBytes()))
@@ -168,7 +168,7 @@ public class ResourceUtils {
                 .withNewMetadata()
                 .withName(NAME)
                 .withNamespace(NAMESPACE)
-                .withLabels(Labels.userLabels(LABELS).withKind(KafkaUser.RESOURCE_KIND).toMap())
+                .withLabels(Labels.userLabels(LABELS).withStrimziKind(KafkaUser.RESOURCE_KIND).toMap())
                 .endMetadata()
                 .addToData("password", Base64.getEncoder().encodeToString("my-password".getBytes()))
                 .build();

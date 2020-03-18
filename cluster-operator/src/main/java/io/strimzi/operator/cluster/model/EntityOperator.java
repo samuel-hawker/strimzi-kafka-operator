@@ -27,7 +27,6 @@ import io.strimzi.api.kafka.model.SystemProperty;
 import io.strimzi.api.kafka.model.TlsSidecar;
 import io.strimzi.api.kafka.model.template.EntityOperatorTemplate;
 import io.strimzi.operator.cluster.ClusterOperatorConfig;
-import io.strimzi.operator.common.model.Labels;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,9 +37,7 @@ import java.util.Map;
  * Represents the Entity Operator deployment
  */
 public class EntityOperator extends AbstractModel {
-    protected static final String COMPONENT = "entity-operator";
-    protected static final String COMPONENT_ARCHITECTURE = "operator";
-
+    protected static final String APPLICATION_NAME = "entity-operator";
 
     protected static final String TLS_SIDECAR_NAME = "tls-sidecar";
     protected static final String TLS_SIDECAR_EO_CERTS_VOLUME_NAME = "eo-certs";
@@ -64,15 +61,13 @@ public class EntityOperator extends AbstractModel {
     /**
      * @param namespace Kubernetes/OpenShift namespace where cluster resources are going to be created
      * @param cluster overall cluster name
-     * @param labels
      */
-    protected EntityOperator(String namespace, String cluster, Labels labels) {
-        super(namespace, cluster, labels);
+    protected EntityOperator(String namespace, String cluster) {
+        super(namespace, cluster);
         this.name = entityOperatorName(cluster);
         this.replicas = EntityOperatorSpec.DEFAULT_REPLICAS;
         this.zookeeperConnect = defaultZookeeperConnect(cluster);
-        this.component = COMPONENT;
-        this.component = COMPONENT_ARCHITECTURE;
+        this.applicationName = APPLICATION_NAME;
     }
 
     protected void setTlsSidecar(TlsSidecar tlsSidecar) {
@@ -138,8 +133,9 @@ public class EntityOperator extends AbstractModel {
             String namespace = kafkaAssembly.getMetadata().getNamespace();
             result = new EntityOperator(
                     namespace,
-                    kafkaAssembly.getMetadata().getName(),
-                    Labels.fromResource(kafkaAssembly).withKind(kafkaAssembly.getKind()));
+                    kafkaAssembly.getMetadata().getName());
+
+            result.setLabels(generateDefaultLabels(kafkaAssembly, APPLICATION_NAME));
 
             result.setOwnerReference(kafkaAssembly);
 
