@@ -44,8 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 public class KafkaBridgeCluster extends AbstractModel {
-    public static final String APPLICATION = "kafka-bridge";
-    public static final String COMPONENT = "data-transfer";
+    public static final String APPLICATION_NAME = "kafka-bridge";
 
 
     // Port configuration
@@ -132,8 +131,7 @@ public class KafkaBridgeCluster extends AbstractModel {
         this.livenessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.readinessProbeOptions = DEFAULT_HEALTHCHECK_OPTIONS;
         this.isMetricsEnabled = DEFAULT_KAFKA_BRIDGE_METRICS_ENABLED;
-        this.applicationName = APPLICATION;
-        this.component = COMPONENT;
+        this.applicationName = APPLICATION_NAME;
 
         this.mountPath = "/var/lib/bridge";
         this.logAndMetricsConfigVolumeName = "kafka-metrics-and-logging";
@@ -192,7 +190,7 @@ public class KafkaBridgeCluster extends AbstractModel {
             ModelUtils.parsePodTemplate(kafkaBridgeCluster, template.getPod());
 
             if (template.getApiService() != null && template.getApiService().getMetadata() != null)  {
-                kafkaBridgeCluster.templateServiceLabels = template.getApiService().getMetadata().getLabels();
+                kafkaBridgeCluster.templateServiceLabels = mergeLabelsOrAnnotations(template.getApiService().getMetadata().getLabels(), ModelUtils.getCustomLabelsOrAnnotations(CO_ENV_VAR_CUSTOM_LABELS));
                 kafkaBridgeCluster.templateServiceAnnotations = template.getApiService().getMetadata().getAnnotations();
             }
 
@@ -229,7 +227,7 @@ public class KafkaBridgeCluster extends AbstractModel {
             ports.add(createServicePort(METRICS_PORT_NAME, METRICS_PORT, METRICS_PORT, "TCP"));
         }
 
-        return createDiscoverableService("ClusterIP", ports, ModelUtils.getCustomLabelsOrAnnotations(CO_ENV_VAR_CUSTOM_LABELS), mergeLabelsOrAnnotations(getDiscoveryAnnotation(port), templateServiceAnnotations, ModelUtils.getCustomLabelsOrAnnotations(CO_ENV_VAR_CUSTOM_ANNOTATIONS)));
+        return createDiscoverableService("ClusterIP", ports, mergeLabelsOrAnnotations(getDiscoveryAnnotation(port), templateServiceAnnotations, ModelUtils.getCustomLabelsOrAnnotations(CO_ENV_VAR_CUSTOM_ANNOTATIONS)));
     }
 
     /**

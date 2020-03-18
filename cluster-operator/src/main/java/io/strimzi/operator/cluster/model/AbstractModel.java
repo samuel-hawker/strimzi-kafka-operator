@@ -156,19 +156,6 @@ public abstract class AbstractModel {
     protected List<SystemProperty> javaSystemProperties = null;
 
     protected Labels labels;
-
-    public Labels getLabels() {
-        return labels;
-    }
-
-    public void setLabels(Labels labels) {
-        this.labels = labels;
-    }
-
-    public void setDefaultLabels(HasMetadata resource) {
-        this.labels = generateDefaultLabels(resource);
-    }
-
     // Templates
     protected Map<String, String> templateStatefulSetLabels;
     protected Map<String, String> templateStatefulSetAnnotations;
@@ -196,6 +183,7 @@ public abstract class AbstractModel {
     private String ownerApiVersion;
     private String ownerKind;
     private String ownerUid;
+
     protected io.strimzi.api.kafka.model.Probe readinessProbeOptions;
     protected io.strimzi.api.kafka.model.Probe livenessProbeOptions;
 
@@ -652,8 +640,7 @@ public abstract class AbstractModel {
                 .withNewMetadata()
                     .withName(name)
                     .withNamespace(namespace)
-//                    .withLabels(mergeLabelsOrAnnotations(getLabelsWithName(templateStatefulSetLabels), templatePersistentVolumeClaimLabels))
-                    .withLabels(templatePersistentVolumeClaimLabels)
+                    .withLabels(getLabelsWithStrimziName(name, templatePersistentVolumeClaimLabels).toMap())
                     .withAnnotations(mergeLabelsOrAnnotations(Collections.singletonMap(ANNO_STRIMZI_IO_DELETE_CLAIM, Boolean.toString(storage.isDeleteClaim())), templatePersistentVolumeClaimAnnotations))
                 .endMetadata()
                 .withNewSpec()
@@ -929,6 +916,18 @@ public abstract class AbstractModel {
             Collectors.toMap(EnvVar::getName, EnvVar::getValue,
                 // On duplicates, last in wins
                 (u, v) -> v));
+    }
+
+    public Labels getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Labels labels) {
+        this.labels = labels;
+    }
+
+    public void setDefaultLabels(HasMetadata resource) {
+        this.labels = generateDefaultLabels(resource);
     }
 
     /**

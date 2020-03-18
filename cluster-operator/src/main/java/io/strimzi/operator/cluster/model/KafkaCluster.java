@@ -655,7 +655,8 @@ public class KafkaCluster extends AbstractModel {
             }
 
             if (template.getPersistentVolumeClaim() != null && template.getPersistentVolumeClaim().getMetadata() != null) {
-                result.templatePersistentVolumeClaimLabels = template.getPersistentVolumeClaim().getMetadata().getLabels();
+                result.templatePersistentVolumeClaimLabels = mergeLabelsOrAnnotations(template.getPersistentVolumeClaim().getMetadata().getLabels(),
+                        result.templateStatefulSetLabels);
                 result.templatePersistentVolumeClaimAnnotations = template.getPersistentVolumeClaim().getMetadata().getAnnotations();
             }
 
@@ -903,9 +904,8 @@ public class KafkaCluster extends AbstractModel {
             }
 
             Service service = createService(externalBootstrapServiceName, getExternalServiceType(), ports,
-                getLabelsWithStrimziName(externalBootstrapServiceName, templateExternalBootstrapServiceLabels),
-                getSelectorLabelsAsMap(),
-                mergeLabelsOrAnnotations(dnsAnnotations, templateExternalBootstrapServiceAnnotations), loadBalancerIP);
+                    getLabelsWithStrimziName(externalBootstrapServiceName, templateExternalBootstrapServiceLabels), getSelectorLabels(),
+                    mergeLabelsOrAnnotations(dnsAnnotations, templateExternalBootstrapServiceAnnotations), loadBalancerIP);
 
             if (isExposedWithLoadBalancer()) {
                 if (templateExternalBootstrapServiceLoadBalancerSourceRanges != null) {
@@ -984,10 +984,10 @@ public class KafkaCluster extends AbstractModel {
                 }
             }
 
-            Labels selector = Labels.fromMap(getSelectorLabelsAsMap()).withStatefulSetPod(kafkaPodName(cluster, pod));
+            Labels selector = getSelectorLabels().withStatefulSetPod(kafkaPodName(cluster, pod));
 
             Service service = createService(perPodServiceName, getExternalServiceType(), ports,
-                    getLabelsWithStrimziName(perPodServiceName, templatePerPodServiceLabels), selector.toMap(),
+                    getLabelsWithStrimziName(perPodServiceName, templatePerPodServiceLabels), selector,
                     mergeLabelsOrAnnotations(dnsAnnotations, templatePerPodServiceAnnotations), loadBalancerIP);
 
             if (isExposedWithLoadBalancer()) {
@@ -1021,8 +1021,8 @@ public class KafkaCluster extends AbstractModel {
             Route route = new RouteBuilder()
                     .withNewMetadata()
                         .withName(perPodServiceName)
-                        .withLabels(getLabelsWithStrimziName(perPodServiceName, templatePerPodRouteLabels))
-                        .withAnnotations(mergeLabelsOrAnnotations(null, templatePerPodRouteAnnotations))
+                        .withLabels(getLabelsWithStrimziName(perPodServiceName, templatePerPodRouteLabels).toMap())
+                        .withAnnotations(templatePerPodRouteAnnotations)
                         .withNamespace(namespace)
                         .withOwnerReferences(createOwnerReference())
                     .endMetadata()

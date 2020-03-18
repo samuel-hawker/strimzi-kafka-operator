@@ -2364,7 +2364,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             futureSts.setHandler(res -> {
                 if (res.succeeded())    {
                     List<PersistentVolumeClaim> desiredPvcs = zkCluster.generatePersistentVolumeClaims();
-                    Future<List<PersistentVolumeClaim>> existingPvcsFuture = pvcOperations.listAsync(namespace, Labels.fromMap(zkCluster.getSelectorLabelsAsMap()));
+                    Future<List<PersistentVolumeClaim>> existingPvcsFuture = pvcOperations.listAsync(namespace, zkCluster.getSelectorLabels());
 
                     maybeCleanPodAndPvc(zkSetOperations, res.result(), desiredPvcs, existingPvcsFuture).setHandler(resultPromise);
                 } else {
@@ -2394,7 +2394,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
                     // This is needed because the restarted pod will be created from old statefulset with old storage configuration.
                     List<PersistentVolumeClaim> desiredPvcs = kafkaCluster.generatePersistentVolumeClaims(getOldStorage(sts));
 
-                    Future<List<PersistentVolumeClaim>> existingPvcsFuture = pvcOperations.listAsync(namespace, Labels.fromMap(kafkaCluster.getSelectorLabelsAsMap()));
+                    Future<List<PersistentVolumeClaim>> existingPvcsFuture = pvcOperations.listAsync(namespace, kafkaCluster.getSelectorLabels());
 
                     maybeCleanPodAndPvc(kafkaSetOperations, sts, desiredPvcs, existingPvcsFuture).setHandler(resultPromise);
                 } else {
@@ -2587,7 +2587,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
          */
         Future<ReconciliationState> zkPersistentClaimDeletion() {
             Promise<ReconciliationState> resultPromise = Promise.promise();
-            Future<List<PersistentVolumeClaim>> futurePvcs = pvcOperations.listAsync(namespace, Labels.fromMap(zkCluster.getSelectorLabelsAsMap()));
+            Future<List<PersistentVolumeClaim>> futurePvcs = pvcOperations.listAsync(namespace, zkCluster.getSelectorLabels());
 
             futurePvcs.setHandler(res -> {
                 if (res.succeeded() && res.result() != null)    {
@@ -2615,7 +2615,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
          */
         Future<ReconciliationState> kafkaPersistentClaimDeletion() {
             Promise<ReconciliationState> resultPromise = Promise.promise();
-            Future<List<PersistentVolumeClaim>> futurePvcs = pvcOperations.listAsync(namespace, Labels.fromMap(kafkaCluster.getSelectorLabelsAsMap()));
+            Future<List<PersistentVolumeClaim>> futurePvcs = pvcOperations.listAsync(namespace, kafkaCluster.getSelectorLabels());
 
             futurePvcs.setHandler(res -> {
                 if (res.succeeded() && res.result() != null)    {

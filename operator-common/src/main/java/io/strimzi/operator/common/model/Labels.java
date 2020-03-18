@@ -88,12 +88,6 @@ public class Labels {
     public static final String KUBERNETES_MANAGED_BY_LABEL = KUBERNETES_DOMAIN + "managed-by";
 
     /**
-     * The component within the architecture
-     * https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
-     */
-    public static final String KUBERNETES_COMPONENT_LABEL = KUBERNETES_DOMAIN + "component";
-
-    /**
      * Used to identify individual pods
      */
     public static final String KUBERNETES_STATEFULSET_POD_LABEL = "statefulset.kubernetes.io/pod-name";
@@ -307,14 +301,14 @@ public class Labels {
         return with(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
     }
 
-    /**
-     * The same labels as this instance, but with the given {@code componentArchitecture} for the {@code app.kubernetes.io/component} key.
-     * @param componentArchitecture The architecture of the Strimzi component.
-     * @return A new instance with the given architecture of this kubernetes component.
-     */
-    public Labels withKubernetesComponent(String componentArchitecture) {
-        return with(Labels.KUBERNETES_COMPONENT_LABEL, componentArchitecture);
-    }
+//    /**
+//     * The same labels as this instance, but with the given {@code componentArchitecture} for the {@code app.kubernetes.io/component} key.
+//     * @param componentArchitecture The architecture of the Strimzi component.
+//     * @return A new instance with the given architecture of this kubernetes component.
+//     */
+//    public Labels withKubernetesComponent(String componentArchitecture) {
+//        return with(Labels.KUBERNETES_COMPONENT_LABEL, componentArchitecture);
+//    }
 
     /**
      * The same labels as this instance, but with the given {@code name} for the {@code strimzi.io/name} key.
@@ -401,7 +395,9 @@ public class Labels {
     }
 
     /**
-     * @param resource
+     * @param resource a resource with meta
+     * @param applicationName a resource with meta
+     * @param managedBy a resource with meta
      * @return The default Labels set
      */
     public static Labels generateDefaultLabels(HasMetadata resource, String applicationName, String managedBy) {

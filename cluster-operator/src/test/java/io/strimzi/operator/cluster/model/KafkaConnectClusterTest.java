@@ -116,7 +116,6 @@ public class KafkaConnectClusterTest {
                 Labels.STRIMZI_NAME_LABEL, name,
                 Labels.STRIMZI_KIND_LABEL, KafkaConnect.RESOURCE_KIND,
                 Labels.KUBERNETES_NAME_LABEL, KafkaConnectCluster.APPLICATION_NAME,
-                Labels.KUBERNETES_COMPONENT_LABEL, KafkaConnectCluster.COMPONENT_ARCHITECTURE,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
                 Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
                 Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);
@@ -124,7 +123,6 @@ public class KafkaConnectClusterTest {
 
     private Map<String, String> expectedDeploymentLabels(String name)    {
         Map<String, String> expectedDeploymentLabels = expectedLabels(name);
-        expectedDeploymentLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, KafkaConnectCluster.APPLICATION_NAME);
 
         return expectedDeploymentLabels;
     }
@@ -1204,12 +1202,12 @@ public class KafkaConnectClusterTest {
         NetworkPolicy np = kc.generateNetworkPolicy(true, true);
 
         assertThat(np.getMetadata().getName(), is(kc.getName()));
-        assertThat(np.getSpec().getPodSelector().getMatchLabels(), is(kc.getSelectorLabelsAsMap()));
+        assertThat(np.getSpec().getPodSelector().getMatchLabels(), is(kc.getSelectorLabels().toMap()));
         assertThat(np.getSpec().getIngress().size(), is(2));
         assertThat(np.getSpec().getIngress().get(0).getPorts().size(), is(1));
         assertThat(np.getSpec().getIngress().get(0).getPorts().get(0).getPort().getIntVal(), is(KafkaConnectCluster.REST_API_PORT));
         assertThat(np.getSpec().getIngress().get(0).getFrom().size(), is(2));
-        assertThat(np.getSpec().getIngress().get(0).getFrom().get(0).getPodSelector().getMatchLabels(), is(kc.getSelectorLabelsAsMap()));
+        assertThat(np.getSpec().getIngress().get(0).getFrom().get(0).getPodSelector().getMatchLabels(), is(kc.getSelectorLabels().toMap()));
         assertThat(np.getSpec().getIngress().get(0).getFrom().get(0).getNamespaceSelector(), is(nullValue()));
         assertThat(np.getSpec().getIngress().get(0).getFrom().get(1).getPodSelector().getMatchLabels(), is(singletonMap(Labels.STRIMZI_KIND_LABEL, "cluster-operator")));
         assertThat(np.getSpec().getIngress().get(0).getFrom().get(1).getNamespaceSelector().getMatchLabels(), is(emptyMap()));

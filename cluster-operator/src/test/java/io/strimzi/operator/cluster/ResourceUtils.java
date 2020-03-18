@@ -138,7 +138,7 @@ public class ResourceUtils {
         ObjectMetaBuilder meta = new ObjectMetaBuilder();
         meta.withNamespace(clusterCmNamespace);
         meta.withName(clusterCmName);
-        meta.withLabels(Labels.userLabels(singletonMap("my-user-label", "cromulent")).toMap());
+        meta.withLabels(Labels.fromMap(singletonMap("my-user-label", "cromulent")).toMap());
         KafkaBuilder builder = new KafkaBuilder();
         return builder.withMetadata(meta.build())
                 .withNewSpec()
@@ -355,7 +355,7 @@ public class ResourceUtils {
         ObjectMeta meta = new ObjectMeta();
         meta.setNamespace(clusterCmNamespace);
         meta.setName(clusterCmName);
-        meta.setLabels(Labels.userLabels(TestUtils.map(Labels.KUBERNETES_DOMAIN + "part-of", "tests", "my-user-label", "cromulent")).toMap());
+        meta.setLabels(Labels.fromMap(TestUtils.map(Labels.KUBERNETES_DOMAIN + "part-of", "tests", "my-user-label", "cromulent")).toMap());
         result.setMetadata(meta);
 
         KafkaSpec spec = new KafkaSpec();

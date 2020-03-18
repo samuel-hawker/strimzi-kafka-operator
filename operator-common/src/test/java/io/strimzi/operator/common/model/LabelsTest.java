@@ -4,6 +4,8 @@
  */
 package io.strimzi.operator.common.model;
 
+import io.strimzi.api.kafka.model.Kafka;
+import io.strimzi.api.kafka.model.KafkaBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -12,9 +14,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import io.strimzi.api.kafka.model.Kafka;
-import io.strimzi.api.kafka.model.KafkaBuilder;
 
 public class LabelsTest {
     @Test
@@ -42,7 +41,7 @@ public class LabelsTest {
 
     @Test
     public void testParseNullLabelsInUserLabels()   {
-        assertThat(Labels.userLabels(null), is(Labels.EMPTY));
+        assertThat(Labels.EMPTY.withUserLabels(null), is(Labels.EMPTY));
     }
 
     @Test
@@ -232,14 +231,12 @@ public class LabelsTest {
         expectedLabels.put(Labels.KUBERNETES_NAME_LABEL, appName);
         expectedLabels.put(Labels.KUBERNETES_INSTANCE_LABEL, instance);
         expectedLabels.put(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
-        expectedLabels.put(Labels.KUBERNETES_COMPONENT_LABEL, appArchitecture);
         expectedLabels.put(Labels.KUBERNETES_PART_OF_LABEL, Labels.APPLICATION_NAME + "-" + instance);
 
         Labels l = Labels.EMPTY
             .withKubernetesName(appName)
             .withKubernetesInstance(instance)
             .withKubernetesManagedBy(operatorName)
-            .withKubernetesComponent(appArchitecture)
             .withKubernetesPartOf(instance);
 
         assertThat(l.toMap(), is(expectedLabels));

@@ -135,7 +135,7 @@ public class EntityOperator extends AbstractModel {
                     namespace,
                     kafkaAssembly.getMetadata().getName());
 
-            result.setLabels(generateDefaultLabels(kafkaAssembly, APPLICATION_NAME));
+            result.setLabels(result.generateDefaultLabels(kafkaAssembly));
 
             result.setOwnerReference(kafkaAssembly);
 

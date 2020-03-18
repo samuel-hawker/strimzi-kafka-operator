@@ -96,8 +96,7 @@ public class KafkaExporterTest {
                 "my-user-label", "cromulent",
                 Labels.STRIMZI_KIND_LABEL, Kafka.RESOURCE_KIND,
                 Labels.STRIMZI_NAME_LABEL, name,
-                Labels.KUBERNETES_NAME_LABEL, KafkaExporter.COMPONENT,
-                Labels.KUBERNETES_COMPONENT_LABEL, KafkaExporter.COMPONENT_ARCHITECTURE,
+                Labels.KUBERNETES_NAME_LABEL, KafkaExporter.APPLICATION_NAME,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
                 Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
                 Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);
