@@ -4,6 +4,9 @@
  */
 package io.strimzi.operator.common.model;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.strimzi.api.kafka.model.Kafka;
 import io.strimzi.api.kafka.model.KafkaBuilder;
 import org.junit.jupiter.api.Test;
@@ -238,6 +241,61 @@ public class LabelsTest {
             .withKubernetesInstance(instance)
             .withKubernetesManagedBy(operatorName)
             .withKubernetesPartOf(instance);
+
+        assertThat(l.toMap(), is(expectedLabels));
+    }
+
+    @Test
+    public void testGenerateDefaultLabels() {
+        String instance = "my-cluster";
+        String operatorName  = "my-operator";
+        String appName = "an-app";
+        String appArchitecture = "app-architecture";
+
+        class ResourceWithMetadata implements HasMetadata {
+
+            String kind;
+            String apiVersion;
+            ObjectMeta metadata;
+
+            public ResourceWithMetadata(String kind, String apiVersion, ObjectMeta metadata) {
+                this.kind = kind;
+                this.apiVersion = apiVersion;
+                this.metadata = metadata;
+            }
+
+            public ObjectMeta getMetadata() {
+                return metadata;
+            }
+            public void setMetadata(ObjectMeta metadata) {
+                this.metadata = metadata;
+            }
+
+            public String getKind() {
+                return kind;
+            }
+
+            public String getApiVersion() {
+                return apiVersion;
+            }
+            public void setApiVersion(String apiVersion) {
+                this.apiVersion = apiVersion;
+            }
+
+        }
+
+        Map<String, String> expectedLabels = new HashMap<>();
+        expectedLabels.put(Labels.STRIMZI_KIND_LABEL, "MyResource");
+        expectedLabels.put(Labels.STRIMZI_NAME_LABEL, Labels.APPLICATION_NAME);
+        expectedLabels.put(Labels.STRIMZI_CLUSTER_LABEL, instance);
+        expectedLabels.put(Labels.KUBERNETES_NAME_LABEL, appName);
+        expectedLabels.put(Labels.KUBERNETES_INSTANCE_LABEL, instance);
+        expectedLabels.put(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
+        expectedLabels.put(Labels.KUBERNETES_PART_OF_LABEL, Labels.APPLICATION_NAME + "-" + instance);
+
+        Labels l = Labels.generateDefaultLabels(new ResourceWithMetadata("MyResource", "strimzi.io/v0", new ObjectMetaBuilder()
+            .withNewName(instance)
+            .build()), appName, operatorName);
 
         assertThat(l.toMap(), is(expectedLabels));
     }

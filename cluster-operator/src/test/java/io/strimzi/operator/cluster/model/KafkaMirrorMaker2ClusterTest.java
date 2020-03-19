@@ -127,7 +127,7 @@ public class KafkaMirrorMaker2ClusterTest {
                 Labels.STRIMZI_KIND_LABEL, KafkaMirrorMaker2.RESOURCE_KIND,
                 Labels.KUBERNETES_NAME_LABEL, KafkaMirrorMaker2Cluster.APPLICATION_NAME,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
-                Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
+                Labels.KUBERNETES_PART_OF_LABEL, Labels.APPLICATION_NAME + "-" + this.cluster,
                 Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);
     }
 
@@ -137,12 +137,6 @@ public class KafkaMirrorMaker2ClusterTest {
 
     private Map<String, String> expectedLabels()    {
         return expectedLabels(KafkaMirrorMaker2Resources.deploymentName(cluster));
-    }
-
-    private Map<String, String> expectedDeploymentLabels()    {
-        Map<String, String> expectedDeploymentLabels = expectedLabels(KafkaMirrorMaker2Resources.deploymentName(cluster));
-
-        return expectedDeploymentLabels;
     }
 
     protected List<EnvVar> getExpectedEnvVars() {
@@ -240,7 +234,7 @@ public class KafkaMirrorMaker2ClusterTest {
 
         assertThat(dep.getMetadata().getName(), is(KafkaMirrorMaker2Resources.deploymentName(cluster)));
         assertThat(dep.getMetadata().getNamespace(), is(namespace));
-        Map<String, String> expectedDeploymentLabels = expectedDeploymentLabels();
+        Map<String, String> expectedDeploymentLabels = expectedLabels();
         assertThat(dep.getMetadata().getLabels(), is(expectedDeploymentLabels));
         assertThat(dep.getSpec().getSelector().getMatchLabels(), is(expectedSelectorLabels()));
         assertThat(dep.getSpec().getReplicas(), is(new Integer(replicas)));

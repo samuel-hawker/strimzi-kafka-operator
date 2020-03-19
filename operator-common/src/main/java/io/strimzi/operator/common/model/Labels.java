@@ -239,9 +239,6 @@ public class Labels {
     public Labels withKubernetesName(String name) {
         return with(Labels.KUBERNETES_NAME_LABEL, name);
     }
-//    public Labels withKubernetesName() {
-//        return with(Labels.KUBERNETES_NAME_LABEL, APPLICATION_NAME);
-//    }
 
     /**
      * The same labels as this instance, but with the given {@code instance} for the {@code app.kubernetes.io/instance} key.
@@ -301,15 +298,6 @@ public class Labels {
         return with(Labels.KUBERNETES_MANAGED_BY_LABEL, operatorName);
     }
 
-//    /**
-//     * The same labels as this instance, but with the given {@code componentArchitecture} for the {@code app.kubernetes.io/component} key.
-//     * @param componentArchitecture The architecture of the Strimzi component.
-//     * @return A new instance with the given architecture of this kubernetes component.
-//     */
-//    public Labels withKubernetesComponent(String componentArchitecture) {
-//        return with(Labels.KUBERNETES_COMPONENT_LABEL, componentArchitecture);
-//    }
-
     /**
      * The same labels as this instance, but with the given {@code name} for the {@code strimzi.io/name} key.
      * @param name The name to add
@@ -362,7 +350,6 @@ public class Labels {
     /**
      * @return An instances containing just the strimzi.io labels present in this instance.
      */
-    // change this
     public Labels strimziSelectorLabels() {
         Map<String, String> newLabels = new HashMap<>(3);
 
@@ -404,11 +391,11 @@ public class Labels {
         String instanceName = resource.getMetadata().getName();
         return Labels.fromResource(resource)
                 .withStrimziKind(resource.getKind())
-
-                // clarify these defaults, these should be different...
+                // Default Strimzi name is the owning application name (Strimzi)
+                // for resources belonging to no particular component
                 .withStrimziName(Labels.APPLICATION_NAME)
+                .withStrimziCluster(instanceName)
                 .withKubernetesName(applicationName)
-
                 .withKubernetesInstance(instanceName)
                 .withKubernetesPartOf(instanceName)
                 .withKubernetesManagedBy(managedBy);

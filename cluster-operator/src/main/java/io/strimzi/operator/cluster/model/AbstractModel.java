@@ -255,33 +255,10 @@ public abstract class AbstractModel {
         return getLabelsWithStrimziName(name, Collections.emptyMap()).strimziSelectorLabels();
     }
 
-//
-//
-//    protected Map<String, String> getLabelsWithName(Map<String, String> userLabels) {
-//        return getLabelsWithName(name, userLabels);
-//    }
-//
-//    protected Map<String, String> getLabelsWithName(String name) {
-//        return labels.withName(name).toMap();
-//    }
-//
     protected Labels getLabelsWithStrimziName(String name, Map<String, String> additionalLabels) {
         return labels.withStrimziName(name).withUserLabels(additionalLabels);
     }
-//
-//    protected Map<String, String> getLabelsWithNameForComponent(Map<String, String> userLabels) {
-//        return getLabelsWithNameForComponent(name, userLabels);
-//    }
-//
-//    protected Map<String, String> getLabelsWithNameForComponent(String name, Map<String, String> userLabels) {
-//        return labels.withName(name)
-//                .withKubernetesName(applicationName)
-//                .withKubernetesComponent(component)
-//                .withUserLabels(userLabels)
-//                .toMap();
-//    }
-//
-//
+
     protected Labels getLabelsWithNameAndDiscovery(String name, Map<String, String> additionalLabels) {
         return getLabelsWithStrimziName(name, additionalLabels).withStrimziDiscovery();
     }
@@ -640,7 +617,8 @@ public abstract class AbstractModel {
                 .withNewMetadata()
                     .withName(name)
                     .withNamespace(namespace)
-                    .withLabels(getLabelsWithStrimziName(name, templatePersistentVolumeClaimLabels).toMap())
+                    // labels with the Strimzi name set to that of the component
+                    .withLabels(getLabelsWithStrimziName(this.name, templatePersistentVolumeClaimLabels).toMap())
                     .withAnnotations(mergeLabelsOrAnnotations(Collections.singletonMap(ANNO_STRIMZI_IO_DELETE_CLAIM, Boolean.toString(storage.isDeleteClaim())), templatePersistentVolumeClaimAnnotations))
                 .endMetadata()
                 .withNewSpec()

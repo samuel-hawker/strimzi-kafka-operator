@@ -117,14 +117,8 @@ public class KafkaConnectClusterTest {
                 Labels.STRIMZI_KIND_LABEL, KafkaConnect.RESOURCE_KIND,
                 Labels.KUBERNETES_NAME_LABEL, KafkaConnectCluster.APPLICATION_NAME,
                 Labels.KUBERNETES_INSTANCE_LABEL, this.cluster,
-                Labels.KUBERNETES_PART_OF_LABEL, this.cluster,
+                Labels.KUBERNETES_PART_OF_LABEL, Labels.APPLICATION_NAME + "-" + this.cluster,
                 Labels.KUBERNETES_MANAGED_BY_LABEL, AbstractModel.STRIMZI_CLUSTER_OPERATOR_NAME);
-    }
-
-    private Map<String, String> expectedDeploymentLabels(String name)    {
-        Map<String, String> expectedDeploymentLabels = expectedLabels(name);
-
-        return expectedDeploymentLabels;
     }
 
     private Map<String, String> expectedSelectorLabels()    {
@@ -226,7 +220,7 @@ public class KafkaConnectClusterTest {
 
         assertThat(dep.getMetadata().getName(), is(KafkaConnectResources.deploymentName(cluster)));
         assertThat(dep.getMetadata().getNamespace(), is(namespace));
-        Map<String, String> expectedDeploymentLabels = expectedDeploymentLabels(KafkaConnectResources.deploymentName(cluster));
+        Map<String, String> expectedDeploymentLabels = expectedLabels(KafkaConnectResources.deploymentName(cluster));
         assertThat(dep.getMetadata().getLabels(), is(expectedDeploymentLabels));
         assertThat(dep.getSpec().getSelector().getMatchLabels(), is(expectedSelectorLabels()));
         assertThat(dep.getSpec().getReplicas(), is(new Integer(replicas)));

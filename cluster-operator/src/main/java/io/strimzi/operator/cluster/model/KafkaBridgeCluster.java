@@ -118,9 +118,8 @@ public class KafkaBridgeCluster extends AbstractModel {
      *
      * @param namespace Kubernetes/OpenShift namespace where Kafka Bridge cluster resources are going to be created
      * @param cluster   overall cluster name
-     * @param labels    labels to add to the cluster
      */
-    protected KafkaBridgeCluster(String namespace, String cluster, Labels labels) {
+    protected KafkaBridgeCluster(String namespace, String cluster) {
         super(namespace, cluster);
         this.name = KafkaBridgeResources.deploymentName(cluster);
         this.serviceName = KafkaBridgeResources.serviceName(cluster);
@@ -141,7 +140,10 @@ public class KafkaBridgeCluster extends AbstractModel {
     public static KafkaBridgeCluster fromCrd(KafkaBridge kafkaBridge, KafkaVersion.Lookup versions) {
 
         KafkaBridgeCluster kafkaBridgeCluster = new KafkaBridgeCluster(kafkaBridge.getMetadata().getNamespace(),
-                kafkaBridge.getMetadata().getName(), Labels.fromResource(kafkaBridge).withStrimziKind(kafkaBridge.getKind()));
+                kafkaBridge.getMetadata().getName());
+
+
+        kafkaBridgeCluster.setDefaultLabels(kafkaBridge);
 
         KafkaBridgeSpec spec = kafkaBridge.getSpec();
         kafkaBridgeCluster.tracing = spec.getTracing();
