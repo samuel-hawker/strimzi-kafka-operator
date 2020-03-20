@@ -206,7 +206,7 @@ public class KafkaAssemblyOperatorMockTest {
                 .withMetadata(new ObjectMetaBuilder()
                         .withName(CLUSTER_NAME)
                         .withNamespace(NAMESPACE)
-                        .withLabels(Labels.userLabels(TestUtils.map("foo", "bar")).toMap())
+                        .withLabels(TestUtils.map("foo", "bar"))
                         .build())
                 .withNewSpec()
                     .withNewKafka()
@@ -251,7 +251,7 @@ public class KafkaAssemblyOperatorMockTest {
     private ResourceOperatorSupplier supplierWithMocks() {
         ZookeeperLeaderFinder leaderFinder = ResourceUtils.zookeeperLeaderFinder(vertx, mockClient);
         return new ResourceOperatorSupplier(vertx, mockClient, leaderFinder,
-                ResourceUtils.adminClientProvider(),
+                ResourceUtils.adminClientProvider(), ResourceUtils.zookeeperScalerProvider(),
                 new PlatformFeaturesAvailability(true, kubernetesVersion), 2_000);
     }
 

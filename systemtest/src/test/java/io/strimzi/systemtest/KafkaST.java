@@ -87,6 +87,8 @@ import java.util.stream.Collectors;
 import static io.strimzi.api.kafka.model.KafkaResources.kafkaStatefulSetName;
 import static io.strimzi.api.kafka.model.KafkaResources.zookeeperStatefulSetName;
 import static io.strimzi.systemtest.Constants.ACCEPTANCE;
+import static io.strimzi.systemtest.Constants.EXTERNAL_CLIENTS_USED;
+import static io.strimzi.systemtest.Constants.INTERNAL_CLIENTS_USED;
 import static io.strimzi.systemtest.Constants.LOADBALANCER_SUPPORTED;
 import static io.strimzi.systemtest.Constants.NODEPORT_SUPPORTED;
 import static io.strimzi.systemtest.Constants.REGRESSION;
@@ -473,8 +475,8 @@ class KafkaST extends BaseST {
             entityOperatorSpec.getTemplate().getTlsSidecarContainer().setEnv(StUtils.createContainerEnvVarsFromMap(envVarUpdated));
         });
 
-        StatefulSetUtils.waitTillSsHasRolled(KafkaResources.kafkaStatefulSetName(CLUSTER_NAME), 2, kafkaSnapshot);
         StatefulSetUtils.waitTillSsHasRolled(KafkaResources.zookeeperStatefulSetName(CLUSTER_NAME), 2, zkSnapshot);
+        StatefulSetUtils.waitTillSsHasRolled(KafkaResources.kafkaStatefulSetName(CLUSTER_NAME), 2, kafkaSnapshot);
         DeploymentUtils.waitTillDepHasRolled(KafkaResources.entityOperatorDeploymentName(CLUSTER_NAME), 1, eoPod);
         KafkaUtils.waitUntilKafkaCRIsReady(CLUSTER_NAME);
 
@@ -522,6 +524,7 @@ class KafkaST extends BaseST {
      * Test sending messages over plain transport, without auth
      */
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testSendMessagesPlainAnonymous() {
         int messagesCount = 200;
         String topicName = TOPIC_NAME + "-" + rng.nextInt(Integer.MAX_VALUE);
@@ -552,6 +555,7 @@ class KafkaST extends BaseST {
      * Test sending messages over tls transport using mutual tls auth
      */
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testSendMessagesTlsAuthenticated() {
         String kafkaUser = "my-user";
         int messagesCount = 200;
@@ -597,6 +601,7 @@ class KafkaST extends BaseST {
      */
     @Test
     @Tag(ACCEPTANCE)
+    @Tag(INTERNAL_CLIENTS_USED)
     void testSendMessagesPlainScramSha() throws InterruptedException {
         String kafkaUsername = "my-user";
         String topicName = TOPIC_NAME + "-" + rng.nextInt(Integer.MAX_VALUE);
@@ -651,6 +656,7 @@ class KafkaST extends BaseST {
      * Test sending messages over tls transport using scram sha auth
      */
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testSendMessagesTlsScramSha() {
         String kafkaUsername = "my-user";
         int messagesCount = 200;
@@ -1088,6 +1094,7 @@ class KafkaST extends BaseST {
 
     @Test
     @Tag(NODEPORT_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testNodePort() throws Exception {
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3, 1)
             .editSpec()
@@ -1178,6 +1185,7 @@ class KafkaST extends BaseST {
     @Test
     @Tag(ACCEPTANCE)
     @Tag(NODEPORT_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testNodePortTls() throws Exception {
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3, 1)
             .editSpec()
@@ -1206,6 +1214,7 @@ class KafkaST extends BaseST {
 
     @Test
     @Tag(LOADBALANCER_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testLoadBalancer() throws Exception {
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3)
             .editSpec()
@@ -1232,6 +1241,7 @@ class KafkaST extends BaseST {
     @Test
     @Tag(ACCEPTANCE)
     @Tag(LOADBALANCER_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testLoadBalancerTls() throws Exception {
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3)
             .editSpec()
@@ -1272,11 +1282,16 @@ class KafkaST extends BaseST {
 
         KafkaResource.kafkaJBOD(CLUSTER_NAME, kafkaReplicas, jbodStorage).done();
         // kafka cluster already deployed
-        verifyVolumeNamesAndLabels(2, 2, 10);
+        verifyVolumeNamesAndLabels(kafkaReplicas, 2, diskSizeGi);
+
         LOGGER.info("Deleting cluster");
-        cmdKubeClient().deleteByName("kafka", CLUSTER_NAME).waitForResourceDeletion("pvc", "data-0-" + KafkaResources.kafkaPodName(CLUSTER_NAME, 0));
-        PersistentVolumeClaimUtils.waitUntilPVCDeletion(CLUSTER_NAME);
-        verifyPVCDeletion(2, jbodStorage);
+        cmdKubeClient().deleteByName("kafka", CLUSTER_NAME);
+
+        LOGGER.info("Waiting for PVC deletion");
+        PersistentVolumeClaimUtils.waitForPVCDeletion(kafkaReplicas, jbodStorage, CLUSTER_NAME);
+
+        LOGGER.info("Waiting for Kafka pods deletion");
+        verifyPVCDeletion(kafkaReplicas, jbodStorage);
     }
 
     @Test
@@ -1291,12 +1306,15 @@ class KafkaST extends BaseST {
 
         KafkaResource.kafkaJBOD(CLUSTER_NAME, kafkaReplicas, jbodStorage).done();
         // kafka cluster already deployed
+        verifyVolumeNamesAndLabels(kafkaReplicas, 2, diskSizeGi);
 
-        verifyVolumeNamesAndLabels(kafkaReplicas, jbodStorage.getVolumes().size(), diskSizeGi);
-        LOGGER.info("Deleting Kafka cluster {}", CLUSTER_NAME);
-        cmdKubeClient().deleteByName("kafka", CLUSTER_NAME).waitForResourceDeletion("Kafka", CLUSTER_NAME);
+        LOGGER.info("Deleting cluster");
+        cmdKubeClient().deleteByName("kafka", CLUSTER_NAME);
+
+        LOGGER.info("Waiting for PVC deletion");
+        PersistentVolumeClaimUtils.waitForPVCDeletion(kafkaReplicas, jbodStorage, CLUSTER_NAME);
+
         LOGGER.info("Waiting for Kafka pods deletion");
-        PodUtils.waitForKafkaClusterPodsDeletion(CLUSTER_NAME);
         verifyPVCDeletion(kafkaReplicas, jbodStorage);
     }
 
@@ -1312,11 +1330,15 @@ class KafkaST extends BaseST {
 
         KafkaResource.kafkaJBOD(CLUSTER_NAME, kafkaReplicas, jbodStorage).done();
         // kafka cluster already deployed
-        verifyVolumeNamesAndLabels(kafkaReplicas, jbodStorage.getVolumes().size(), diskSizeGi);
+        verifyVolumeNamesAndLabels(kafkaReplicas, 2, diskSizeGi);
+
         LOGGER.info("Deleting cluster");
-        cmdKubeClient().deleteByName("kafka", CLUSTER_NAME).waitForResourceDeletion("pod", KafkaResources.kafkaPodName(CLUSTER_NAME, 0));
+        cmdKubeClient().deleteByName("kafka", CLUSTER_NAME);
+
+        LOGGER.info("Waiting for PVC deletion");
+        PersistentVolumeClaimUtils.waitForPVCDeletion(kafkaReplicas, jbodStorage, CLUSTER_NAME);
+
         LOGGER.info("Waiting for Kafka pods deletion");
-        PodUtils.waitForKafkaClusterPodsDeletion(CLUSTER_NAME);
         verifyPVCDeletion(kafkaReplicas, jbodStorage);
     }
 
@@ -1383,6 +1405,7 @@ class KafkaST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testPersistentStorageSize() {
         String[] diskSizes = {"70Gi", "20Gi"};
         int kafkaRepl = 2;
@@ -1464,6 +1487,7 @@ class KafkaST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testLabelModificationDoesNotBreakCluster() throws Exception {
         Map<String, String> labels = new HashMap<>();
         String[] labelKeys = {"label-name-1", "label-name-2", ""};
@@ -1745,6 +1769,7 @@ class KafkaST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testMessagesAreStoredInDisk() {
         String topicName = TEST_TOPIC_NAME + new Random().nextInt(Integer.MAX_VALUE);
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 1, 1).done();
@@ -1808,6 +1833,7 @@ class KafkaST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testConsumerOffsetFiles() {
         String topicName = TEST_TOPIC_NAME + new Random().nextInt(Integer.MAX_VALUE);
         Map<String, Object> kafkaConfig = new HashMap<>();

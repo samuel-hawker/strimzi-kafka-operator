@@ -123,7 +123,7 @@ public class JbodStorageTest {
         ResourceOperatorSupplier ros =
                 new ResourceOperatorSupplier(this.vertx, this.mockClient,
                         ResourceUtils.zookeeperLeaderFinder(this.vertx, this.mockClient),
-                        ResourceUtils.adminClientProvider(),
+                        ResourceUtils.adminClientProvider(), ResourceUtils.zookeeperScalerProvider(),
                         pfa, 60_000L);
 
         this.kao = new KafkaAssemblyOperator(this.vertx, pfa, new MockCertManager(), new PasswordGenerator(10, "a", "a"), ros, ResourceUtils.dummyClusterOperatorConfig(VERSIONS, 2_000));
@@ -299,7 +299,7 @@ public class JbodStorageTest {
 
     private List<PersistentVolumeClaim> getPvcs(String namespace, String name) {
         String kafkaStsName = KafkaCluster.kafkaClusterName(name);
-        Labels pvcSelector = Labels.forCluster(name).withKind(Kafka.RESOURCE_KIND).withName(kafkaStsName);
+        Labels pvcSelector = Labels.forStrimziCluster(name).withStrimziKind(Kafka.RESOURCE_KIND).withStrimziName(kafkaStsName);
         return mockClient.persistentVolumeClaims().inNamespace(namespace).withLabels(pvcSelector.toMap())
                 .list().getItems();
     }

@@ -4,6 +4,7 @@
  */
 package io.strimzi.systemtest;
 
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -30,7 +31,7 @@ import io.strimzi.systemtest.resources.crd.KafkaMirrorMakerResource;
 import io.strimzi.systemtest.resources.crd.KafkaResource;
 import io.strimzi.systemtest.resources.crd.KafkaTopicResource;
 import io.strimzi.systemtest.resources.crd.KafkaUserResource;
-import io.strimzi.systemtest.utils.StUtils;
+import io.strimzi.systemtest.utils.ClientUtils;
 import io.strimzi.systemtest.utils.kubeUtils.controllers.DeploymentUtils;
 import io.strimzi.systemtest.utils.kubeUtils.controllers.StatefulSetUtils;
 import io.strimzi.systemtest.utils.kubeUtils.objects.PodUtils;
@@ -66,6 +67,8 @@ import static io.strimzi.api.kafka.model.KafkaResources.clusterCaKeySecretName;
 import static io.strimzi.api.kafka.model.KafkaResources.kafkaStatefulSetName;
 import static io.strimzi.api.kafka.model.KafkaResources.zookeeperStatefulSetName;
 import static io.strimzi.systemtest.Constants.ACCEPTANCE;
+import static io.strimzi.systemtest.Constants.EXTERNAL_CLIENTS_USED;
+import static io.strimzi.systemtest.Constants.INTERNAL_CLIENTS_USED;
 import static io.strimzi.systemtest.Constants.NETWORKPOLICIES_SUPPORTED;
 import static io.strimzi.systemtest.Constants.NODEPORT_SUPPORTED;
 import static io.strimzi.systemtest.Constants.REGRESSION;
@@ -315,6 +318,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoRenewClusterCaCertsTriggeredByAnno() {
         autoRenewSomeCaCertsTriggeredByAnno(asList(
                 clusterCaCertificateSecretName(CLUSTER_NAME)),
@@ -327,6 +331,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoRenewClientsCaCertsTriggeredByAnno() {
         autoRenewSomeCaCertsTriggeredByAnno(asList(
                 clientsCaCertificateSecretName(CLUSTER_NAME)),
@@ -340,6 +345,7 @@ class SecurityST extends BaseST {
 
     @Test
     @Tag(ACCEPTANCE)
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoRenewAllCaCertsTriggeredByAnno() {
         autoRenewSomeCaCertsTriggeredByAnno(asList(
                 clusterCaCertificateSecretName(CLUSTER_NAME),
@@ -471,6 +477,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoReplaceClusterCaKeysTriggeredByAnno() {
         autoReplaceSomeKeysTriggeredByAnno(asList(clusterCaKeySecretName(CLUSTER_NAME)),
                 true,
@@ -479,6 +486,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoReplaceClientsCaKeysTriggeredByAnno() {
         autoReplaceSomeKeysTriggeredByAnno(asList(clientsCaKeySecretName(CLUSTER_NAME)),
                 false,
@@ -487,6 +495,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoReplaceAllCaKeysTriggeredByAnno() {
         autoReplaceSomeKeysTriggeredByAnno(asList(clusterCaKeySecretName(CLUSTER_NAME),
                 clientsCaKeySecretName(CLUSTER_NAME)),
@@ -524,6 +533,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testAutoRenewCaCertsTriggerByExpiredCertificate() {
         // 1. Create the Secrets already, and a certificate that's already expired
         String clusterCaCert = createSecret("cluster-ca.crt", clusterCaCertificateSecretName(CLUSTER_NAME), "ca.crt");
@@ -641,6 +651,7 @@ class SecurityST extends BaseST {
 
     @Test
     @Tag(NODEPORT_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testCertRenewalInMaintenanceWindow() {
         String secretName = CLUSTER_NAME + "-cluster-ca-cert";
         LocalDateTime maintenanceWindowStart = LocalDateTime.now().withSecond(0);
@@ -701,6 +712,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testCertRegeneratedAfterInternalCAisDeleted() {
         KafkaResource.kafkaPersistent(CLUSTER_NAME, 3, 1).done();
 
@@ -734,7 +746,7 @@ class SecurityST extends BaseST {
             kubeClient().deleteSecret(s.getMetadata().getName());
         }
 
-        StUtils.waitForReconciliation(testClass, testName, NAMESPACE);
+        PodUtils.waitUntilPodsStability(kubeClient().listPodsByPrefixInName(KafkaResources.kafkaStatefulSetName(CLUSTER_NAME)));
         StatefulSetUtils.waitTillSsHasRolled(kafkaStatefulSetName(CLUSTER_NAME), 3, kafkaPods);
 
         for (Secret s : secrets) {
@@ -759,6 +771,7 @@ class SecurityST extends BaseST {
 
     @Test
     @Tag(NETWORKPOLICIES_SUPPORTED)
+    @Tag(INTERNAL_CLIENTS_USED)
     void testNetworkPoliciesWithPlainListener() {
         String allowedKafkaClientsName = CLUSTER_NAME + "-" + Constants.KAFKA_CLIENTS + "-allow";
         String deniedKafkaClientsName = CLUSTER_NAME + "-" + Constants.KAFKA_CLIENTS + "-deny";
@@ -836,6 +849,7 @@ class SecurityST extends BaseST {
 
     @Test
     @Tag(NETWORKPOLICIES_SUPPORTED)
+    @Tag(INTERNAL_CLIENTS_USED)
     void testNetworkPoliciesWithTlsListener() {
         String allowedKafkaClientsName = CLUSTER_NAME + "-" + Constants.KAFKA_CLIENTS + "-allow";
         String deniedKafkaClientsName = CLUSTER_NAME + "-" + Constants.KAFKA_CLIENTS + "-deny";
@@ -1024,6 +1038,7 @@ class SecurityST extends BaseST {
 
     @Test
     @Tag(NODEPORT_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testAclRuleReadAndWrite() throws Exception {
         final String kafkaUserWrite = "kafka-user-write";
         final String kafkaUserRead = "kafka-user-read";
@@ -1123,6 +1138,7 @@ class SecurityST extends BaseST {
 
     @Test
     @Tag(NODEPORT_SUPPORTED)
+    @Tag(EXTERNAL_CLIENTS_USED)
     void testAclWithSuperUser() throws Exception {
         KafkaResource.kafkaEphemeral(CLUSTER_NAME,  3, 1)
             .editMetadata()
@@ -1216,6 +1232,7 @@ class SecurityST extends BaseST {
     }
 
     @Test
+    @Tag(INTERNAL_CLIENTS_USED)
     void testCaRenewalBreakInMiddle() {
         KafkaResource.kafkaPersistent(CLUSTER_NAME, 3, 3)
             .editSpec()
@@ -1259,17 +1276,25 @@ class SecurityST extends BaseST {
                 .build());
         });
 
-        StUtils.waitForReconciliation(testClass, testName, NAMESPACE);
+        ClientUtils.waitUntilClientReceivedMessagesTls(internalKafkaClient, topicName, NAMESPACE, CLUSTER_NAME, userName, messagesCount);
 
-        received = internalKafkaClient.receiveMessagesTls(topicName, NAMESPACE, CLUSTER_NAME, userName, messagesCount, "TLS", CONSUMER_GROUP_NAME + "-" + rng.nextInt(Integer.MAX_VALUE));
-        assertThat(received, is(sent));
+        TestUtils.waitFor("Waiting for some kafka pod to be in the pending phase because of selected high cpu resource",
+            Constants.GLOBAL_POLL_INTERVAL, Constants.GLOBAL_TIMEOUT,
+            () -> {
+                List<Pod> filteredPod = kubeClient().listPodsByPrefixInName(KafkaResources.zookeeperStatefulSetName(CLUSTER_NAME))
+                    .stream().filter(pod -> pod.getStatus().getPhase().equals("Pending")).collect(Collectors.toList());
+                LOGGER.info("Filtered pods are {}", filteredPod.toString());
+                return filteredPod.get(0).getStatus().getPhase().equals("Pending");
+            }
+        );
 
-        StUtils.waitForReconciliation(testClass, testName, NAMESPACE);
         List<String> podStatuses = kubeClient().listPods().stream()
             .filter(p -> p.getMetadata().getName().startsWith(KafkaResources.zookeeperStatefulSetName(CLUSTER_NAME))
                     && p.getMetadata().getLabels().containsKey("strimzi.io/kind")
                     && p.getMetadata().getLabels().containsValue("Kafka"))
             .map(p -> p.getStatus().getPhase()).sorted().collect(Collectors.toList());
+
+        LOGGER.info("Some of pod kafka is in pending phase because of selected cpu high resource");
         assertThat(podStatuses, hasItem("Pending"));
 
         KafkaResource.replaceKafkaResource(CLUSTER_NAME, k -> {
