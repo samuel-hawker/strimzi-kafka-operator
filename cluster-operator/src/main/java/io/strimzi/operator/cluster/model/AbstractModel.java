@@ -256,7 +256,7 @@ public abstract class AbstractModel {
     }
 
     protected Labels getLabelsWithStrimziName(String name, Map<String, String> additionalLabels) {
-        return labels.withStrimziName(name).withUserLabels(additionalLabels);
+        return labels.withStrimziName(name).withAdditionalLabels(additionalLabels);
     }
 
     protected Labels getLabelsWithNameAndDiscovery(String name, Map<String, String> additionalLabels) {
@@ -270,11 +270,6 @@ public abstract class AbstractModel {
     protected Labels generateDefaultLabels(HasMetadata resource) {
         return Labels.generateDefaultLabels(resource, applicationName, STRIMZI_CLUSTER_OPERATOR_NAME);
     }
-
-    protected Labels getLabelsWithStrimziName(String resourceName) {
-        return labels.withStrimziName(resourceName);
-    }
-
 
 
 

@@ -44,7 +44,7 @@ public class LabelsTest {
 
     @Test
     public void testParseNullLabelsInUserLabels()   {
-        assertThat(Labels.EMPTY.withUserLabels(null), is(Labels.EMPTY));
+        assertThat(Labels.EMPTY.withAdditionalLabels(null), is(Labels.EMPTY));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class LabelsTest {
         Labels start = Labels.forStrimziCluster("my-cluster");
 
         // null user labels
-        Labels nullLabels = start.withUserLabels(null);
+        Labels nullLabels = start.withAdditionalLabels(null);
         assertThat(nullLabels.toMap(), is(start.toMap()));
 
         // Non-null values
@@ -116,7 +116,7 @@ public class LabelsTest {
         expected.putAll(start.toMap());
         expected.putAll(userLabels);
 
-        Labels nonNullLabels = start.withUserLabels(userLabels);
+        Labels nonNullLabels = start.withAdditionalLabels(userLabels);
         assertThat(nonNullLabels.toMap(), is(expected));
     }
 
@@ -146,7 +146,7 @@ public class LabelsTest {
         expected.putAll(start.toMap());
         expected.putAll(expectedUserLabels);
 
-        Labels labels = start.withUserLabels(userLabels);
+        Labels labels = start.withAdditionalLabels(userLabels);
         assertThat(labels.toMap(), is(expected));
     }
 
@@ -158,7 +158,7 @@ public class LabelsTest {
             userLabelsWithStrimzi.put("key2", "value2");
             userLabelsWithStrimzi.put(Labels.STRIMZI_DOMAIN + "something", "value3");
 
-            Labels nonNullLabels = Labels.EMPTY.withUserLabels(userLabelsWithStrimzi);
+            Labels nonNullLabels = Labels.EMPTY.withAdditionalLabels(userLabelsWithStrimzi);
         });
     }
 

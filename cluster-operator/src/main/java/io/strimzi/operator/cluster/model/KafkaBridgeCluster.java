@@ -192,7 +192,8 @@ public class KafkaBridgeCluster extends AbstractModel {
             ModelUtils.parsePodTemplate(kafkaBridgeCluster, template.getPod());
 
             if (template.getApiService() != null && template.getApiService().getMetadata() != null)  {
-                kafkaBridgeCluster.templateServiceLabels = mergeLabelsOrAnnotations(template.getApiService().getMetadata().getLabels(), ModelUtils.getCustomLabelsOrAnnotations(CO_ENV_VAR_CUSTOM_LABELS));
+                kafkaBridgeCluster.templateServiceLabels = mergeLabelsOrAnnotations(template.getApiService().getMetadata().getLabels(),
+                        ModelUtils.getCustomLabelsOrAnnotations(CO_ENV_VAR_CUSTOM_LABELS));
                 kafkaBridgeCluster.templateServiceAnnotations = template.getApiService().getMetadata().getAnnotations();
             }
 

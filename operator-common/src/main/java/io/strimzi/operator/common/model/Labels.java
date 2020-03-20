@@ -6,6 +6,7 @@ package io.strimzi.operator.common.model;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,32 +101,32 @@ public class Labels {
     private final Map<String, String> labels;
 
     /**
-     * @return The value of the {@code strimzi.io/cluster} label of the given {@code resource}.
      * @param resource The resource.
+     * @return The value of the {@code strimzi.io/cluster} label of the given {@code resource}.
      */
     public static String cluster(HasMetadata resource) {
         return resource.getMetadata().getLabels().get(Labels.STRIMZI_CLUSTER_LABEL);
     }
 
     /**
-     * @return the value of the {@code strimzi.io/name} label of the given {@code resource}.
      * @param resource The resource.
+     * @return the value of the {@code strimzi.io/name} label of the given {@code resource}.
      */
     public static String name(HasMetadata resource) {
         return resource.getMetadata().getLabels().get(Labels.STRIMZI_NAME_LABEL);
     }
 
     /**
+     * @param additionalLabels The labels
      * @return A {@code Labels} instance from the given map
-     * @param userLabels The labels
      */
-    private static Labels userLabels(Map<String, String> userLabels) {
+    private static Labels additionalLabels(Map<String, String> additionalLabels) {
 
-        if (userLabels == null) {
+        if (additionalLabels == null) {
             return EMPTY;
         }
 
-        List<String> invalidLabels = userLabels
+        List<String> invalidLabels = additionalLabels
                 .keySet()
                 .stream()
                 .filter(key -> key.startsWith(Labels.STRIMZI_DOMAIN) && !key.startsWith(Labels.STRIMZI_CLUSTER_LABEL))
@@ -135,7 +136,7 @@ public class Labels {
         }
 
         // Remove Kubernetes Domain specific labels
-        Map<String, String> filteredLabels = userLabels
+        Map<String, String> filteredLabels = additionalLabels
                 .entrySet()
                 .stream()
                 .filter(entryset -> !entryset.getKey().startsWith(Labels.KUBERNETES_DOMAIN))
@@ -145,13 +146,13 @@ public class Labels {
     }
 
     /**
-     * @param userLabels The labels to add.
-     * @return A new instances with the given {@code userLabels} added to the labels in this instance.
+     * @param additionalLabels The labels to add.
+     * @return A new instances with the given {@code additionalLabels} added to the labels in this instance.
      */
-    public Labels withUserLabels(Map<String, String> userLabels) {
+    public Labels withAdditionalLabels(Map<String, String> additionalLabels) {
         Map<String, String> newLabels = new HashMap<>(labels.size());
         newLabels.putAll(labels);
-        newLabels.putAll(Labels.userLabels(userLabels).toMap());
+        newLabels.putAll(Labels.additionalLabels(additionalLabels).toMap());
 
         return new Labels(newLabels);
     }
@@ -161,12 +162,12 @@ public class Labels {
      * @return the labels of the given {@code resource}.
      */
     public static Labels fromResource(HasMetadata resource) {
-        return resource.getMetadata().getLabels() != null ? userLabels(resource.getMetadata().getLabels()) : EMPTY;
+        return resource.getMetadata().getLabels() != null ? additionalLabels(resource.getMetadata().getLabels()) : EMPTY;
     }
 
     /**
-     * @return A labels instance from Map.
      * @param labels The map of labels.
+     * @return A labels instance from Map.
      */
     public static Labels fromMap(Map<String, String> labels) {
         if (labels != null) {
@@ -179,8 +180,8 @@ public class Labels {
     /**
      * Parse Labels from String into Labels object. The expected format of the String with labels is `key1=value1,key2=value2`
      *
-     * @param stringLabels  String with labels
-     * @return  Labels object with parsed labels
+     * @param stringLabels String with labels
+     * @return Labels object with parsed labels
      * @throws IllegalArgumentException The string could not be parsed.
      */
     public static Labels fromString(String stringLabels) throws IllegalArgumentException {
@@ -214,6 +215,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code kind} for the {@code strimzi.io/kind} key.
+     *
      * @param kind The kind to add.
      * @return A new instance with the given kind added.
      */
@@ -224,6 +226,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code cluster} for the {@code strimzi.io/cluster} key.
+     *
      * @param cluster The cluster to add.
      * @return A new instance with the given cluster added.
      */
@@ -233,6 +236,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the application name {@code strimzi} for the {@code app.kubernetes.io/name} key.
+     *
      * @param name The kubernetes name to add.
      * @return A new instance with the given kubernetes application name added.
      */
@@ -242,6 +246,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code instance} for the {@code app.kubernetes.io/instance} key.
+     *
      * @param instanceName The instance to add.
      * @return A new instance with the given kubernetes application instance added.
      */
@@ -251,6 +256,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code part-of} for the {@code app.kubernetes.io/part-of} key.
+     *
      * @param instanceName The instance used to generate the unique label to add composed with the application name.
      * @return A new instance with the given kubernetes application part-of label added.
      */
@@ -260,23 +266,23 @@ public class Labels {
 
     /**
      * Validates the instance name and if needed modifies it to make it a valid Label value:
-     *   - (([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?
-     *   - 63 characters max
+     * - (([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?
+     * - 63 characters max
      * This method is written to handle instance names which are valid resource names, since they are derived from a
      * custom resource. It does not modify arbitrary names as label values.
-     *
      *
      * @param instance Theoriginal name of the instance
      * @return Either the original instance name or a modified version to match label value criteria
      */
-    /*test*/ static String getOrValidInstanceLabelValue(String instance) {
-        if (instance == null)   {
+    /*test*/
+    static String getOrValidInstanceLabelValue(String instance) {
+        if (instance == null) {
             return "";
         }
 
         int i = Math.min(instance.length(), 63);
 
-        while (i > 0)   {
+        while (i > 0) {
             char lastChar = instance.charAt(i - 1);
 
             if (lastChar == '.' || lastChar == '-') {
@@ -291,6 +297,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code operatorName} for the {@code app.kubernetes.io/managed-by} key.
+     *
      * @param operatorName The name of the operator managing this resource.
      * @return A new instance with the given operator that is managing this resource.
      */
@@ -300,6 +307,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code name} for the {@code strimzi.io/name} key.
+     *
      * @param name The name to add
      * @return A new instance with the given name added.
      */
@@ -309,6 +317,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with "true" for the {@code strimzi.io/discovery} key.
+     *
      * @return A new instance with the given name added.
      */
     public Labels withStrimziDiscovery() {
@@ -317,6 +326,7 @@ public class Labels {
 
     /**
      * The same labels as this instance, but with the given {@code name} for the {@code statefulset.kubernetes.io/pod-name} key.
+     *
      * @param name The pod name to add
      * @return A new instance with the given pod name added.
      */
@@ -348,16 +358,19 @@ public class Labels {
     }
 
     /**
-     * @return An instances containing just the strimzi.io labels present in this instance.
+     * @return A new instances containing just the strimzi.io selector labels present in this instance.
      */
     public Labels strimziSelectorLabels() {
         Map<String, String> newLabels = new HashMap<>(3);
 
-        for (Map.Entry<String, String> entry : labels.entrySet()) {
-            if (entry.getKey().startsWith(STRIMZI_DOMAIN) && !entry.getKey().equals(STRIMZI_DISCOVERY_LABEL)) {
-                newLabels.put(entry.getKey(), entry.getValue());
-            }
-        }
+        List<String> strimziSelectorLabels = new ArrayList<>();
+        strimziSelectorLabels.add(STRIMZI_CLUSTER_LABEL);
+        strimziSelectorLabels.add(STRIMZI_NAME_LABEL);
+        strimziSelectorLabels.add(STRIMZI_KIND_LABEL);
+
+        strimziSelectorLabels.forEach(key -> {
+            if (labels.containsKey(key)) newLabels.put(key, labels.get(key));
+        });
 
         return new Labels(newLabels);
     }
@@ -382,9 +395,9 @@ public class Labels {
     }
 
     /**
-     * @param resource a resource with meta
-     * @param applicationName a resource with meta
-     * @param managedBy a resource with meta
+     * @param resource        a resource with metadata
+     * @param applicationName the name of the application of the component
+     * @param managedBy       a resource with meta
      * @return The default Labels set
      */
     public static Labels generateDefaultLabels(HasMetadata resource, String applicationName, String managedBy) {

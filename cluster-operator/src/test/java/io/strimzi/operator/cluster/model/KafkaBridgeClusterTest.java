@@ -105,11 +105,7 @@ public class KafkaBridgeClusterTest {
     }
 
     private Map<String, String> expectedSelectorLabels()    {
-        return Labels.fromMap(expectedLabels()).strimziSelectorLabels().toMap();
-    }
-
-    private Map<String, String> expectedLabels()    {
-        return expectedLabels(KafkaBridgeResources.deploymentName(cluster));
+        return Labels.fromMap(expectedLabels(KafkaBridgeResources.deploymentName(cluster))).strimziSelectorLabels().toMap();
     }
 
     protected List<EnvVar> getExpectedEnvVars() {
@@ -178,7 +174,7 @@ public class KafkaBridgeClusterTest {
 
         assertThat(dep.getMetadata().getName(), is(KafkaBridgeResources.deploymentName(cluster)));
         assertThat(dep.getMetadata().getNamespace(), is(namespace));
-        Map<String, String> expectedDeploymentLabels = expectedLabels(cluster);
+        Map<String, String> expectedDeploymentLabels = expectedLabels(KafkaBridgeResources.deploymentName(cluster));
         assertThat(dep.getMetadata().getLabels(), is(expectedDeploymentLabels));
         assertThat(dep.getSpec().getSelector().getMatchLabels(), is(expectedSelectorLabels()));
         assertThat(dep.getSpec().getReplicas(), is(new Integer(replicas)));
