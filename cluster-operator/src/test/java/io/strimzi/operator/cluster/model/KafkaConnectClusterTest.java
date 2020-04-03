@@ -154,6 +154,19 @@ public class KafkaConnectClusterTest {
     }
 
     @Test
+    public void testCustomConfig() {
+        KafkaConnect connect = new KafkaConnectBuilder(ResourceUtils.createEmptyKafkaConnectCluster(namespace, cluster))
+                .editOrNewSpec()
+                    .addToConfig("listeners.https.ssl.truststore.location", "${file:/opt/kafka/external-configuration/cert/ca.p12}")
+                    .addToConfig("listeners.https.ssl.truststore.password", "oNfjnNz13wT1")
+                .endSpec()
+                .build();
+        KafkaConnectCluster kc = KafkaConnectCluster.fromCrd(connect, VERSIONS);
+
+        assertThat(kc.getConfiguration().asOrderedProperties(), is(defaultConfiguration));
+    }
+
+    @Test
     public void testFromCrd() {
         assertThat(kc.replicas, is(replicas));
         assertThat(kc.image, is(image));

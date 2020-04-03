@@ -179,7 +179,7 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
     public Future<Map<String, Object>> createOrUpdatePutRequest(
             String host, int port,
             String connectorName, JsonObject configJson) {
-        Future<Map<String, Object>> result = Future.future();
+        Promise<Map<String, Object>> result = Promise.promise();
         HttpClientOptions options = new HttpClientOptions().setLogActivity(true);
         Buffer data = configJson.toBuffer();
         String path = "/connectors/" + connectorName + "/config";
@@ -216,7 +216,7 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
                 .putHeader("Content-Length", String.valueOf(data.length()))
                 .write(data)
                 .end();
-        return result;
+        return result.future();
     }
 
     @Override
