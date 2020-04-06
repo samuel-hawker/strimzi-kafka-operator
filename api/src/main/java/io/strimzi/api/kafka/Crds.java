@@ -20,22 +20,25 @@ import io.strimzi.api.kafka.model.DoneableKafka;
 import io.strimzi.api.kafka.model.DoneableKafkaBridge;
 import io.strimzi.api.kafka.model.DoneableKafkaConnect;
 import io.strimzi.api.kafka.model.DoneableKafkaConnectS2I;
+import io.strimzi.api.kafka.model.DoneableKafkaConnector;
 import io.strimzi.api.kafka.model.DoneableKafkaMirrorMaker;
 import io.strimzi.api.kafka.model.DoneableKafkaMirrorMaker2;
 import io.strimzi.api.kafka.model.DoneableKafkaTopic;
 import io.strimzi.api.kafka.model.DoneableKafkaUser;
-import io.strimzi.api.kafka.model.DoneableKafkaConnector;
-import io.strimzi.api.kafka.model.KafkaBridge;
 import io.strimzi.api.kafka.model.Kafka;
+import io.strimzi.api.kafka.model.KafkaBridge;
 import io.strimzi.api.kafka.model.KafkaConnect;
 import io.strimzi.api.kafka.model.KafkaConnectS2I;
+import io.strimzi.api.kafka.model.KafkaConnector;
 import io.strimzi.api.kafka.model.KafkaMirrorMaker;
 import io.strimzi.api.kafka.model.KafkaMirrorMaker2;
 import io.strimzi.api.kafka.model.KafkaTopic;
 import io.strimzi.api.kafka.model.KafkaUser;
-import io.strimzi.api.kafka.model.KafkaConnector;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.strimzi.api.kafka.model.Constants.CRD_KIND;
@@ -47,17 +50,18 @@ import static java.util.Collections.singletonList;
 public class Crds {
 
     @SuppressWarnings("unchecked")
-    private static final Class<? extends CustomResource>[] CRDS = new Class[] {
-        Kafka.class,
-        KafkaConnect.class,
-        KafkaConnectS2I.class,
-        KafkaTopic.class,
-        KafkaUser.class,
-        KafkaMirrorMaker.class,
-        KafkaBridge.class,
-        KafkaConnector.class,
-        KafkaMirrorMaker2.class
-    };
+    private static final Map<Class<? extends CustomResource>, CustomResourceDefinition> CRDS = new HashMap<>();
+    static {
+        CRDS.put(Kafka.class, kafka());
+        CRDS.put(KafkaConnect.class, kafkaConnect());
+        CRDS.put(KafkaConnectS2I.class, kafkaConnectS2I());
+        CRDS.put(KafkaTopic.class, kafkaTopic());
+        CRDS.put(KafkaUser.class, kafkaUser());
+        CRDS.put(KafkaMirrorMaker.class, kafkaMirrorMaker());
+        CRDS.put(KafkaBridge.class, kafkaBridge());
+        CRDS.put(KafkaConnector.class, kafkaConnector());
+        CRDS.put(KafkaMirrorMaker2.class, kafkaMirrorMaker2());
+    }
 
     private Crds() {
     }
@@ -66,7 +70,10 @@ public class Crds {
      * Register custom resource kinds with {@link KubernetesDeserializer} so Fabric8 knows how to deserialize them.
      */
     public static void registerCustomKinds() {
-        for (Class<? extends CustomResource> crdClass : CRDS) {
+        for (Map.Entry<Class<? extends CustomResource>, CustomResourceDefinition> crdMap : CRDS.entrySet()) {
+            CustomResourceDefinition crd = crdMap.getValue();
+            crdMap.getKey().getField("VERSIONS").get(null)).stream().map(v ->
+//                        group + "/" + v).collect(Collectors.toList())
             for (String version : apiVersions(crdClass)) {
                 KubernetesDeserializer.registerCustomKind(version, kind(crdClass), crdClass);
             }
@@ -331,21 +338,21 @@ public class Crds {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T extends CustomResource> List<String> apiVersions(Class<T> cls) {
-        try {
-            String group = (String) cls.getField("RESOURCE_GROUP").get(null);
-
-            List<String> versions;
-            try {
-                versions = singletonList(group + "/" + (String) cls.getField("VERSION").get(null));
-            } catch (NoSuchFieldException e) {
-                versions = ((List<String>) cls.getField("VERSIONS").get(null)).stream().map(v ->
-                        group + "/" + v).collect(Collectors.toList());
-            }
-            return versions;
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    @SuppressWarnings("unchecked")
+//    public static <T extends CustomResource> List<String> apiVersions(Class<T> cls) {
+//        try {
+//            String group = (String) cls.getField("RESOURCE_GROUP").get(null);
+//
+//            List<String> versions;
+//            try {
+//                versions = singletonList(group + "/" + (String) cls.getField("VERSION").get(null));
+//            } catch (NoSuchFieldException e) {
+//                versions = ((List<String>) cls.getField("VERSIONS").get(null)).stream().map(v ->
+//                        group + "/" + v).collect(Collectors.toList());
+//            }
+//            return versions;
+//        } catch (NoSuchFieldException | IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 }
