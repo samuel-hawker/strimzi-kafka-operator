@@ -30,7 +30,7 @@ public class KafkaConnectSpec extends AbstractKafkaConnectSpec {
 
     private static final long serialVersionUID = 1L;
 
-    public static final String FORBIDDEN_PREFIXES = "ssl., sasl., security., plugin.path, rest., bootstrap.servers, consumer.interceptor.classes, producer.interceptor.classes";
+    public static final String FORBIDDEN_PREFIXES = "ssl., sasl., security., plugin.path, bootstrap.servers, consumer.interceptor.classes, producer.interceptor.classes";
     public static final String FORBIDDEN_PREFIX_EXCEPTIONS = "ssl.endpoint.identification.algorithm";
 
     private Map<String, Object> config = new HashMap<>(0);

@@ -59,7 +59,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static io.strimzi.operator.cluster.model.ModelUtils.createHttpProbe;
+//import static io.strimzi.operator.cluster.model.ModelUtils.createHttpsProbe;
 
 @SuppressWarnings({"checkstyle:ClassFanOutComplexity"})
 public class KafkaConnectCluster extends AbstractModel {
@@ -439,8 +439,8 @@ public class KafkaConnectCluster extends AbstractModel {
                 .withCommand(getCommand())
                 .withEnv(getEnvVars())
                 .withPorts(getContainerPortList())
-                .withLivenessProbe(createHttpProbe(livenessPath, REST_API_PORT_NAME, livenessProbeOptions))
-                .withReadinessProbe(createHttpProbe(readinessPath, REST_API_PORT_NAME, readinessProbeOptions))
+//                .withLivenessProbe(createHttpsProbe(livenessPath, REST_API_PORT_NAME, livenessProbeOptions))
+//                .withReadinessProbe(createHttpsProbe(readinessPath, REST_API_PORT_NAME, readinessProbeOptions))
                 .withVolumeMounts(getVolumeMounts())
                 .withResources(getResources())
                 .withImagePullPolicy(determineImagePullPolicy(imagePullPolicy, getImage()))

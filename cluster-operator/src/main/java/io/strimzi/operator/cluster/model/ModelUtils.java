@@ -186,6 +186,17 @@ public class ModelUtils {
         return probe;
     }
 
+    protected static Probe createHttpsProbe(String path, String port, io.strimzi.api.kafka.model.Probe userProbe) {
+        Probe probe = ModelUtils.newProbeBuilder(userProbe).withNewHttpGet()
+                .withPath(path)
+                .withNewPort(port)
+                .withScheme("HTTPS")
+                .endHttpGet()
+                .build();
+        log.trace("Created http probe {}", probe);
+        return probe;
+    }
+
     static Probe createExecProbe(List<String> command, io.strimzi.api.kafka.model.Probe userProbe) {
         Probe probe = newProbeBuilder(userProbe).withNewExec()
                 .withCommand(command)

@@ -918,8 +918,8 @@ spec:
             config:
               type: object
               description: 'The Kafka Connect configuration. Properties with the following
-                prefixes cannot be set: ssl., sasl., security., plugin.path, rest.,
-                bootstrap.servers, consumer.interceptor.classes, producer.interceptor.classes.'
+                prefixes cannot be set: ssl., sasl., security., plugin.path, bootstrap.servers,
+                consumer.interceptor.classes, producer.interceptor.classes.'
             externalConfiguration:
               type: object
               properties:
