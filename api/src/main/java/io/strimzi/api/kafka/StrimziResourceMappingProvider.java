@@ -123,7 +123,7 @@ public class StrimziResourceMappingProvider implements KubernetesResourceMapping
         return crds;
     }
 
-    public <T extends KubernetesResource&HasMetadata,
+    public <T extends KubernetesResource & HasMetadata,
             L extends KubernetesResourceList<T>,
             D extends Doneable<T>> MixedOperation<T, L, D, Resource<T, D>> operation(KubernetesClient client,
                                                                                      Class<T> cls,

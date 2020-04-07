@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 
 @JsonDeserialize
@@ -85,14 +84,11 @@ public class Kafka extends CustomResource implements UnknownPropertyPreserving, 
 
     public static final String SCOPE = "Namespaced";
     public static final String RESOURCE_KIND = "Kafka";
-    public static final String RESOURCE_LIST_KIND = RESOURCE_KIND + "List";
     public static final String RESOURCE_GROUP = Constants.RESOURCE_GROUP_NAME;
     public static final String RESOURCE_PLURAL = "kafkas";
-    public static final String RESOURCE_SINGULAR = "kafka";
     public static final String CRD_API_VERSION = Constants.V1BETA1_API_VERSION;
     public static final String CRD_NAME = RESOURCE_PLURAL + "." + RESOURCE_GROUP;
     public static final String SHORT_NAME = "k";
-    public static final List<String> RESOURCE_SHORTNAMES = unmodifiableList(singletonList(SHORT_NAME));
 
     private String apiVersion;
     private ObjectMeta metadata;

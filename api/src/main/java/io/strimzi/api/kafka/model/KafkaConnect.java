@@ -23,12 +23,7 @@ import io.sundr.builder.annotations.Inline;
 import lombok.EqualsAndHashCode;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableList;
 
 @JsonDeserialize
 @Crd(
@@ -83,16 +78,11 @@ public class KafkaConnect extends CustomResource implements UnknownPropertyPrese
     public static final String SCOPE = "Namespaced";
     public static final String V1ALPHA1 = Constants.V1ALPHA1;
     public static final String V1BETA1 = Constants.V1BETA1;
-    public static final List<String> VERSIONS = unmodifiableList(asList(V1BETA1, V1ALPHA1));
     public static final String RESOURCE_KIND = "KafkaConnect";
-    public static final String RESOURCE_LIST_KIND = RESOURCE_KIND + "List";
     public static final String RESOURCE_GROUP = Constants.RESOURCE_GROUP_NAME;
     public static final String RESOURCE_PLURAL = "kafkaconnects";
-    public static final String RESOURCE_SINGULAR = "kafkaconnect";
     public static final String CRD_API_VERSION = Constants.V1BETA1_API_VERSION;
-    public static final String CRD_NAME = RESOURCE_PLURAL + "." + RESOURCE_GROUP;
     public static final String SHORT_NAME = "kc";
-    public static final List<String> RESOURCE_SHORTNAMES = singletonList(SHORT_NAME);
 
     private String apiVersion;
     private KafkaConnectSpec spec;
