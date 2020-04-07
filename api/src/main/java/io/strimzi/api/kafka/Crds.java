@@ -35,14 +35,11 @@ import io.strimzi.api.kafka.model.KafkaMirrorMaker2;
 import io.strimzi.api.kafka.model.KafkaTopic;
 import io.strimzi.api.kafka.model.KafkaUser;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.strimzi.api.kafka.model.Constants.CRD_KIND;
-import static java.util.Collections.singletonList;
 
 /**
  * "Static" information about the CRDs defined in this package
@@ -50,17 +47,17 @@ import static java.util.Collections.singletonList;
 public class Crds {
 
     @SuppressWarnings("unchecked")
-    private static final Map<Class<? extends CustomResource>, CustomResourceDefinition> CRDS = new HashMap<>();
+    private static final Map<CustomResourceDefinition, List<String>> CRDS = new HashMap<>();
     static {
-        CRDS.put(Kafka.class, kafka());
-        CRDS.put(KafkaConnect.class, kafkaConnect());
-        CRDS.put(KafkaConnectS2I.class, kafkaConnectS2I());
-        CRDS.put(KafkaTopic.class, kafkaTopic());
-        CRDS.put(KafkaUser.class, kafkaUser());
-        CRDS.put(KafkaMirrorMaker.class, kafkaMirrorMaker());
-        CRDS.put(KafkaBridge.class, kafkaBridge());
-        CRDS.put(KafkaConnector.class, kafkaConnector());
-        CRDS.put(KafkaMirrorMaker2.class, kafkaMirrorMaker2());
+        CRDS.put(kafka(), Kafka.VERSIONS);
+        CRDS.put(kafkaConnect(), KafkaConnect.VERSIONS);
+        CRDS.put(kafkaConnectS2I(), KafkaConnectS2I.VERSIONS);
+        CRDS.put(kafkaTopic(), KafkaTopic.VERSIONS);
+        CRDS.put(kafkaUser(), KafkaUser.VERSIONS);
+        CRDS.put(kafkaMirrorMaker(), KafkaMirrorMaker.VERSIONS);
+        CRDS.put(kafkaBridge(), KafkaBridge.VERSIONS);
+        CRDS.put(kafkaConnector(), KafkaConnector.VERSIONS);
+        CRDS.put(kafkaMirrorMaker2(), KafkaMirrorMaker2.VERSIONS);
     }
 
     private Crds() {
@@ -70,11 +67,9 @@ public class Crds {
      * Register custom resource kinds with {@link KubernetesDeserializer} so Fabric8 knows how to deserialize them.
      */
     public static void registerCustomKinds() {
-        for (Map.Entry<Class<? extends CustomResource>, CustomResourceDefinition> crdMap : CRDS.entrySet()) {
-            CustomResourceDefinition crd = crdMap.getValue();
-            crdMap.getKey().getField("VERSIONS").get(null)).stream().map(v ->
-//                        group + "/" + v).collect(Collectors.toList())
-            for (String version : apiVersions(crdClass)) {
+        for (Map.Entry<CustomResourceDefinition, List<String>> crdMap : CRDS.entrySet()) {
+            CustomResourceDefinition crd = crdMap.getKey();
+            for (String version : crdMap.getValue()) {
                 KubernetesDeserializer.registerCustomKind(version, kind(crdClass), crdClass);
             }
         }
@@ -337,22 +332,4 @@ public class Crds {
             throw new RuntimeException(e);
         }
     }
-
-//    @SuppressWarnings("unchecked")
-//    public static <T extends CustomResource> List<String> apiVersions(Class<T> cls) {
-//        try {
-//            String group = (String) cls.getField("RESOURCE_GROUP").get(null);
-//
-//            List<String> versions;
-//            try {
-//                versions = singletonList(group + "/" + (String) cls.getField("VERSION").get(null));
-//            } catch (NoSuchFieldException e) {
-//                versions = ((List<String>) cls.getField("VERSIONS").get(null)).stream().map(v ->
-//                        group + "/" + v).collect(Collectors.toList());
-//            }
-//            return versions;
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 }
