@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.api.model.Doneable;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelectorBuilder;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.CustomResourceList;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -64,10 +65,14 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PfxOptions;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -310,7 +315,26 @@ public abstract class AbstractConnectOperator<C extends KubernetesClient, T exte
             return Future.succeededFuture();
         }
 
+//        secretOperations.getAsync("myproject", "my-cluster-clients-ca-cert")
+//                .compose(secret -> {
+//                    Buffer cert = Buffer.buffer(secret.getData().get("ca.p12"));
+//
+//                })
+        // this is slightly problematic in kafkaConnectorAssembly it is Function<> { connect -> new KafkaConnectApiImpl(vertx) }
         KafkaConnectApi apiClient = connectClientProvider.apply(vertx);
+
+        Secret secret = secretOperations.get("myproject", "my-cluster-clients-ca-cert");
+        Buffer cert = Buffer.buffer(Base64.getDecoder().decode(secret.getData().get("ca.p12")));
+
+        System.out.println(cert.toString());
+
+        WebClientOptions options = new WebClientOptions()
+                .setTrustOptions(new PfxOptions()
+                    .setValue(cert)
+                    .setPassword("O69Oxfm7VrX2"));
+        WebClient client = WebClient.create(vertx, options);
+        // TODO hack remove
+        apiClient.setClient(client);
 
         return CompositeFuture.join(
                 apiClient.list(host, port),

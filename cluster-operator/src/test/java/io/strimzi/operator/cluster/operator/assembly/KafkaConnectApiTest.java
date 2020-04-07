@@ -141,7 +141,7 @@ public class KafkaConnectApiTest {
                     .put("tasks.max", "1")
                     .put("file", "/dev/null")
                     .put("topic", "my-topic");
-                return client.createOrUpdatePutRequest("localhost", PORT, "test", o);
+                return client.createOrUpdatePutRequest("localhost", PORT, "test", o, null);
             })
             .compose(created -> {
                 Promise<Map<String, Object>> promise = Promise.promise();
@@ -214,7 +214,7 @@ public class KafkaConnectApiTest {
                     .put("tasks.max", "1")
                     .put("file", "/dev/null")
                     .put("topic", "my-topic");
-                return client.createOrUpdatePutRequest("localhost", PORT, "broken", o)
+                return client.createOrUpdatePutRequest("localhost", PORT, "broken", o, null)
                     .compose(ignored -> Future.failedFuture(new AssertionError("Should fail")))
                     .recover(e -> {
                         if (e instanceof ConnectRestException) {
@@ -233,7 +233,7 @@ public class KafkaConnectApiTest {
                     .put("tasks.max", "dog")
                     .put("file", "/dev/null")
                     .put("topic", "my-topic");
-                return client.createOrUpdatePutRequest("localhost", PORT, "broken2", o)
+                return client.createOrUpdatePutRequest("localhost", PORT, "broken2", o, null)
                     .compose(ignored -> Future.failedFuture(new AssertionError("Should fail")))
                     .recover(e -> {
                         if (e instanceof ConnectRestException) {

@@ -75,7 +75,7 @@ spec:
     listeners.https.ssl.keystore.password: ${file:/opt/kafka/external-configuration/cert/connector.properties:user.password}
     listeners.https.ssl.keystore.type: PKCS12
     #
-    listeners.https.ssl.truststore.location: /opt/kafka/external-configuration/ca/ca.p12
-    #    grabbed from the same file
-    listeners.https.ssl.truststore.password: ${file:/opt/kafka/external-configuration/cert/connector.properties:ca.password}
-    listeners.https.ssl.truststore.type: PKCS12
+#    listeners.https.ssl.truststore.location: /opt/kafka/external-configuration/ca/ca.p12
+#    #    grabbed from the same file
+#    listeners.https.ssl.truststore.password: ${file:/opt/kafka/external-configuration/cert/connector.properties:ca.password}
+#    listeners.https.ssl.truststore.type: PKCS12

@@ -47,6 +47,7 @@ public interface KafkaConnectApi {
      * @param port The port to make the request to.
      * @param connectorName The name of the connector to create or update.
      * @param configJson The connectors configuration.
+     * @param certValue The connectors configuration.
      * @return A Future which completes with the result of the request. If the request was successful,
      * this returns information about the connector, including its name, config and tasks.
      */
@@ -139,6 +140,8 @@ public interface KafkaConnectApi {
      * this returns the list of connector plugins.
      */
     Future<List<ConnectorPlugin>> listConnectorPlugins(String host, int port);
+    
+    void setClient(WebClient client);
 }
 
 class ConnectRestException extends RuntimeException {
@@ -173,6 +176,7 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
     public static final TypeReference<Map<String, Object>> TREE_TYPE = new TypeReference<Map<String, Object>>() { };
     public static final TypeReference<Map<String, String>> MAP_OF_STRINGS = new TypeReference<Map<String, String>>() { };
     private final Vertx vertx;
+    private WebClient client;
 
     public KafkaConnectApiImpl(Vertx vertx) {
         this.vertx = vertx;
@@ -425,34 +429,36 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
     public Future<List<String>> list(String host, int port) {
         String path = "/connectors";
         Future<List<String>> result = Future.future();
-        HttpClientOptions options = new HttpClientOptions().setLogActivity(true);
+        // needed config?
+//        HttpClientOptions options = new HttpClientOptions().setLogActivity(true);
 
-        vertx.createHttpClient(options)
-                .get(port, host, path, response -> {
-                    response.exceptionHandler(error -> {
-                        result.fail(error);
-                    });
+        System.out.println("Making list request");
+        client.get(port, host, path)
+            .followRedirects(true)
+            .putHeader("Accept", "application/json")
+            .ssl(true)
+            .send(ar -> {
+                System.out.println(ar.toString());
+                if (ar.succeeded()) {
+                    HttpResponse<Buffer> response = ar.result();
                     if (response.statusCode() == 200) {
-                        response.bodyHandler(buffer -> {
-                            JsonArray objects = buffer.toJsonArray();
-                            List<String> list = new ArrayList<>(objects.size());
-                            for (Object o : objects) {
-                                if (o instanceof String) {
-                                    list.add((String) o);
-                                } else {
-                                    result.fail(o == null ? "null" : o.getClass().getName());
-                                }
+                        JsonArray objects = response.body().toJsonArray();
+                        List<String> list = new ArrayList<>(objects.size());
+                        for (Object o : objects) {
+                            if (o instanceof String) {
+                                list.add((String) o);
+                            } else {
+                                result.fail(o == null ? "null" : o.getClass().getName());
                             }
-                            result.complete(list);
-                        });
+                        }
+                        result.complete(list);
                     } else {
-                        result.fail(new ConnectRestException(response, "Unexpected status code"));
+                        result.fail("Unexpected status code" + response.toString());
                     }
-                })
-                .exceptionHandler(result::fail)
-                .setFollowRedirects(true)
-                .putHeader("Accept", "application/json")
-                .end();
+                } else {
+                    result.fail(ar.cause());
+                }
+            });
         return result;
     }
 
@@ -486,5 +492,10 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
                 .putHeader("Accept", "application/json")
                 .end();
         return result;
+    }
+
+    @Override
+    public void setClient(WebClient client) {
+        this.client = client;
     }
 }
