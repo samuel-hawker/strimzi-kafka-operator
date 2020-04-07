@@ -198,7 +198,7 @@ public class ConnectorMockTest {
                 return Future.failedFuture(new ConnectRestException("GET", String.format("/connectors/%s", connectorName), 404, "Not Found", ""));
             }
         });
-        when(api.createOrUpdatePutRequest(any(), anyInt(), anyString(), any())).thenAnswer(invocation -> {
+        when(api.createOrUpdatePutRequest(any(), anyInt(), anyString(), any(), any())).thenAnswer(invocation -> {
             String host = invocation.getArgument(0);
             System.err.println("###### create " + host);
             String connectorName = invocation.getArgument(2);
@@ -529,7 +529,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
 
         // Create KafkaConnect cluster and wait till it's ready
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).createNew()
@@ -549,7 +549,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), set(key("cluster-connect-api.ns.svc", connectorName)));
         
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).withName(connectorName).delete();
@@ -587,7 +587,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), emptySet());
 
         // Create KafkaConnect cluster and wait till it's ready
@@ -606,7 +606,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), set(key("cluster-connect-api.ns.svc", connectorName)));
 
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).withName(connectorName).delete();
@@ -643,7 +643,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
 
         // Create KafkaConnect cluster and wait till it's ready
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).createNew()
@@ -663,7 +663,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), set(key("cluster-connect-api.ns.svc", connectorName)));
 
         Crds.kafkaConnectOperation(client).inNamespace(NAMESPACE).withName(connectName).delete();
@@ -699,7 +699,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), emptySet());
 
         // Create KafkaConnect cluster and wait till it's ready
@@ -718,7 +718,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), set(key("cluster-connect-api.ns.svc", connectorName)));
 
         Crds.kafkaConnectOperation(client).inNamespace(NAMESPACE).withName(connectName).delete();
@@ -776,10 +776,10 @@ public class ConnectorMockTest {
 
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connect1Name, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connect2Name, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
 
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).withName(connectorName).patch(new KafkaConnectorBuilder()
                 .withNewMetadata()
@@ -800,7 +800,7 @@ public class ConnectorMockTest {
                 eq(connectorName));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connect2Name, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
 
         CountDownLatch async = new CountDownLatch(1);
         kafkaConnectOperator.reconcile(new Reconciliation("test", "KafkaConnect", NAMESPACE, connect1Name)).setHandler(ar -> {
@@ -815,7 +815,7 @@ public class ConnectorMockTest {
     /** Create connect, create connector, delete connector, delete connect */
     @Test
     public void testExceptionFromRestApi() {
-        when(api.createOrUpdatePutRequest(any(), anyInt(), anyString(), any())).thenAnswer(invocation -> {
+        when(api.createOrUpdatePutRequest(any(), anyInt(), anyString(), any(), any())).thenAnswer(invocation -> {
             return Future.failedFuture(new ConnectRestException("GET", "/foo", 500, "Internal server error", "Bad stuff happened"));
         });
         runningConnectors.clear();
@@ -839,7 +839,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
 
         // Create KafkaConnect cluster and wait till it's ready
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).createNew()
@@ -858,7 +858,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), emptySet());
     }
 
@@ -885,7 +885,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, never()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
 
         // Create KafkaConnect cluster and wait till it's ready
         Crds.kafkaConnectorOperation(client).inNamespace(NAMESPACE).createNew()
@@ -906,7 +906,7 @@ public class ConnectorMockTest {
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT));
         verify(api, atLeastOnce()).createOrUpdatePutRequest(
                 eq(KafkaConnectResources.qualifiedServiceName(connectName, NAMESPACE)), eq(KafkaConnectCluster.REST_API_PORT),
-                eq(connectorName), any());
+                eq(connectorName), any(), any());
         assertEquals(runningConnectors.keySet(), singleton(key("cluster-connect-api.ns.svc", connectorName)));
 
         verify(api, never()).pause(

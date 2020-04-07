@@ -12,11 +12,15 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.net.PemTrustOptions;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,6 +35,8 @@ import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 
+//import io.vertx.core.buffer.Buffer;
+
 /**
  * A Java client for the Kafka Connect REST API.
  */
@@ -44,7 +50,7 @@ public interface KafkaConnectApi {
      * @return A Future which completes with the result of the request. If the request was successful,
      * this returns information about the connector, including its name, config and tasks.
      */
-    Future<Map<String, Object>> createOrUpdatePutRequest(String host, int port, String connectorName, JsonObject configJson);
+    Future<Map<String, Object>> createOrUpdatePutRequest(String host, int port, String connectorName, JsonObject configJson, Buffer certValue);
 
     /**
      * Make a {@code GET} request to {@code /connectors/${connectorName}/config}.
@@ -164,10 +170,8 @@ class ConnectRestException extends RuntimeException {
 @SuppressWarnings({"deprecation"})
 class KafkaConnectApiImpl implements KafkaConnectApi {
     private static final Logger log = LogManager.getLogger(KafkaConnectApiImpl.class);
-    public static final TypeReference<Map<String, Object>> TREE_TYPE = new TypeReference<Map<String, Object>>() {
-    };
-    public static final TypeReference<Map<String, String>> MAP_OF_STRINGS = new TypeReference<Map<String, String>>() {
-    };
+    public static final TypeReference<Map<String, Object>> TREE_TYPE = new TypeReference<Map<String, Object>>() { };
+    public static final TypeReference<Map<String, String>> MAP_OF_STRINGS = new TypeReference<Map<String, String>>() { };
     private final Vertx vertx;
 
     public KafkaConnectApiImpl(Vertx vertx) {
@@ -178,44 +182,58 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
     @SuppressWarnings("unchecked")
     public Future<Map<String, Object>> createOrUpdatePutRequest(
             String host, int port,
-            String connectorName, JsonObject configJson) {
+            String connectorName, JsonObject configJson,
+            Buffer certValue) {
+
+        // wrong place to put it...
+        host = "https://" + host;
         Promise<Map<String, Object>> result = Promise.promise();
-        HttpClientOptions options = new HttpClientOptions().setLogActivity(true);
+//        HttpClientOptions options = new HttpClientOptions().setLogActivity(true);
         Buffer data = configJson.toBuffer();
         String path = "/connectors/" + connectorName + "/config";
         log.debug("Making PUT request to {} with body {}", path, configJson);
-        vertx.createHttpClient(options)
-                .put(port, host, path, response -> {
-                    response.exceptionHandler(error -> {
-                        result.fail(error);
-                    });
+
+        WebClientOptions options = new WebClientOptions().setTrustOptions(new PemTrustOptions().addCertValue(certValue));
+        WebClient client = WebClient.create(vertx, options);
+
+//        vertx.createHttpClient(options)
+        client.put(port, host, path)
+            .followRedirects(true)
+            .putHeader("Accept", "application/json")
+            .putHeader("Content-Type", "application/json")
+            .putHeader("Content-Length", String.valueOf(data.length()))
+            .ssl(true)
+            .sendBuffer(data, ar -> {
+                System.out.println("result" + ar.toString());
+                if (ar.succeeded()) {
+                    HttpResponse<Buffer> response = ar.result();
+
                     if (response.statusCode() == 200 || response.statusCode() == 201) {
-                        response.bodyHandler(buffer -> {
-                            ObjectMapper mapper = new ObjectMapper();
-                            try {
-                                Map t = mapper.readValue(buffer.getBytes(), Map.class);
-                                log.debug("Got {} response to PUT request to {}: {}", response.statusCode(), path, t);
-                                result.complete(t);
-                            } catch (IOException e) {
-                                result.fail(new ConnectRestException(response, "Could not deserialize response: " + e));
-                            }
-                        });
+                        ObjectMapper mapper = new ObjectMapper();
+                        try {
+                            Map t = mapper.readValue(response.body().getBytes(), Map.class);
+                            log.debug("Got {} response to PUT request to {}: {}", response.statusCode(), path, t);
+                            result.complete(t);
+                        } catch (IOException e) {
+                            // fix this
+//                            result.fail(new ConnectRestException(response, "Could not deserialize response: " + e));
+                            result.fail("Could not deserialize response: " + e);
+
+                        }
                     } else {
                         // TODO Handle 409 (Conflict) indicating a rebalance in progress
                         log.debug("Got {} response to PUT request to {}", response.statusCode(), path);
-                        response.bodyHandler(buffer -> {
-                            JsonObject x = buffer.toJsonObject();
-                            result.fail(new ConnectRestException(response, x.getString("message")));
-                        });
+                        JsonObject x = response.body().toJsonObject();
+//                        result.fail(new ConnectRestException(response, x.getString("message")));
+                        result.fail(x.getString("message"));
                     }
-                })
-                .exceptionHandler(result::fail)
-                .setFollowRedirects(true)
-                .putHeader("Accept", "application/json")
-                .putHeader("Content-Type", "application/json")
-                .putHeader("Content-Length", String.valueOf(data.length()))
-                .write(data)
-                .end();
+                } else {
+                    result.fail(ar.cause());
+                }
+
+            });
+
+
         return result.future();
     }
 

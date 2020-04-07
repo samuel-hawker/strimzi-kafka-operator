@@ -54,6 +54,7 @@ import io.strimzi.operator.common.model.Labels;
 import io.strimzi.operator.common.operator.resource.ConfigMapOperator;
 import io.strimzi.operator.common.operator.resource.CrdOperator;
 import io.strimzi.operator.common.operator.resource.PodDisruptionBudgetOperator;
+import io.strimzi.operator.common.operator.resource.SecretOperator;
 import io.strimzi.operator.common.operator.resource.ServiceAccountOperator;
 import io.strimzi.operator.common.operator.resource.ServiceOperator;
 import io.strimzi.operator.common.operator.resource.StatusUtils;
@@ -61,6 +62,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,6 +95,7 @@ public abstract class AbstractConnectOperator<C extends KubernetesClient, T exte
     protected final ImagePullPolicy imagePullPolicy;
     protected final ConfigMapOperator configMapOperations;
     protected final ServiceOperator serviceOperations;
+    protected final SecretOperator secretOperations;
     protected final PodDisruptionBudgetOperator podDisruptionBudgetOperator;
     protected final List<LocalObjectReference> imagePullSecrets;
     protected final long operationTimeoutMs;
@@ -116,6 +119,7 @@ public abstract class AbstractConnectOperator<C extends KubernetesClient, T exte
         this.connectClientProvider = connectClientProvider;
         this.configMapOperations = supplier.configMapOperations;
         this.serviceOperations = supplier.serviceOperations;
+        this.secretOperations = supplier.secretOperations;
         this.serviceAccountOperations = supplier.serviceAccountOperations;
         this.podDisruptionBudgetOperator = supplier.podDisruptionBudgetOperator;
         this.imagePullPolicy = config.getImagePullPolicy();
@@ -462,7 +466,11 @@ public abstract class AbstractConnectOperator<C extends KubernetesClient, T exte
 
     protected Future<Map<String, Object>> createOrUpdateConnector(Reconciliation reconciliation, String host, KafkaConnectApi apiClient,
                                                                   String connectorName, KafkaConnectorSpec connectorSpec) {
-        return apiClient.createOrUpdatePutRequest(host, port, connectorName, asJson(connectorSpec))
+        return secretOperations.getAsync("myproject", "my-cluster-clients-ca-cert")
+            .compose(secret -> {
+                Buffer cert = Buffer.buffer(secret.getData().get("ca.p12"));
+                return apiClient.createOrUpdatePutRequest(host, port, connectorName, asJson(connectorSpec), cert);
+            })
             .compose(ignored -> apiClient.statusWithBackOff(new BackOff(200L, 2, 10), host, port,
                     connectorName))
             .compose(status -> {
