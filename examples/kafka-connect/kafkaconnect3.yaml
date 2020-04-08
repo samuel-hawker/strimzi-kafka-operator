@@ -3,13 +3,18 @@ kind: KafkaConnect
 metadata:
   name: my-connect-cluster
   annotations:
-  # use-connector-resources configures this KafkaConnect
-  # to use KafkaConnector resources to avoid
-  # needing to call the Connect REST API directly
+    # set to true so admin point is used by operator
     strimzi.io/use-connector-resources: "true"
 spec:
   version: 2.4.0
   replicas: 1
+
+  bootstrapServers: my-cluster-kafka-bootstrap:9093
+  tls:
+    trustedCertificates:
+      - secretName: my-cluster-cluster-ca-cert
+        certificate: ca.crt
+#  rest:
   externalConfiguration:
     volumes:
       - name: cert
@@ -20,23 +25,22 @@ spec:
         secret:
           secretName: my-cluster-clients-ca-cert
 
-      - name: user
-        secret:
-          secretName: my-user
-
-  #    env:
-  #      - name: MY_ENVIRONMENT_VARIABLE
-  #        valueFrom:
-  #          secretKeyRef:
-  #            name: my-secret
-  #            key: my-key
-
-  bootstrapServers: my-cluster-kafka-bootstrap:9093
-  tls:
-    trustedCertificates:
-      - secretName: my-cluster-cluster-ca-cert
-        certificate: ca.crt
   config:
+    config.providers: file
+    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
+
+    rest.advertised.listener: https
+    rest.advertised.port: 8083
+
+    listeners.https.ssl.client.auth: none
+
+    listeners: https://:8083
+
+    listeners.https.ssl.keystore.location: /opt/kafka/external-configuration/cert/user.crt
+    listeners.https.ssl.keystore.password: ${file:/opt/kafka/external-configuration/cert/connector.properties:user.password}
+    listeners.https.ssl.keystore.type: PKCS12
+
+
 #    has to be unique
     group.id: connect-cluster-2
     offset.storage.topic: connect-cluster-offsets
@@ -47,33 +51,22 @@ spec:
     offset.storage.replication.factor: 1
     status.storage.replication.factor: 1
 
-    config.providers: file
-    config.providers.file.class: org.apache.kafka.common.config.provider.FileConfigProvider
-
-    # Support for TLS-enabling the REST API provided by the Kafka Connect workers
-    #    TODO needed?
-    rest.advertised.listener: https
-    rest.advertised.port: 8083
-
-    listeners.https.ssl.client.auth: none
-
-    listeners: https://:8083
-
     #    listeners.https.ssl.endpoint.identification.algorithm:
 
-#    #    Match files with volumes
-#    listeners.https.ssl.keystore.location: "${file:/opt/kafka/external-configuration/cert/connector.properties:user.p12}"
-#    listeners.https.ssl.keystore.password: "${file:/opt/kafka/external-configuration/cert/connector.properties:user.password}"
-#    listeners.https.ssl.keystore.type: PKCS12
-###
-#    listeners.https.ssl.truststore.location: "${file:/opt/kafka/external-configuration/cert/connector.properties:cert.p12}"
-#    #    grabbed from the same file
-#    listeners.https.ssl.truststore.password: "${file:/opt/kafka/external-configuration/cert/connector.properties:cert.password}"
-#    listeners.https.ssl.truststore.type: PKCS12
+    #    #    Match files with volumes
+    #    listeners.https.ssl.keystore.location: "${file:/opt/kafka/external-configuration/cert/connector.properties:user.p12}"
+    #    listeners.https.ssl.keystore.password: "${file:/opt/kafka/external-configuration/cert/connector.properties:user.password}"
+    #    listeners.https.ssl.keystore.type: PKCS12
+    ###
+    #    listeners.https.ssl.truststore.location: "${file:/opt/kafka/external-configuration/cert/connector.properties:cert.p12}"
+    #    #    grabbed from the same file
+    #    listeners.https.ssl.truststore.password: "${file:/opt/kafka/external-configuration/cert/connector.properties:cert.password}"
+    #    listeners.https.ssl.truststore.type: PKCS12
+    #
+    #    listeners.https.ssl.keystore.location: /opt/kafka/external-configuration/user/user.p12
+    #    listeners.https.ssl.keystore.password: ${file:/opt/kafka/external-configuration/cert/connector.properties:user.password}
+    #    listeners.https.ssl.keystore.type: PKCS12
 
-    listeners.https.ssl.keystore.location: /opt/kafka/external-configuration/user/user.p12
-    listeners.https.ssl.keystore.password: ${file:/opt/kafka/external-configuration/cert/connector.properties:user.password}
-    listeners.https.ssl.keystore.type: PKCS12
     #
 #    listeners.https.ssl.truststore.location: /opt/kafka/external-configuration/ca/ca.p12
 #    #    grabbed from the same file

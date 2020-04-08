@@ -439,6 +439,7 @@ class KafkaConnectApiImpl implements KafkaConnectApi {
             .ssl(true)
             .send(ar -> {
                 System.out.println(ar.toString());
+                System.out.println(ar.result().toString());
                 if (ar.succeeded()) {
                     HttpResponse<Buffer> response = ar.result();
                     if (response.statusCode() == 200) {

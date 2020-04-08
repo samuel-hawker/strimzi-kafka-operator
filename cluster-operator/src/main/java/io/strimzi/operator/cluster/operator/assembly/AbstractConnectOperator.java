@@ -323,15 +323,20 @@ public abstract class AbstractConnectOperator<C extends KubernetesClient, T exte
         // this is slightly problematic in kafkaConnectorAssembly it is Function<> { connect -> new KafkaConnectApiImpl(vertx) }
         KafkaConnectApi apiClient = connectClientProvider.apply(vertx);
 
-        Secret secret = secretOperations.get("myproject", "my-cluster-clients-ca-cert");
-        Buffer cert = Buffer.buffer(Base64.getDecoder().decode(secret.getData().get("ca.p12")));
+//        Secret secret = secretOperations.get("myproject", "my-cluster-clients-ca-cert");
+//        Buffer cert = Buffer.buffer(Base64.getDecoder().decode(secret.getData().get("ca.p12")));
+        Secret secret = secretOperations.get("myproject", "mysecret");
+        String certString = secret.getData().get("user.crt");
+        System.out.println("certString " + certString);
 
-        System.out.println(cert.toString());
+        Buffer cert = Buffer.buffer(Base64.getDecoder().decode(certString));
+//        System.out.println("decoded" + cert.toString());
+
 
         WebClientOptions options = new WebClientOptions()
                 .setTrustOptions(new PfxOptions()
                     .setValue(cert)
-                    .setPassword("O69Oxfm7VrX2"));
+                    .setPassword("password"));
         WebClient client = WebClient.create(vertx, options);
         // TODO hack remove
         apiClient.setClient(client);
