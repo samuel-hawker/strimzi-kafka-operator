@@ -315,23 +315,12 @@ public abstract class AbstractConnectOperator<C extends KubernetesClient, T exte
             return Future.succeededFuture();
         }
 
-//        secretOperations.getAsync("myproject", "my-cluster-clients-ca-cert")
-//                .compose(secret -> {
-//                    Buffer cert = Buffer.buffer(secret.getData().get("ca.p12"));
-//
-//                })
-        // this is slightly problematic in kafkaConnectorAssembly it is Function<> { connect -> new KafkaConnectApiImpl(vertx) }
         KafkaConnectApi apiClient = connectClientProvider.apply(vertx);
 
-//        Secret secret = secretOperations.get("myproject", "my-cluster-clients-ca-cert");
-//        Buffer cert = Buffer.buffer(Base64.getDecoder().decode(secret.getData().get("ca.p12")));
         Secret secret = secretOperations.get("myproject", "mysecret");
         String certString = secret.getData().get("user.crt");
-        System.out.println("certString " + certString);
 
         Buffer cert = Buffer.buffer(Base64.getDecoder().decode(certString));
-//        System.out.println("decoded" + cert.toString());
-
 
         WebClientOptions options = new WebClientOptions()
                 .setTrustOptions(new PfxOptions()
