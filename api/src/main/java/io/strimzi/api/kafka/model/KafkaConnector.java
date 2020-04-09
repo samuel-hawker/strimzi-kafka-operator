@@ -67,7 +67,7 @@ public class KafkaConnector extends CustomResource implements UnknownPropertyPre
     public static final String CRD_API_VERSION = Constants.V1BETA1_API_VERSION;
     public static final String RESOURCE_PLURAL = "kafkaconnectors";
     public static final String RESOURCE_SINGULAR = "kafkaconnector";
-    public static final String RESOURCE_GROUP = Constants.RESOURCE_GROUP_NAME;
+    public static final String RESOURCE_GROUP = Constants.RESOURCE_GROUP;
     public static final String RESOURCE_KIND = "KafkaConnector";
     public static final String RESOURCE_LIST_KIND = RESOURCE_KIND + "List";
     public static final String SHORT_NAME = "kctr";

@@ -45,14 +45,14 @@ public class ExamplesTest {
      * and validating them.
      */
     @Test
-    public void examples() throws Exception {
+    public void examples() {
         validateRecursively(new File("../examples"));
     }
 
     private void validateRecursively(File directory) {
         for (File f : directory.listFiles()) {
             if (f.isDirectory()) {
-                if (f.getAbsolutePath().contains("examples/metrics/grafana") || f.getAbsolutePath().contains("examples/metrics/prometheus"))  {
+                if (isExemptPath(f.getAbsolutePath())) {
                     continue;
                 } else {
                     validateRecursively(f);
@@ -63,6 +63,12 @@ public class ExamplesTest {
             }
         }
     }
+
+    private boolean isExemptPath(String path) {
+        return path.contains("examples/metrics/grafana") ||
+                path.contains("examples/metrics/prometheus");
+    }
+
 
     private void validate(File f) {
         try {

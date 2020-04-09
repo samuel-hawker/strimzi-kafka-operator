@@ -101,7 +101,7 @@ public class KafkaMirrorMaker extends CustomResource implements UnknownPropertyP
     public static final List<String> VERSIONS = unmodifiableList(asList(V1BETA1, V1ALPHA1));
     public static final String RESOURCE_KIND = "KafkaMirrorMaker";
     public static final String RESOURCE_LIST_KIND = RESOURCE_KIND + "List";
-    public static final String RESOURCE_GROUP = Constants.RESOURCE_GROUP_NAME;
+    public static final String RESOURCE_GROUP = Constants.RESOURCE_GROUP;
     public static final String RESOURCE_PLURAL = "kafkamirrormakers";
     public static final String RESOURCE_SINGULAR = "kafkamirrormaker";
     public static final String CRD_API_VERSION = Constants.V1BETA1_API_VERSION;

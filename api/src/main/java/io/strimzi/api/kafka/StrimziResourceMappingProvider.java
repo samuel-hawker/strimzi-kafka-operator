@@ -93,21 +93,22 @@ public class StrimziResourceMappingProvider implements KubernetesResourceMapping
                     .withApiVersion(descriptor.crdApiVersion)
                     .withKind(descriptor.kind)
                     .withNewMetadata()
-                    .withName(descriptor.plural + "." + descriptor.group)
+                        .withName(descriptor.plural + "." + descriptor.group)
                     .endMetadata()
                     .withNewSpec()
-                    .withScope(descriptor.scope)
-                    .withGroup(descriptor.group)
-                    .withVersion(descriptor.version)
-                    .withNewNames()
-                    .withSingular(descriptor.singular)
-                    .withPlural(descriptor.plural)
-                    .withKind(descriptor.kind)
-                    .withListKind(descriptor.listKind)
-                    .endNames()
-                    .withNewSubresources()
-                    .withStatus(descriptor.statusClass.newInstance())
-                    .endSubresources()
+                        .withScope(descriptor.scope)
+                        .withGroup(descriptor.group)
+                        .withVersion(descriptor.version)
+                        .withNewNames()
+                            .withSingular(descriptor.singular)
+                            .withPlural(descriptor.plural)
+                            .withKind(descriptor.kind)
+                            .withListKind(descriptor.listKind)
+                        .endNames()
+                        .withNewSubresources()
+                            // problem
+                            .withStatus(descriptor.statusClass != null  ? descriptor.statusClass.newInstance() : null)
+                        .endSubresources()
                     .endSpec()
                     .build());
 
@@ -130,6 +131,7 @@ public class StrimziResourceMappingProvider implements KubernetesResourceMapping
                                                                                      Class<L> listCls,
                                                                                      Class<D> doneableCls) {
         // TODO This doesn't work because the annotations jar is not on the runtime classpath.
+        System.out.println("blow up");
         Crd annotation = cls.getAnnotation(Crd.class);
         String key = annotation.spec().group() + "/" +
                 annotation.spec().version() + "#" +

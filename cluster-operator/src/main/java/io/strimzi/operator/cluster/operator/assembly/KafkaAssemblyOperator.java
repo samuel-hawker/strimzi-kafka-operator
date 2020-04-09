@@ -450,7 +450,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
                     Kafka kafka = getRes.result();
 
                     if (kafka != null) {
-                        if ((Constants.RESOURCE_GROUP_NAME + "/" + Constants.V1ALPHA1).equals(kafka.getApiVersion()))   {
+                        if ((Constants.RESOURCE_GROUP + "/" + Constants.V1ALPHA1).equals(kafka.getApiVersion()))   {
                             log.warn("{}: The resource needs to be upgraded from version {} to 'v1beta1' to use the status field", reconciliation, kafka.getApiVersion());
                             updateStatusPromise.complete();
                         } else {

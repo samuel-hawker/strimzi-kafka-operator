@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 public class StatusUtils {
-    private static final String V1ALPHA1 = Constants.RESOURCE_GROUP_NAME + "/" + Constants.V1ALPHA1;
+    private static final String V1ALPHA1 = Constants.RESOURCE_GROUP + "/" + Constants.V1ALPHA1;
 
     /**
      * Returns the current timestamp in ISO 8601 format, for example "2019-07-23T09:08:12.356Z".
