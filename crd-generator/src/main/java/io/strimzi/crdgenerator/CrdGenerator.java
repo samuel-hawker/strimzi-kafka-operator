@@ -422,12 +422,20 @@ public class CrdGenerator {
 
     private Collection<Property> unionOfSubclassProperties(Class<?> crdClass) {
         TreeMap<String, Property> result = new TreeMap<>();
+        System.out.println(crdClass.getName());
         for (Class subtype : Property.subtypes(crdClass)) {
             result.putAll(properties(subtype));
         }
         result.putAll(properties(crdClass));
         JsonPropertyOrder order = crdClass.getAnnotation(JsonPropertyOrder.class);
+        if (order == null && !isExemptClass(crdClass)) {
+            throw new InvalidCrdException(crdClass.getName() + " missing @JsonPropertyOrder annotation");
+        }
         return sortedProperties(order != null ? order.value() : null, result).values();
+    }
+
+    private boolean isExemptClass(Class<?> crdClass) {
+        return crdClass == Object.class;
     }
 
     private ArrayNode buildSchemaRequired(Class<?> crdClass) {
