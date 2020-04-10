@@ -311,6 +311,34 @@ public class TestCrds {
             ))
     public class ExampleWithMissingJsonPropertyOrderAnnotationCrd<T, U extends ValidCrdNumber, V extends U> extends CustomResource { }
 
+    @Crd(
+            apiVersion = "apiextensions.k8s.io/v1beta1",
+            spec = @Crd.Spec(
+                    group = "crdgenerator.strimzi.io",
+                    names = @Crd.Spec.Names(
+                            kind = "Example",
+                            plural = "examples",
+                            categories = {"strimzi"}),
+                    scope = "Namespaced",
+                    version = "v1alpha1",
+                    versions = {
+                            @Crd.Spec.Version(name = "v1alpha1", served = true, storage = true),
+                            @Crd.Spec.Version(name = "v1beta1", served = true, storage = false)
+                    },
+                    additionalPrinterColumns = {
+                            @Crd.Spec.AdditionalPrinterColumn(
+                                    name = "Foo",
+                                    description = "The foo",
+                                    jsonPath = "...",
+                                    type = "integer"
+                            )
+                    }
+            ))
+    @JsonPropertyOrder({})
+    public class ExampleWithMissingFieldValuesInJsonPropertyAnnotationsCrd<T, U extends ValidCrdNumber, V extends U> extends CustomResource {
+        private Object someField;
+    }
+
     @JsonPropertyOrder({})
     public abstract class ValidCrdNumber extends Number { }
 }

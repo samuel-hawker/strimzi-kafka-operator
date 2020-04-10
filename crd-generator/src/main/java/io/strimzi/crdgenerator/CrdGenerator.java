@@ -35,6 +35,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -422,16 +424,23 @@ public class CrdGenerator {
 
     private Collection<Property> unionOfSubclassProperties(Class<?> crdClass) {
         TreeMap<String, Property> result = new TreeMap<>();
-        System.out.println(crdClass.getName());
         for (Class subtype : Property.subtypes(crdClass)) {
             result.putAll(properties(subtype));
         }
         result.putAll(properties(crdClass));
-        JsonPropertyOrder order = crdClass.getAnnotation(JsonPropertyOrder.class);
-        if (order == null && !isExemptClass(crdClass)) {
+        JsonPropertyOrder orderAnnotation = crdClass.getAnnotation(JsonPropertyOrder.class);
+        if (orderAnnotation == null && !isExemptClass(crdClass)) {
             throw new InvalidCrdException(crdClass.getName() + " missing @JsonPropertyOrder annotation");
         }
-        return sortedProperties(order != null ? order.value() : null, result).values();
+        // Check that order contains exactly all fields
+        String[] order = orderAnnotation != null ? orderAnnotation.value() : null;
+        String[] objectProperties = result.keySet().toArray(new String[result.size()]);
+
+
+        if (!Arrays.deepEquals(order, objectProperties)) {
+            throw new InvalidCrdException("");
+        }
+        return sortedProperties(, result).values();
     }
 
     private boolean isExemptClass(Class<?> crdClass) {

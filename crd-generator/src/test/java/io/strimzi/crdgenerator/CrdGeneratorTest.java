@@ -54,4 +54,30 @@ public class CrdGeneratorTest {
                 containsString("ExampleWithMissingJsonPropertyOrderAnnotationCrd missing @JsonPropertyOrder annotation"));
 
     }
+
+    @Test
+    public void testGeneratorCrdWithMissingFieldValuesInJsonPropertyAnnotationsThrowsInvalidCrdException() {
+        CrdGenerator crdGenerator = new CrdGenerator(new YAMLMapper().configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false));
+        StringWriter w = new StringWriter();
+        InvalidCrdException invalidCrd = assertThrows(InvalidCrdException.class, () ->
+                crdGenerator.generate(TestCrds.ExampleWithMissingFieldValuesInJsonPropertyAnnotationsCrd.class, w));
+
+        //TODO fix
+        assertThat(invalidCrd.getMessage(),
+                containsString("ExampleWithMissingJsonPropertyOrderAnnotationCrd missing @JsonPropertyOrder annotation"));
+
+    }
+
+    @Test
+    public void testGeneratorCrdWithExtraFieldValuesInJsonPropertyAnnotationsThrowsInvalidCrdException() {
+        CrdGenerator crdGenerator = new CrdGenerator(new YAMLMapper().configure(YAMLGenerator.Feature.WRITE_DOC_START_MARKER, false));
+        StringWriter w = new StringWriter();
+        InvalidCrdException invalidCrd = assertThrows(InvalidCrdException.class, () ->
+                crdGenerator.generate(TestCrds.ExampleWithMissingJsonPropertyOrderAnnotationCrd.class, w));
+
+        assertThat(invalidCrd.getMessage(),
+                containsString("ExampleWithMissingJsonPropertyOrderAnnotationCrd missing @JsonPropertyOrder annotation"));
+        //TODO fix
+
+    }
 }

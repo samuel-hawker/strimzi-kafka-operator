@@ -21,6 +21,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -208,6 +210,12 @@ class Property implements AnnotatedElement {
             result = unordered;
         }
         return unmodifiableMap(result);
+    }
+
+    static boolean arrayDiff(String[] arr1, String[] arr2) {
+        HashSet<String> set1 = new HashSet<String>(Arrays.asList(arr1));
+        HashSet<String> set2 = new HashSet<String>(Arrays.asList(arr2));
+        return set1.equals(set2);
     }
 
     static boolean hasAnyGetterAndAnySetter(Class<?> crdClass) {
