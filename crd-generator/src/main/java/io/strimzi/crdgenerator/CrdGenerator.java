@@ -35,7 +35,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -432,15 +431,48 @@ public class CrdGenerator {
         if (orderAnnotation == null && !isExemptClass(crdClass)) {
             throw new InvalidCrdException(crdClass.getName() + " missing @JsonPropertyOrder annotation");
         }
+
+        String diff = "";
         // Check that order contains exactly all fields
         String[] order = orderAnnotation != null ? orderAnnotation.value() : null;
         String[] objectProperties = result.keySet().toArray(new String[result.size()]);
+        List<String> orderarr = Arrays.asList(order);
+        List<String> otherarr = Arrays.asList(objectProperties);
 
+//        if (orderarr hasDuplicates) {
+//            diff += "something";
+//        }
 
-        if (!Arrays.deepEquals(order, objectProperties)) {
-            throw new InvalidCrdException("");
+        for(int i = 0; i < order.length; ++i) {
+            boolean found = false;
+            for (int j = 0; j < objectProperties.length; ++j) {
+                if (order[i] == objectProperties[j]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                diff += "JsonProperty " + order[i] + " not found in class fields\n";
+            }
         }
-        return sortedProperties(, result).values();
+
+        for(int i = 0; i < objectProperties.length; ++i) {
+            boolean found = false;
+            for (int j = 0; j < order.length; ++j) {
+                if (objectProperties[i] == order[j]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                diff += "Property " + order[i] + " not found in JsonPropertyOrder\n";
+            }
+        }
+
+        if (!diff.isEmpty()) {
+            throw new InvalidCrdException(crdClass.getName() + "\n" + diff);
+        }
+        return sortedProperties(order, result).values();
     }
 
     private boolean isExemptClass(Class<?> crdClass) {
