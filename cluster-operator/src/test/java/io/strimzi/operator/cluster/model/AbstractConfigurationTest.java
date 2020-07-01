@@ -75,14 +75,14 @@ public class AbstractConfigurationTest {
     public void testEmptyConfigurationString() {
         String configuration = "";
         AbstractConfiguration config = new TestConfigurationWithoutDefaults(configuration);
-        assertThat(config.getConfiguration().isEmpty(), is(true));
+        assertThat(config.getConfiguration(), is(""));
     }
 
     @Test
     public void testEmptyJson() {
         JsonObject configuration = new JsonObject();
         AbstractConfiguration config = new TestConfigurationWithoutDefaults(configuration);
-        assertThat(config.getConfiguration().isEmpty(), is(true));
+        assertThat(config.getConfiguration(), is(""));
     }
 
     @Test

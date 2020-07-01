@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.strimzi.operator.cluster.CustomMatchers.hasOwnerReferenceFor;
 import static io.strimzi.operator.cluster.model.CruiseControl.ENV_VAR_BROKER_CPU_UTILIZATION_CAPACITY;
 import static io.strimzi.operator.cluster.model.CruiseControl.ENV_VAR_BROKER_DISK_MIB_CAPACITY;
 import static io.strimzi.operator.cluster.model.CruiseControl.ENV_VAR_BROKER_INBOUND_NETWORK_KIB_PER_SECOND_CAPACITY;
@@ -242,8 +243,7 @@ public class CruiseControlTest {
 
         assertThat(dep.getMetadata().getName(), is(CruiseControlResources.deploymentName(cluster)));
         assertThat(dep.getMetadata().getNamespace(), is(namespace));
-        assertThat(dep.getMetadata().getOwnerReferences().size(), is(1));
-        assertThat(dep.getMetadata().getOwnerReferences().get(0), is(cc.createOwnerReference()));
+        assertThat(dep, hasOwnerReferenceFor(resource));
 
         // checks on the main Cruise Control container
         Container ccContainer = containers.stream().filter(container -> ccImage.equals(container.getImage())).findFirst().get();

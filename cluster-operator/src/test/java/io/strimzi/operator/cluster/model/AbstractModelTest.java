@@ -25,8 +25,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
 
 public class AbstractModelTest {
 
@@ -41,9 +45,11 @@ public class AbstractModelTest {
     public void testJvmMemoryOptionsExplicit() {
         Map<String, String> env = getStringStringMap("4", "4",
                 0.5, 4_000_000_000L, null);
-        assertThat(env.get(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS), is("-Xms4 -Xmx4"));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION), is(nullValue()));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX), is(nullValue()));
+        assertThat(env, allOf(
+                hasEntry(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS, "-Xms4 -Xmx4"),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION)),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX))
+        ));
     }
 
     private Map<String, String> getStringStringMap(String xmx, String xms, double dynamicFraction, long dynamicMax, ResourceRequirements resources) {
@@ -75,18 +81,22 @@ public class AbstractModelTest {
     public void testJvmMemoryOptionsXmsOnly() {
         Map<String, String> env = getStringStringMap(null, "4",
                 0.5, 5_000_000_000L, null);
-        assertThat(env.get(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS), is("-Xms4"));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION), is(nullValue()));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX), is(nullValue()));
+        assertThat(env, allOf(
+                hasEntry(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS, "-Xms4"),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION)),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX))
+        ));
     }
 
     @Test
     public void testJvmMemoryOptionsXmxOnly() {
         Map<String, String> env = getStringStringMap("4", null,
                 0.5, 5_000_000_000L, null);
-        assertThat(env.get(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS), is("-Xmx4"));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION), is(nullValue()));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX), is(nullValue()));
+        assertThat(env, allOf(
+                hasEntry(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS, "-Xms4"),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION)),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX))
+        ));
     }
 
 
@@ -95,8 +105,11 @@ public class AbstractModelTest {
         Map<String, String> env = getStringStringMap(null, null,
                 0.5, 5_000_000_000L, null);
         assertThat(env.get(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS), is("-Xms" + AbstractModel.DEFAULT_JVM_XMS));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION), is(nullValue()));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX), is(nullValue()));
+        assertThat(env, allOf(
+                hasEntry(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS, "-Xms" + AbstractModel.DEFAULT_JVM_XMS),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION)),
+                not(hasKey(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX))
+        ));
     }
 
     private ResourceRequirements getResourceRequest() {
@@ -108,9 +121,11 @@ public class AbstractModelTest {
     public void testJvmMemoryOptionsDefaultWithMemoryLimit() {
         Map<String, String> env = getStringStringMap(null, "4",
                 0.5, 5_000_000_000L, getResourceRequest());
-        assertThat(env.get(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS), is("-Xms4"));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION), is("0.5"));
-        assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX), is("5000000000"));
+        assertThat(env, allOf(
+                hasEntry(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS, "-Xms4"),
+                hasEntry(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION, "0.5"),
+                hasEntry(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX, "5000000000")
+        ));
     }
 
     @Test
@@ -120,6 +135,11 @@ public class AbstractModelTest {
         assertThat(env.get(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS), is(nullValue()));
         assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION), is("0.7"));
         assertThat(env.get(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX), is("10000000000"));
+        assertThat(env, allOf(
+                not(hasKey(AbstractModel.ENV_VAR_KAFKA_HEAP_OPTS)),
+                hasEntry(AbstractModel.ENV_VAR_DYNAMIC_HEAP_FRACTION, "0.7"),
+                hasEntry(AbstractModel.ENV_VAR_DYNAMIC_HEAP_MAX, "10000000000")
+        ));
     }
 
     @Test

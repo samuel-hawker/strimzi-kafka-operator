@@ -24,7 +24,9 @@ import static java.util.Collections.emptyMap;
 @JsonPropertyOrder({ "authentication", "authorization", "quotas" })
 @EqualsAndHashCode
 public class KafkaUserSpec  implements UnknownPropertyPreserving, Serializable {
-
+    /**
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     private KafkaUserAuthentication authentication;
