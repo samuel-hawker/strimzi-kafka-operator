@@ -73,28 +73,24 @@ public class Main {
         
         KubernetesClient client = new DefaultKubernetesClient();
 
-        maybeCreateClusterRoles(vertx, config, client).onComplete(crs -> {
-            if (crs.succeeded())    {
-                PlatformFeaturesAvailability.create(vertx, client).onComplete(pfa -> {
-                    if (pfa.succeeded()) {
-                        log.info("Environment facts gathered: {}", pfa.result());
-
-                        run(vertx, client, pfa.result(), config).onComplete(ar -> {
-                            if (ar.failed()) {
-                                log.error("Unable to start operator for 1 or more namespace", ar.cause());
-                                System.exit(1);
-                            }
-                        });
-                    } else {
-                        log.error("Failed to gather environment facts", pfa.cause());
-                        System.exit(1);
-                    }
-                });
-            } else  {
-                log.error("Failed to create Cluster Roles", crs.cause());
+        maybeCreateClusterRoles(vertx, config, client)
+            .onFailure(e -> {
+                log.error("Failed to create Cluster Roles", e);
                 System.exit(1);
-            }
-        });
+            })
+            .compose(v -> PlatformFeaturesAvailability.create(vertx, client))
+            .onFailure(e -> {
+                log.error("Failed to gather environment facts", e);
+                System.exit(1);
+            })
+            .compose(pfa -> {
+                log.info("Environment facts gathered: {}", pfa);
+                return run(vertx, client, pfa, config);
+            })
+            .onFailure(e -> {
+                log.error("Unable to start operator for 1 or more namespace", e);
+                System.exit(1);
+            });
     }
 
     static CompositeFuture run(Vertx vertx, KubernetesClient client, PlatformFeaturesAvailability pfa, ClusterOperatorConfig config) {
@@ -135,8 +131,8 @@ public class Main {
 
         List<Future> futures = new ArrayList<>(config.getNamespaces().size());
         for (String namespace : config.getNamespaces()) {
-            Promise<String> prom = Promise.promise();
-            futures.add(prom.future());
+            Promise<String> clusterOperatorVerticleDeployed = Promise.promise();
+            futures.add(clusterOperatorVerticleDeployed.future());
             ClusterOperator operator = new ClusterOperator(namespace,
                     config.getReconciliationIntervalMs(),
                     client,
@@ -156,7 +152,7 @@ public class Main {
                         log.error("Cluster Operator verticle in namespace {} failed to start", namespace, res.cause());
                         System.exit(1);
                     }
-                    prom.handle(res);
+                    clusterOperatorVerticleDeployed.handle(res);
                 });
         }
         return CompositeFuture.join(futures);
@@ -167,7 +163,7 @@ public class Main {
             List<Future> futures = new ArrayList<>();
             ClusterRoleOperator cro = new ClusterRoleOperator(vertx, client, config.getOperationTimeoutMs());
 
-            Map<String, String> clusterRoles = new HashMap<String, String>() {
+            Map<String, String> clusterRoles = new HashMap<>() {
                 {
                     put("strimzi-cluster-operator-namespaced", "020-ClusterRole-strimzi-cluster-operator-role.yaml");
                     put("strimzi-cluster-operator-global", "021-ClusterRole-strimzi-cluster-operator-role.yaml");
@@ -184,7 +180,7 @@ public class Main {
                         new InputStreamReader(Main.class.getResourceAsStream("/cluster-roles/" + clusterRole.getValue()),
                                 StandardCharsets.UTF_8))) {
                     String yaml = br.lines().collect(Collectors.joining(System.lineSeparator()));
-                    ClusterRole role = cro.convertYamlToClusterRole(yaml);
+                    ClusterRole role = ClusterRoleOperator.convertYamlToClusterRole(yaml);
                     Future fut = cro.reconcile(role.getMetadata().getName(), role);
                     futures.add(fut);
                 } catch (IOException e) {
