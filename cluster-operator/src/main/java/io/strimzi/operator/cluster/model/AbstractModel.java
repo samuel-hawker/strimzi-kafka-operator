@@ -165,6 +165,8 @@ public abstract class AbstractModel {
         }
     }
 
+    private static final String NAMESPACED = System.getenv("NAMESPACED");
+
     protected final String cluster;
     protected final String namespace;
 
@@ -1404,7 +1406,7 @@ public abstract class AbstractModel {
     // roles and rolebindings
     public static boolean isNamespaceScoped() {
         // Make this mockable
-        return System.getenv("NAMESPACED") != null;
+        return NAMESPACED != null;
 
     }
 }
