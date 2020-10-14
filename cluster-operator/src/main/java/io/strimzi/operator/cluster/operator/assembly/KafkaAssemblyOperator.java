@@ -3004,7 +3004,6 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
                     eoDeployment != null ? entityOperator.generateServiceAccount() : null));
         }
 
-        // THIS DOESN't WORK, there needs to be two separate rolebindings produced.
         Future<ReconciliationState> entityOperatorTopicOpClusterRoleRoleBinding() {
             if (eoDeployment != null && entityOperator.getTopicOperator() != null) {
                 String watchedNamespace = namespace;
