@@ -19,6 +19,10 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentStrategy;
 import io.fabric8.kubernetes.api.model.apps.DeploymentStrategyBuilder;
+import io.fabric8.kubernetes.api.model.rbac.PolicyRule;
+import io.fabric8.kubernetes.api.model.rbac.PolicyRuleBuilder;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.strimzi.api.kafka.model.Constants;
 import io.strimzi.api.kafka.model.ContainerEnvVar;
 import io.strimzi.api.kafka.model.EntityOperatorSpec;
 import io.strimzi.api.kafka.model.JvmOptions;
@@ -51,6 +55,7 @@ public class EntityOperator extends AbstractModel {
     // Entity Operator configuration keys
     public static final String ENV_VAR_ZOOKEEPER_CONNECT = "STRIMZI_ZOOKEEPER_CONNECT";
     public static final String EO_CLUSTER_ROLE_NAME = "strimzi-entity-operator";
+//    public static final String EO_ROLE_NAME = "strimzi-entity-operator";
 
     private String zookeeperConnect;
     private EntityTopicOperator topicOperator;
@@ -346,6 +351,45 @@ public class EntityOperator extends AbstractModel {
             return null;
         }
         return super.generateServiceAccount();
+    }
+
+    /**
+     * Get the name of the Entity Operator Role given the name of the {@code cluster}.
+     * @param cluster The cluster name
+     * @return The name of the EO role.
+     */
+    public static String entityOperatorRoleName(String cluster) {
+        return entityOperatorName(cluster);
+    }
+
+    @Override
+    protected String getRoleName() {
+        return entityOperatorRoleName(cluster);
+    }
+
+    // Move to separate class?
+    public Role generateRole() {
+        List<PolicyRule> rules = new ArrayList<>();
+
+        rules.add(new PolicyRuleBuilder()
+                .addToResources("secrets")
+                .addToVerbs("create", "delete", "get", "list", "patch", "update")
+                .addToApiGroups("")
+                .build());
+
+        rules.add(new PolicyRuleBuilder()
+                .addToResources("events")
+                .addToVerbs("create")
+                .addToApiGroups("")
+                .build());
+
+        rules.add(new PolicyRuleBuilder()
+                .addToResources("kafkatopics", "kafkatopics/status", "kafkausers", "kafkausers/status")
+                .addToVerbs("create", "delete", "get", "list", "patch", "update", "watch")
+                .addToApiGroups(Constants.RESOURCE_GROUP_NAME)
+                .build());
+
+        return isNamespaceScoped() ? super.generateRole(rules) : null;
     }
 
     protected static void javaOptions(List<EnvVar> envVars, JvmOptions jvmOptions, List<SystemProperty> javaSystemProperties) {
