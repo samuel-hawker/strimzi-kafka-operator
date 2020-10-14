@@ -224,7 +224,7 @@ public class EntityTopicOperatorTest {
 
     @Test
     public void testRoleBinding()   {
-        RoleBinding binding = entityTopicOperator.generateRoleBinding(namespace, toWatchedNamespace);
+        RoleBinding binding = entityTopicOperator.generateClusterRoleRoleBinding(namespace, toWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(toWatchedNamespace));

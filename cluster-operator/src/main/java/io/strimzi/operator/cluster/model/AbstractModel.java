@@ -49,6 +49,9 @@ import io.fabric8.kubernetes.api.model.policy.PodDisruptionBudget;
 import io.fabric8.kubernetes.api.model.policy.PodDisruptionBudgetBuilder;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBinding;
 import io.fabric8.kubernetes.api.model.rbac.ClusterRoleBindingBuilder;
+import io.fabric8.kubernetes.api.model.rbac.PolicyRule;
+import io.fabric8.kubernetes.api.model.rbac.Role;
+import io.fabric8.kubernetes.api.model.rbac.RoleBuilder;
 import io.fabric8.kubernetes.api.model.rbac.RoleRef;
 import io.fabric8.kubernetes.api.model.rbac.Subject;
 import io.strimzi.api.kafka.model.ContainerEnvVar;
@@ -656,6 +659,13 @@ public abstract class AbstractModel {
      * @return the name of the service account used by the deployed cluster for Kubernetes API operations.
      */
     protected String getServiceAccountName() {
+        return null;
+    }
+
+    /**
+     * @return the name of the role used by the service account for the deployed cluster for Kubernetes API operations.
+     */
+    protected String getRoleName() {
         return null;
     }
 
@@ -1308,6 +1318,18 @@ public abstract class AbstractModel {
             .build();
     }
 
+    public Role generateRole(List<PolicyRule> rules) {
+        return new RoleBuilder()
+                .withNewMetadata()
+                    .withName(getRoleName())
+                    .withNamespace(namespace)
+                    .withOwnerReferences(createOwnerReference())
+                    .addToLabels(labels.toMap())
+                .endMetadata()
+                .withRules(rules)
+                .build();
+    }
+
     /**
      * Adds the supplied list of user configured container environment variables {@see io.strimzi.api.kafka.model.ContainerEnvVar} to the
      * supplied list of fabric8 environment variables {@see io.fabric8.kubernetes.api.model.EnvVar},
@@ -1369,7 +1391,7 @@ public abstract class AbstractModel {
         return warningConditions;
     }
 
-    public DeploymentStrategy getDeploymentStrategy()   {
+    public DeploymentStrategy getDeploymentStrategy() {
         if (templateDeploymentStrategy == io.strimzi.api.kafka.model.template.DeploymentStrategy.ROLLING_UPDATE) {
             return new DeploymentStrategyBuilder()
                     .withType("RollingUpdate")
@@ -1383,5 +1405,12 @@ public abstract class AbstractModel {
                     .withType("Recreate")
                     .build();
         }
+    }
+
+    // Placeholder for the proper env which will signify that this operator is namespace scoped and should use
+    // roles and rolebindings
+    public static boolean isNamespaceScoped() {
+        // Make this mockable
+        return System.getenv("NAMESPACED") != null;
     }
 }
