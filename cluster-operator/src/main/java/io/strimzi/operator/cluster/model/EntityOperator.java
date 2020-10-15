@@ -388,7 +388,7 @@ public class EntityOperator extends AbstractModel {
                 .addToApiGroups(Constants.RESOURCE_GROUP_NAME)
                 .build());
 
-        return isNamespaceScoped() ? super.generateRole(rules) : null;
+        return !isClusterScoped() ? super.generateRole(rules) : null;
     }
 
     protected static void javaOptions(List<EnvVar> envVars, JvmOptions jvmOptions, List<SystemProperty> javaSystemProperties) {

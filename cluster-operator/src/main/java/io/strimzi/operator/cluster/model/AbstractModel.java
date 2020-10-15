@@ -1404,9 +1404,8 @@ public abstract class AbstractModel {
 
     // Placeholder for the proper env which will signify that this operator is namespace scoped and should use
     // roles and rolebindings
-    public static boolean isNamespaceScoped() {
+    public static boolean isClusterScoped() {
         // Make this mockable
-        return NAMESPACED != null;
-
+        return NAMESPACED == null;
     }
 }
