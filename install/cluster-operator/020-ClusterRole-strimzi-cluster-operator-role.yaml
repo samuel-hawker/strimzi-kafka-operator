@@ -1,5 +1,5 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   name: strimzi-cluster-operator-namespaced
   labels:
@@ -19,6 +19,7 @@ rules:
   - apiGroups:
       - "rbac.authorization.k8s.io"
     resources:
+      - roles
       # The cluster operator needs to access and manage rolebindings to grant Strimzi components cluster permissions
       - rolebindings
     verbs:

@@ -4,6 +4,8 @@ metadata:
   name: my-cluster
 spec:
   kafka:
+    authorization:
+      type: simple
     version: 2.6.0
     replicas: 1
     listeners:

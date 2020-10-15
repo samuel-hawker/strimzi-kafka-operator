@@ -7,8 +7,8 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: strimzi-cluster-operator
-    namespace: myproject
+    namespace: my-project
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: strimzi-cluster-operator-namespaced
   apiGroup: rbac.authorization.k8s.io

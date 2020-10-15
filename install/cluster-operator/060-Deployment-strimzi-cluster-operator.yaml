@@ -16,6 +16,8 @@ spec:
         name: strimzi-cluster-operator
         strimzi.io/kind: cluster-operator
     spec:
+      imagePullSecrets:
+        - name: ibm-entitlement-key
       serviceAccountName: strimzi-cluster-operator
       volumes:
         - name: co-config-volume
@@ -23,7 +25,9 @@ spec:
             name: strimzi-cluster-operator
       containers:
         - name: strimzi-cluster-operator
-          image: strimzi/operator:latest
+          image: hyc-qp-stable-docker-local.artifactory.swg-devops.com/strimzi/operator:role
+          imagePullPolicy: Always
+
           ports:
             - containerPort: 8080
               name: http
