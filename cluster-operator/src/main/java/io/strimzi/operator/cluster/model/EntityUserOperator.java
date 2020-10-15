@@ -325,7 +325,7 @@ public class EntityUserOperator extends AbstractModel {
     }
 
     public RoleBinding generateClusterRoleRoleBinding(String namespace, String watchedNamespace) {
-        if (isNamespaceScoped()) {
+        if (!isClusterScoped()) {
             return null;
         }
 
@@ -356,7 +356,7 @@ public class EntityUserOperator extends AbstractModel {
     }
 
     public RoleBinding generateRoleRoleBinding(String namespace, String watchedNamespace) {
-        if (!isNamespaceScoped()) {
+        if (isClusterScoped()) {
             return null;
         }
         Subject ks = new SubjectBuilder()

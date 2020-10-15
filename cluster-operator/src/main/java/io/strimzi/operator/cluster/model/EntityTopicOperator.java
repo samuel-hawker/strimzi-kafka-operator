@@ -293,7 +293,7 @@ public class EntityTopicOperator extends AbstractModel {
     }
 
     public RoleBinding generateClusterRoleRoleBinding(String namespace, String watchedNamespace) {
-        if (isNamespaceScoped()) {
+        if (!isClusterScoped()) {
             return null;
         }
 
@@ -324,7 +324,7 @@ public class EntityTopicOperator extends AbstractModel {
     }
 
     public RoleBinding generateRoleRoleBinding(String namespace, String watchedNamespace) {
-        if (!isNamespaceScoped()) {
+        if (isClusterScoped()) {
             return null;
         }
 
