@@ -167,8 +167,6 @@ public abstract class AbstractModel {
         }
     }
 
-    private static final String NAMESPACED = System.getenv("NAMESPACED");
-
     protected final String cluster;
     protected final String namespace;
 
