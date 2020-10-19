@@ -800,6 +800,18 @@ public class ResourceUtils {
                 false);
     }
 
+    public static ClusterOperatorConfig dummyClusterOperatorConfigRolesOnly(KafkaVersion.Lookup versions, long operationTimeoutMs) {
+        return new ClusterOperatorConfig(
+                singleton("dummy"),
+                60_000,
+                operationTimeoutMs,
+                false,
+                versions,
+                null,
+                null,
+                true);
+    }
+
     public static ClusterOperatorConfig dummyClusterOperatorConfig(KafkaVersion.Lookup versions) {
         return dummyClusterOperatorConfig(versions, ClusterOperatorConfig.DEFAULT_OPERATION_TIMEOUT_MS);
     }

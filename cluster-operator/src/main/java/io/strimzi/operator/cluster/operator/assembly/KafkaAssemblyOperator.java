@@ -2984,7 +2984,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             return Future.succeededFuture(this);
         }
 
-        private final Future<ReconciliationState> getEntityOperatorDescription() {
+        final Future<ReconciliationState> getEntityOperatorDescription() {
             this.entityOperator = EntityOperator.fromCrd(kafkaAssembly, versions);
 
             if (entityOperator != null) {
@@ -3028,9 +3028,10 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             }
         }
 
+        // Deploy entity operator Role if STRIMZI_ROLES_ONLY is set and entity operator is deployed
         Future<ReconciliationState> entityOperatorRole() {
             final Role role;
-            if (isRolesOnly() && eoDeployment != null) {
+            if (isRolesOnly() && isEntityOperatorDeployed()) {
                 role = entityOperator.generateRole();
             } else {
                 role = null;
@@ -3045,32 +3046,47 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         Future<ReconciliationState> entityOperatorServiceAccount() {
             return withVoid(serviceAccountOperations.reconcile(namespace,
                     EntityOperator.entityOperatorServiceAccountName(name),
-                    eoDeployment != null ? entityOperator.generateServiceAccount() : null));
+                    isEntityOperatorDeployed() ? entityOperator.generateServiceAccount() : null));
+        }
+
+        // Check for is the entity operator will be deployed as part of the reconciliation
+        // Related resources need to know this to know whether to deploy
+        private boolean isEntityOperatorDeployed() {
+            return eoDeployment != null;
+        }
+
+        // Check for if roles can be used for the topic and user operator
+        // If watched namespace is set to the current namespace Roles can be used
+        // Note watchedNamespace can't be unset as it defaults to the deployed namespace
+        public boolean canUseRoles(String watchedNamespace) {
+            return isRolesOnly() && this.namespace.equals(watchedNamespace);
         }
 
         Future<ReconciliationState> entityOperatorTopicOpRoleRoleBinding() {
-            // Don't deploy Role RoleBinding if not running in roles only mode, or if the topic operator is not deployed
-            if (!isRolesOnly() || eoDeployment == null || entityOperator.getTopicOperator() == null) {
+            // Don't deploy Role RoleBinding if not running in roles only mode,
+            // or if the topic operator is not deployed,
+            // or if the topic operator needs to watch a different namespace
+            if (!isEntityOperatorDeployed()
+                    || entityOperator.getTopicOperator() == null
+                    || !canUseRoles(entityOperator.getTopicOperator().getWatchedNamespace())) {
+                log.info("entityOperatorTopicOpRoleRoleBinding not required");
                 return withVoid(roleBindingOperations.reconcile(namespace, EntityTopicOperator.roleRoleBindingName(name), null));
             }
 
-            // TODO this logic needs sorting.
-            String watchedNamespace = namespace;
-
-            if (entityOperator.getTopicOperator().getWatchedNamespace() != null
-                    && !entityOperator.getTopicOperator().getWatchedNamespace().isEmpty()) {
-                watchedNamespace = entityOperator.getTopicOperator().getWatchedNamespace();
-            }
-
             return withVoid(roleBindingOperations.reconcile(
-                    watchedNamespace,
+                    namespace,
                     EntityTopicOperator.roleRoleBindingName(name),
-                    entityOperator.getTopicOperator().generateRoleRoleBinding(namespace, watchedNamespace)));
+                    entityOperator.getTopicOperator().generateRoleRoleBinding(namespace, namespace)));
         }
 
         Future<ReconciliationState> entityOperatorTopicOpClusterRoleRoleBinding() {
-            // Don't deploy ClusterRole RoleBinding if running in roles only mode, or if the topic operator is not deployed
-            if (isRolesOnly() || eoDeployment == null || entityOperator.getTopicOperator() == null) {
+            // Don't deploy ClusterRole RoleBinding if it can use roles,
+            // or if the topic operator is not deployed,
+            // or if the topic operator doesn't need to watch a different namespace
+            if (!isEntityOperatorDeployed()
+                    || entityOperator.getTopicOperator() == null
+                    || canUseRoles(entityOperator.getTopicOperator().getWatchedNamespace())) {
+                log.info("entityOperatorTopicOpClusterRoleBinding not required");
                 return withVoid(roleBindingOperations.reconcile(namespace, EntityTopicOperator.clusterRoleRoleBindingName(name), null));
             }
 
@@ -3088,37 +3104,29 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         }
 
         Future<ReconciliationState> entityOperatorUserOpRoleRoleBinding() {
-            // Don't deploy Role RoleBinding if not running in roles only mode, or if the user operator is not deployed
-            if (!isRolesOnly() || eoDeployment == null || entityOperator.getUserOperator() == null) {
+            // Don't deploy Role RoleBinding if not running in roles only mode,
+            // or if the user operator is not deployed,
+            // or if the user operator needs to watch a different namespace
+            if (!isEntityOperatorDeployed()
+                    || entityOperator.getUserOperator() == null
+                    || !canUseRoles(entityOperator.getUserOperator().getWatchedNamespace())) {
+                log.info("entityOperatorUserOpRoleRoleBinding not required");
                 return withVoid(roleBindingOperations.reconcile(namespace, EntityUserOperator.roleRoleBindingName(name), null));
             }
 
-            Future<ReconcileResult<RoleBinding>> ownNamespaceFuture;
-            Future<ReconcileResult<RoleBinding>> watchedNamespaceFuture;
-
-            String watchedNamespace = namespace;
-
-            if (entityOperator.getUserOperator().getWatchedNamespace() != null
-                    && !entityOperator.getUserOperator().getWatchedNamespace().isEmpty()) {
-                watchedNamespace = entityOperator.getUserOperator().getWatchedNamespace();
-            }
-
-            if (!namespace.equals(watchedNamespace)) {
-                watchedNamespaceFuture = roleBindingOperations.reconcile(watchedNamespace, EntityUserOperator.roleRoleBindingName(name), entityOperator.getUserOperator().generateRoleRoleBinding(namespace, watchedNamespace));
-            } else {
-                watchedNamespaceFuture = Future.succeededFuture();
-            }
-
+            // TODO Comment true?
             // Create role binding for the the UI runs in (it needs to access the CA etc.)
-            ownNamespaceFuture = roleBindingOperations.reconcile(namespace, EntityUserOperator.roleRoleBindingName(name), entityOperator.getUserOperator().generateRoleRoleBinding(namespace, namespace));
-
-
-            return withVoid(CompositeFuture.join(ownNamespaceFuture, watchedNamespaceFuture));
+            return withVoid(roleBindingOperations.reconcile(namespace, EntityUserOperator.roleRoleBindingName(name), entityOperator.getUserOperator().generateRoleRoleBinding(namespace, namespace)));
         }
 
         Future<ReconciliationState> entityOperatorUserOpClusterRoleRoleBinding() {
-            // Don't deploy ClusterRole RoleBinding if running in roles only mode, or if the user operator is not deployed
-            if (isRolesOnly() || eoDeployment == null || entityOperator.getUserOperator() == null) {
+            // Don't deploy ClusterRole RoleBinding if running in roles only mode,
+            // or if the user operator is not deployed,
+            // or if the user operator doesn't need to watch a different namespace
+            if (!isEntityOperatorDeployed()
+                    || entityOperator.getUserOperator() == null
+                    || canUseRoles(entityOperator.getUserOperator().getWatchedNamespace())) {
+                log.info("entityOperatorUserOpClusterRoleRoleBinding not required");
                 return withVoid(roleBindingOperations.reconcile(namespace, EntityUserOperator.clusterRoleRoleBindingName(name), null));
             }
 
@@ -3147,20 +3155,20 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
 
         Future<ReconciliationState> entityOperatorTopicOpAncillaryCm() {
             return withVoid(configMapOperations.reconcile(namespace,
-                    eoDeployment != null && entityOperator.getTopicOperator() != null ?
+                    isEntityOperatorDeployed() && entityOperator.getTopicOperator() != null ?
                             entityOperator.getTopicOperator().getAncillaryConfigMapName() : EntityTopicOperator.metricAndLogConfigsName(name),
                     topicOperatorMetricsAndLogsConfigMap));
         }
 
         Future<ReconciliationState> entityOperatorUserOpAncillaryCm() {
             return withVoid(configMapOperations.reconcile(namespace,
-                    eoDeployment != null && entityOperator.getUserOperator() != null ?
+                    isEntityOperatorDeployed() && entityOperator.getUserOperator() != null ?
                             entityOperator.getUserOperator().getAncillaryConfigMapName() : EntityUserOperator.metricAndLogConfigsName(name),
                     userOperatorMetricsAndLogsConfigMap));
         }
 
         Future<ReconciliationState> entityOperatorDeployment() {
-            if (this.entityOperator != null && eoDeployment != null) {
+            if (this.entityOperator != null && isEntityOperatorDeployed()) {
                 Future<Deployment> future = deploymentOperations.getAsync(namespace, this.entityOperator.getName());
                 return future.compose(dep -> {
                     // getting the current cluster CA generation from the current deployment, if exists
@@ -3193,7 +3201,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         }
 
         Future<ReconciliationState> entityOperatorReady() {
-            if (this.entityOperator != null && eoDeployment != null) {
+            if (this.entityOperator != null && isEntityOperatorDeployed()) {
                 Future<Deployment> future = deploymentOperations.getAsync(namespace, this.entityOperator.getName());
                 return future.compose(dep -> {
                     return withVoid(deploymentOperations.waitForObserved(namespace, this.entityOperator.getName(), 1_000, operationTimeoutMs));

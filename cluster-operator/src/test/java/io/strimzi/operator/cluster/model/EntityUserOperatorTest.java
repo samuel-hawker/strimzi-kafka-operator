@@ -297,14 +297,19 @@ public class EntityUserOperatorTest {
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));
+
+        assertThat(binding.getRoleRef().getKind(), is("ClusterRole"));
+        assertThat(binding.getRoleRef().getName(), is("strimzi-entity-operator"));
     }
 
     @Test
-    // need to mock the envar correctly
     public void testRoleRoleBinding()   {
         RoleBinding binding = entityUserOperator.generateRoleRoleBinding(namespace, uoWatchedNamespace);
 
-//        assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
-//        assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));
+        assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
+        assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));
+
+        assertThat(binding.getRoleRef().getKind(), is("Role"));
+        assertThat(binding.getRoleRef().getName(), is("foo-entity-operator"));
     }
 }
