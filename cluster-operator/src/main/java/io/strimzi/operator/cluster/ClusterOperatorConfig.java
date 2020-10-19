@@ -36,9 +36,16 @@ public class ClusterOperatorConfig {
     public static final String STRIMZI_NAMESPACE = "STRIMZI_NAMESPACE";
     public static final String STRIMZI_FULL_RECONCILIATION_INTERVAL_MS = "STRIMZI_FULL_RECONCILIATION_INTERVAL_MS";
     public static final String STRIMZI_OPERATION_TIMEOUT_MS = "STRIMZI_OPERATION_TIMEOUT_MS";
-    public static final String STRIMZI_CREATE_CLUSTER_ROLES = "STRIMZI_CREATE_CLUSTER_ROLES";
     public static final String STRIMZI_IMAGE_PULL_POLICY = "STRIMZI_IMAGE_PULL_POLICY";
     public static final String STRIMZI_IMAGE_PULL_SECRETS = "STRIMZI_IMAGE_PULL_SECRETS";
+
+    // Feature Flags
+    public static final String STRIMZI_ROLES_ONLY = "STRIMZI_ROLES_ONLY";
+    public static final boolean DEFAULT_STRIMZI_ROLES_ONLY = false;
+    public static final String STRIMZI_CREATE_CLUSTER_ROLES = "STRIMZI_CREATE_CLUSTER_ROLES";
+    public static final boolean DEFAULT_CREATE_CLUSTER_ROLES = false;
+
+
 
     // Env vars for configuring images
     public static final String STRIMZI_KAFKA_IMAGES = "STRIMZI_KAFKA_IMAGES";
@@ -58,7 +65,6 @@ public class ClusterOperatorConfig {
 
     public static final long DEFAULT_FULL_RECONCILIATION_INTERVAL_MS = 120_000;
     public static final long DEFAULT_OPERATION_TIMEOUT_MS = 300_000;
-    public static final boolean DEFAULT_CREATE_CLUSTER_ROLES = false;
 
     private final Set<String> namespaces;
     private final long reconciliationIntervalMs;
@@ -67,6 +73,7 @@ public class ClusterOperatorConfig {
     private final KafkaVersion.Lookup versions;
     private final ImagePullPolicy imagePullPolicy;
     private final List<LocalObjectReference> imagePullSecrets;
+    private final boolean rolesOnly;
 
     /**
      * Constructor
@@ -74,12 +81,13 @@ public class ClusterOperatorConfig {
      * @param namespaces namespace in which the operator will run and create resources
      * @param reconciliationIntervalMs    specify every how many milliseconds the reconciliation runs
      * @param operationTimeoutMs    timeout for internal operations specified in milliseconds
-     * @param createClusterRoles true to create the cluster roles
+     * @param createClusterRoles true to create the ClusterRoles
      * @param versions The configured Kafka versions
      * @param imagePullPolicy Image pull policy configured by the user
      * @param imagePullSecrets Set of secrets for pulling container images from secured repositories
+     * @param rolesOnly true to use Roles where possible instead of ClusterRoles
      */
-    public ClusterOperatorConfig(Set<String> namespaces, long reconciliationIntervalMs, long operationTimeoutMs, boolean createClusterRoles, KafkaVersion.Lookup versions, ImagePullPolicy imagePullPolicy, List<LocalObjectReference> imagePullSecrets) {
+    public ClusterOperatorConfig(Set<String> namespaces, long reconciliationIntervalMs, long operationTimeoutMs, boolean createClusterRoles, KafkaVersion.Lookup versions, ImagePullPolicy imagePullPolicy, List<LocalObjectReference> imagePullSecrets, boolean rolesOnly) {
         this.namespaces = unmodifiableSet(new HashSet<>(namespaces));
         this.reconciliationIntervalMs = reconciliationIntervalMs;
         this.operationTimeoutMs = operationTimeoutMs;
@@ -87,6 +95,7 @@ public class ClusterOperatorConfig {
         this.versions = versions;
         this.imagePullPolicy = imagePullPolicy;
         this.imagePullSecrets = imagePullSecrets;
+        this.rolesOnly = rolesOnly;
     }
 
     /**
@@ -122,14 +131,15 @@ public class ClusterOperatorConfig {
      * @return  Cluster Operator configuration instance
      */
     public static ClusterOperatorConfig fromMap(Map<String, String> map, KafkaVersion.Lookup lookup) {
-        Set<String> namespaces = parseNamespaceList(map.get(ClusterOperatorConfig.STRIMZI_NAMESPACE));
-        long reconciliationInterval = parseReconciliationInerval(map.get(ClusterOperatorConfig.STRIMZI_FULL_RECONCILIATION_INTERVAL_MS));
-        long operationTimeout = parseOperationTimeout(map.get(ClusterOperatorConfig.STRIMZI_OPERATION_TIMEOUT_MS));
-        boolean createClusterRoles = parseCreateClusterRoles(map.get(ClusterOperatorConfig.STRIMZI_CREATE_CLUSTER_ROLES));
-        ImagePullPolicy imagePullPolicy = parseImagePullPolicy(map.get(ClusterOperatorConfig.STRIMZI_IMAGE_PULL_POLICY));
-        List<LocalObjectReference> imagePullSecrets = parseImagePullSecrets(map.get(ClusterOperatorConfig.STRIMZI_IMAGE_PULL_SECRETS));
-        return new ClusterOperatorConfig(namespaces, reconciliationInterval, operationTimeout, createClusterRoles, lookup, imagePullPolicy, imagePullSecrets);
+        Set<String> namespaces = parseNamespaceList(map.get(STRIMZI_NAMESPACE));
+        long reconciliationInterval = parseReconciliationInerval(map.get(STRIMZI_FULL_RECONCILIATION_INTERVAL_MS));
+        long operationTimeout = parseOperationTimeout(map.get(STRIMZI_OPERATION_TIMEOUT_MS));
+        boolean createClusterRoles = parseCreateClusterRoles(map.get(STRIMZI_CREATE_CLUSTER_ROLES));
+        ImagePullPolicy imagePullPolicy = parseImagePullPolicy(map.get(STRIMZI_IMAGE_PULL_POLICY));
+        List<LocalObjectReference> imagePullSecrets = parseImagePullSecrets(map.get(STRIMZI_IMAGE_PULL_SECRETS));
+        boolean rolesOnly = parseRolesOnly(map.get(STRIMZI_ROLES_ONLY));
 
+        return new ClusterOperatorConfig(namespaces, reconciliationInterval, operationTimeout, createClusterRoles, lookup, imagePullPolicy, imagePullSecrets, rolesOnly);
     }
 
     private static Set<String> parseNamespaceList(String namespacesList)   {
@@ -179,6 +189,16 @@ public class ClusterOperatorConfig {
         }
 
         return createClusterRoles;
+    }
+
+    private static boolean parseRolesOnly(String rolesOnlyEnvVar) {
+        boolean rolesOnly = DEFAULT_STRIMZI_ROLES_ONLY;
+
+        if (rolesOnlyEnvVar != null) {
+            rolesOnly = Boolean.parseBoolean(rolesOnlyEnvVar);
+        }
+
+        return rolesOnly;
     }
 
     private static ImagePullPolicy parseImagePullPolicy(String imagePullPolicyEnvVar) {
@@ -297,10 +317,17 @@ public class ClusterOperatorConfig {
     }
 
     /**
-     * @return Retuns list of configured ImagePullSecrets. Null if no secrets were configured.
+     * @return The list of configured ImagePullSecrets. Null if no secrets were configured.
      */
     public List<LocalObjectReference> getImagePullSecrets() {
         return imagePullSecrets;
+    }
+
+    /**
+     * @return whether the operator is installed to use Roles instead of ClusterRoles where-ever possible.
+     */
+    public boolean getRolesOnly() {
+        return rolesOnly;
     }
 
     @Override
@@ -313,6 +340,7 @@ public class ClusterOperatorConfig {
                 ",versions=" + versions +
                 ",imagePullPolicy=" + imagePullPolicy +
                 ",imagePullSecrets=" + imagePullSecrets +
+                ",rolesOnly=" + rolesOnly +
                 ")";
     }
 }

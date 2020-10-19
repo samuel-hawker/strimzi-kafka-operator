@@ -796,7 +796,8 @@ public class ResourceUtils {
                 false,
                 versions,
                 null,
-                null);
+                null,
+                false);
     }
 
     public static ClusterOperatorConfig dummyClusterOperatorConfig(KafkaVersion.Lookup versions) {

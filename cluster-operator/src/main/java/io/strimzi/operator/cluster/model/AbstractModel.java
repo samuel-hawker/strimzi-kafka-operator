@@ -165,8 +165,6 @@ public abstract class AbstractModel {
         }
     }
 
-    private static final String NAMESPACED = System.getenv("NAMESPACED");
-
     protected final String cluster;
     protected final String namespace;
 
@@ -1400,12 +1398,5 @@ public abstract class AbstractModel {
      */
     public List<Condition> getWarningConditions() {
         return warningConditions;
-    }
-
-    // Placeholder for the proper env which will signify that this operator is namespace scoped and should use
-    // roles and rolebindings
-    public static boolean isClusterScoped() {
-        // Make this mockable
-        return NAMESPACED == null;
     }
 }

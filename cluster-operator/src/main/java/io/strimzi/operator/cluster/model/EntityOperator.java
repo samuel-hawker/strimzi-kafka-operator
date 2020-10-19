@@ -366,7 +366,6 @@ public class EntityOperator extends AbstractModel {
         return entityOperatorRoleName(cluster);
     }
 
-    // Move to separate class?
     public Role generateRole() {
         List<PolicyRule> rules = new ArrayList<>();
 
@@ -388,7 +387,7 @@ public class EntityOperator extends AbstractModel {
                 .addToApiGroups(Constants.RESOURCE_GROUP_NAME)
                 .build());
 
-        return !isClusterScoped() ? super.generateRole(rules) : null;
+        return super.generateRole(rules);
     }
 
     protected static void javaOptions(List<EnvVar> envVars, JvmOptions jvmOptions, List<SystemProperty> javaSystemProperties) {
