@@ -338,6 +338,11 @@ public class EntityUserOperator extends AbstractModel {
         return rb;
     }
 
+    @Override
+    protected String getRoleName() {
+        return EntityOperator.getRoleName(cluster);
+    }
+
     public RoleBinding generateRoleRoleBinding(String namespace, String watchedNamespace) {
         Subject ks = new SubjectBuilder()
                 .withKind("ServiceAccount")

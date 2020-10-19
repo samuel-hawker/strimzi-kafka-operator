@@ -363,6 +363,10 @@ public class EntityOperator extends AbstractModel {
 
     @Override
     protected String getRoleName() {
+        return getRoleName(cluster);
+    }
+
+    protected static String getRoleName(String cluster) {
         return entityOperatorRoleName(cluster);
     }
 

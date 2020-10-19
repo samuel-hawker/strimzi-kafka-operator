@@ -231,12 +231,14 @@ public class EntityTopicOperatorTest {
     }
 
     @Test
-    public void testClusterRoleRoleBindingWhenRolePossible() {
-//        HOW
+    public void testClusterRoleRoleBinding() {
         RoleBinding binding = entityTopicOperator.generateClusterRoleRoleBinding(namespace, toWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(toWatchedNamespace));
+
+        assertThat(binding.getRoleRef().getKind(), is("ClusterRole"));
+        assertThat(binding.getRoleRef().getName(), is("strimzi-entity-operator"));
     }
 
     @Test
@@ -245,5 +247,8 @@ public class EntityTopicOperatorTest {
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(toWatchedNamespace));
+
+        assertThat(binding.getRoleRef().getKind(), is("Role"));
+        assertThat(binding.getRoleRef().getName(), is("foo-entity-operator"));
     }
 }
