@@ -293,7 +293,7 @@ public class EntityUserOperatorTest {
 
     @Test
     public void testClusterRoleRoleBinding()   {
-        RoleBinding binding = entityUserOperator.generateClusterRoleRoleBinding(namespace, uoWatchedNamespace);
+        RoleBinding binding = entityUserOperator.generateRoleBindingForClusterRole(namespace, uoWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));
@@ -304,7 +304,7 @@ public class EntityUserOperatorTest {
 
     @Test
     public void testRoleRoleBinding()   {
-        RoleBinding binding = entityUserOperator.generateRoleRoleBinding(namespace, uoWatchedNamespace);
+        RoleBinding binding = entityUserOperator.generateRoleBindingForRole(namespace, uoWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));

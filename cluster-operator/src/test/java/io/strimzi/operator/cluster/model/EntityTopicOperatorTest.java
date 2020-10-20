@@ -224,7 +224,7 @@ public class EntityTopicOperatorTest {
 
     @Test
     public void testClusterRoleRoleBindingDefault() {
-        RoleBinding binding = entityTopicOperator.generateClusterRoleRoleBinding(namespace, toWatchedNamespace);
+        RoleBinding binding = entityTopicOperator.generateRoleBindingForClusterRole(namespace, toWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(toWatchedNamespace));
@@ -232,7 +232,7 @@ public class EntityTopicOperatorTest {
 
     @Test
     public void testClusterRoleRoleBinding() {
-        RoleBinding binding = entityTopicOperator.generateClusterRoleRoleBinding(namespace, toWatchedNamespace);
+        RoleBinding binding = entityTopicOperator.generateRoleBindingForClusterRole(namespace, toWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(toWatchedNamespace));
@@ -243,7 +243,7 @@ public class EntityTopicOperatorTest {
 
     @Test
     public void testRoleRoleBinding() {
-        RoleBinding binding = entityTopicOperator.generateRoleRoleBinding(namespace, toWatchedNamespace);
+        RoleBinding binding = entityTopicOperator.generateRoleBindingForRole(namespace, toWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(toWatchedNamespace));
