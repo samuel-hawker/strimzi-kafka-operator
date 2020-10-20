@@ -85,6 +85,10 @@ public class Environment {
      */
     private static final String STRIMZI_FULL_RECONCILIATION_INTERVAL_MS_ENV = "STRIMZI_FULL_RECONCILIATION_INTERVAL_MS";
     /**
+     * CO Roles only mode.
+     */
+    private static final String STRIMZI_ROLES_ONLY_ENV = "STRIMZI_ROLES_ONLY";
+    /**
      * OLM env variables
      */
     private static final String OLM_OPERATOR_NAME_ENV = "OLM_OPERATOR_NAME";
