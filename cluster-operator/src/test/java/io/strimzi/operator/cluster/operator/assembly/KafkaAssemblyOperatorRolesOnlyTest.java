@@ -361,7 +361,7 @@ public class KafkaAssemblyOperatorRolesOnlyTest {
     }
 
     public static Matcher<RoleBinding> hasRoleRef(RoleRef roleRef) {
-        return new TypeSafeDiagnosingMatcher<>() {
+        return new TypeSafeDiagnosingMatcher<RoleBinding>() {
 
             @Override
             public void describeTo(final Description description) {

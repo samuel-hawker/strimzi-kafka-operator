@@ -311,7 +311,7 @@ public class EntityUserOperator extends AbstractModel {
                 VolumeUtils.createVolumeMount(EntityOperator.TLS_SIDECAR_CA_CERTS_VOLUME_NAME, EntityOperator.TLS_SIDECAR_CA_CERTS_VOLUME_MOUNT));
     }
 
-    public RoleBinding generateClusterRoleRoleBinding(String namespace, String watchedNamespace) {
+    public RoleBinding generateRoleBindingForClusterRole(String namespace, String watchedNamespace) {
         Subject ks = new SubjectBuilder()
                 .withKind("ServiceAccount")
                 .withName(EntityOperator.entityOperatorServiceAccountName(cluster))
@@ -343,7 +343,7 @@ public class EntityUserOperator extends AbstractModel {
         return EntityOperator.getRoleName(cluster);
     }
 
-    public RoleBinding generateRoleRoleBinding(String namespace, String watchedNamespace) {
+    public RoleBinding generateRoleBindingForRole(String namespace, String watchedNamespace) {
         Subject ks = new SubjectBuilder()
                 .withKind("ServiceAccount")
                 .withName(EntityOperator.entityOperatorServiceAccountName(cluster))

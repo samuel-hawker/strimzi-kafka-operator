@@ -3044,7 +3044,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             return withVoid(roleBindingOperations.reconcile(
                     namespace,
                     EntityTopicOperator.roleRoleBindingName(name),
-                    entityOperator.getTopicOperator().generateRoleRoleBinding(namespace, namespace)));
+                    entityOperator.getTopicOperator().generateRoleBindingForRole(namespace, namespace)));
         }
 
         Future<ReconciliationState> entityOperatorTopicOpClusterRoleRoleBinding() {
@@ -3068,7 +3068,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             return withVoid(roleBindingOperations.reconcile(
                     watchedNamespace,
                     EntityTopicOperator.clusterRoleRoleBindingName(name),
-                    entityOperator.getTopicOperator().generateClusterRoleRoleBinding(namespace, watchedNamespace)));
+                    entityOperator.getTopicOperator().generateRoleBindingForClusterRole(namespace, watchedNamespace)));
         }
 
         Future<ReconciliationState> entityOperatorUserOpRoleRoleBinding() {
@@ -3084,7 +3084,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
 
             // TODO Comment true?
             // Create role binding for the the UI runs in (it needs to access the CA etc.)
-            return withVoid(roleBindingOperations.reconcile(namespace, EntityUserOperator.roleRoleBindingName(name), entityOperator.getUserOperator().generateRoleRoleBinding(namespace, namespace)));
+            return withVoid(roleBindingOperations.reconcile(namespace, EntityUserOperator.roleRoleBindingName(name), entityOperator.getUserOperator().generateRoleBindingForRole(namespace, namespace)));
         }
 
         Future<ReconciliationState> entityOperatorUserOpClusterRoleRoleBinding() {
@@ -3109,13 +3109,13 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             }
 
             if (!namespace.equals(watchedNamespace)) {
-                watchedNamespaceFuture = roleBindingOperations.reconcile(watchedNamespace, EntityUserOperator.clusterRoleRoleBindingName(name), entityOperator.getUserOperator().generateClusterRoleRoleBinding(namespace, watchedNamespace));
+                watchedNamespaceFuture = roleBindingOperations.reconcile(watchedNamespace, EntityUserOperator.clusterRoleRoleBindingName(name), entityOperator.getUserOperator().generateRoleBindingForClusterRole(namespace, watchedNamespace));
             } else {
                 watchedNamespaceFuture = Future.succeededFuture();
             }
 
             // Create role binding for the the UI runs in (it needs to access the CA etc.)
-            ownNamespaceFuture = roleBindingOperations.reconcile(namespace, EntityUserOperator.clusterRoleRoleBindingName(name), entityOperator.getUserOperator().generateClusterRoleRoleBinding(namespace, namespace));
+            ownNamespaceFuture = roleBindingOperations.reconcile(namespace, EntityUserOperator.clusterRoleRoleBindingName(name), entityOperator.getUserOperator().generateRoleBindingForClusterRole(namespace, namespace));
 
 
             return withVoid(CompositeFuture.join(ownNamespaceFuture, watchedNamespaceFuture));
