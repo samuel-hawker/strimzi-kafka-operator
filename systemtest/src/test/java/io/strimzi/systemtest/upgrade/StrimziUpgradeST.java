@@ -211,7 +211,7 @@ public class StrimziUpgradeST extends AbstractST {
 
         // Update CRDs, CRB, etc.
         cluster.applyClusterOperatorInstallFiles();
-        applyRoleBindings(NAMESPACE);
+        applyBindings(NAMESPACE);
 
         kubeClient().getClient().apps().deployments().inNamespace(NAMESPACE).withName(ResourceManager.getCoDeploymentName()).delete();
         kubeClient().getClient().apps().deployments().inNamespace(NAMESPACE).withName(ResourceManager.getCoDeploymentName()).create(BundleResource.defaultClusterOperator(NAMESPACE).build());

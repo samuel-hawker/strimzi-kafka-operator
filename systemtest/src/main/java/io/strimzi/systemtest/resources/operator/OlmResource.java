@@ -56,7 +56,8 @@ public class OlmResource {
                 .replace("${OLM_APP_BUNDLE_PREFIX}", Environment.OLM_APP_BUNDLE_PREFIX)
                 .replace("${OLM_OPERATOR_VERSION}", Environment.OLM_OPERATOR_VERSION)
                 .replace("${STRIMZI_FULL_RECONCILIATION_INTERVAL_MS}", Long.toString(reconciliationInterval))
-                .replace("${STRIMZI_OPERATION_TIMEOUT_MS}", Long.toString(operationTimeout)));
+                .replace("${STRIMZI_OPERATION_TIMEOUT_MS}", Long.toString(operationTimeout))
+                .replace("${STRIMZI_ROLES_ONLY}", Environment.STRIMZI_ROLES_ONLY));
 
         ResourceManager.cmdKubeClient().apply(subscriptionFile);
         // Make sure that operator will be deleted
