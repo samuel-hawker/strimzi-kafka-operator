@@ -132,7 +132,7 @@ public abstract class AbstractST implements TestSeparator {
         } else {
             LOGGER.info("Going to install ClusterOperator via Yaml bundle");
             prepareEnvForOperator(namespace, bindingsNamespaces);
-            if ("true".equals(Environment.STRIMZI_ROLES_ONLY)) {
+            if (Environment.isRolesOnly()) {
                 // if roles only, only deploy the rolebindings
                 applyRoleBindings(namespace, namespace);
             } else {
@@ -170,7 +170,7 @@ public abstract class AbstractST implements TestSeparator {
                     (x, y) -> x, LinkedHashMap::new));
         for (Map.Entry<File, String> entry : operatorFiles.entrySet()) {
             LOGGER.info("Applying configuration file: {}", entry.getKey());
-            if ("true".equals(Environment.STRIMZI_ROLES_ONLY)) {
+            if (Environment.isRolesOnly()) {
                 switchClusterRolesToRoles(entry.getValue());
             }
             clusterOperatorConfigs.push(entry.getKey().getPath());
