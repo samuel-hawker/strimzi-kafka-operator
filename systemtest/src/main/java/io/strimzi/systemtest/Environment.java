@@ -174,6 +174,10 @@ public class Environment {
         return Environment.CLUSTER_OPERATOR_INSTALL_TYPE.toUpperCase(Locale.ENGLISH).equals("HELM");
     }
 
+    public static boolean isRolesOnly() {
+        return "true".equals(STRIMZI_ROLES_ONLY);
+    }
+
     public static boolean useLatestReleasedBridge() {
         return Environment.BRIDGE_IMAGE.equals(Environment.BRIDGE_IMAGE_DEFAULT);
     }

@@ -31,7 +31,7 @@ class RolesOnlyOperatorST extends AbstractST {
 
     @Test
     void testRolesOnlyDeploysRoles() {
-        assumeTrue("true".equals(Environment.STRIMZI_ROLES_ONLY));
+        assumeTrue(Environment.isRolesOnly());
         prepareEnvironment();
 
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3, 3).done();
