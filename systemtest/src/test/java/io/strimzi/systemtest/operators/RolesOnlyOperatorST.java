@@ -37,6 +37,7 @@ class RolesOnlyOperatorST extends AbstractST {
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3, 3).done();
 
         // Obviously not right.
+        // Get advice on how to resolve what this test should do.
         assertThat(kubeClient().listClusterRoles(), is(Collections.emptyList()));
     }
 
@@ -44,19 +45,6 @@ class RolesOnlyOperatorST extends AbstractST {
         prepareEnvForOperator(NAMESPACE);
         applyBindings(NAMESPACE);
         // 060-Deployment
-        BundleResource.clusterOperator(NAMESPACE)
-//                .editOrNewSpec()
-//                    .editOrNewTemplate()
-//                        .editOrNewSpec()
-//                            .editContainer(0)
-//                                .addNewEnv()
-//                                    .withName("STRIMZI_ROLES_ONLY")
-//                                    .withValue("true")
-//                                .endEnv()
-//                            .endContainer()
-//                        .endSpec()
-//                    .endTemplate()
-//                .endSpec()
-                .done();
+        BundleResource.clusterOperator(NAMESPACE).done();
     }
 }

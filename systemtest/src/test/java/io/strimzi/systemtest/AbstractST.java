@@ -295,12 +295,6 @@ public abstract class AbstractST implements TestSeparator {
         // 030-ClusterRoleBinding
         KubernetesResource.clusterRoleBinding(TestUtils.USER_PATH + "/../install/cluster-operator/030-ClusterRoleBinding-strimzi-cluster-operator-kafka-broker-delegation.yaml", namespace);
     }
-//    private static void applyClusterRoleBindingsAsRoleBindings(String namespace, String bindingsNamespace) {
-//        // 021-ClusterRoleBinding
-//        KubernetesResource.roleBinding(TestUtils.USER_PATH + "/../install/cluster-operator/021-ClusterRoleBinding-strimzi-cluster-operator.yaml", namespace, bindingsNamespace);
-//        // 030-ClusterRoleBinding
-//        KubernetesResource.roleBinding(TestUtils.USER_PATH + "/../install/cluster-operator/030-ClusterRoleBinding-strimzi-cluster-operator-kafka-broker-delegation.yaml", namespace, bindingsNamespace);
-//    }
 
     private static void applyRoleBindings(String namespace, String bindingsNamespace) {
         // 020-RoleBinding
