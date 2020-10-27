@@ -665,7 +665,7 @@ public abstract class AbstractModel {
     /**
      * @return the name of the role used by the service account for the deployed cluster for Kubernetes API operations.
      */
-    protected String getRoleName() {
+    protected String getServiceAccountRoleName() {
         return null;
     }
 
@@ -1321,7 +1321,7 @@ public abstract class AbstractModel {
     public Role generateRole(List<PolicyRule> rules) {
         return new RoleBuilder()
                 .withNewMetadata()
-                    .withName(getRoleName())
+                    .withName(getServiceAccountRoleName())
                     .withNamespace(namespace)
                     .withOwnerReferences(createOwnerReference())
                     .addToLabels(labels.toMap())

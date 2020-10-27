@@ -352,7 +352,7 @@ public class EntityUserOperator extends AbstractModel {
     }
 
     @Override
-    protected String getRoleName() {
+    protected String getServiceAccountRoleName() {
         return EntityOperator.getRoleName(cluster);
     }
 
@@ -364,7 +364,7 @@ public class EntityUserOperator extends AbstractModel {
                 .build();
 
         RoleRef roleRef = new RoleRefBuilder()
-                .withName(getRoleName())
+                .withName(getServiceAccountRoleName())
                 .withApiGroup("rbac.authorization.k8s.io")
                 .withKind("Role")
                 .build();
