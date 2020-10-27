@@ -74,7 +74,7 @@ public class BundleResource {
 
         envVars.add(new EnvVar("STRIMZI_IMAGE_PULL_POLICY", Environment.COMPONENTS_IMAGE_PULL_POLICY, null));
         envVars.add(new EnvVar("STRIMZI_LOG_LEVEL", Environment.STRIMZI_LOG_LEVEL, null));
-        envVars.add(new EnvVar("STRIMZI_ROLES_ONLY", Environment.STRIMZI_ROLES_ONLY, null));
+        envVars.add(new EnvVar("STRIMZI_PERMISSIONS_MODE", Environment.STRIMZI_PERMISSIONS_MODE, null));
         // Apply updated env variables
         clusterOperator.getSpec().getTemplate().getSpec().getContainers().get(0).setEnv(envVars);
 

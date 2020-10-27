@@ -2996,7 +2996,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             }
         }
 
-        // Deploy entity operator Role if STRIMZI_ROLES_ONLY is set and entity operator is deployed
+        // Deploy entity operator Role if STRIMZI_PERMISSIONS_MODE is set to use roles and entity operator is deployed
         Future<ReconciliationState> entityOperatorRole() {
             final Role role;
             if (permissionsMode.canUseRoles() && isEntityOperatorDeployed()) {
