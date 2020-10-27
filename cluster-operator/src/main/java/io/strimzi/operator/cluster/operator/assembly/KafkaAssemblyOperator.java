@@ -162,7 +162,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
 
     private final long operationTimeoutMs;
 
-    private final boolean isRolesOnly;
+    private final ClusterOperatorConfig.PermissionsMode permissionsMode;
 
     private final ZookeeperSetOperator zkSetOperations;
     private final KafkaSetOperator kafkaSetOperations;
@@ -194,7 +194,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         super(vertx, pfa, Kafka.RESOURCE_KIND, certManager, passwordGenerator,
                 supplier.kafkaOperator, supplier, config);
         this.operationTimeoutMs = config.getOperationTimeoutMs();
-        this.isRolesOnly = config.getRolesOnly();
+        this.permissionsMode = config.getPermissionsMode();
         this.routeOperations = supplier.routeOperations;
         this.zkSetOperations = supplier.zkSetOperations;
         this.kafkaSetOperations = supplier.kafkaSetOperations;
@@ -2999,7 +2999,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         // Deploy entity operator Role if STRIMZI_ROLES_ONLY is set and entity operator is deployed
         Future<ReconciliationState> entityOperatorRole() {
             final Role role;
-            if (isRolesOnly() && isEntityOperatorDeployed()) {
+            if (permissionsMode.canUseRoles() && isEntityOperatorDeployed()) {
                 role = entityOperator.generateRole();
             } else {
                 role = null;
@@ -3027,7 +3027,7 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
         // If watched namespace is set to the current namespace Roles can be used
         // Note watchedNamespace can't be unset as it defaults to the deployed namespace
         public boolean canUseRoles(String watchedNamespace) {
-            return isRolesOnly() && this.namespace.equals(watchedNamespace);
+            return permissionsMode.canUseRoles() && this.namespace.equals(watchedNamespace);
         }
 
         Future<ReconciliationState> entityOperatorTopicOpRoleRoleBinding() {
@@ -3606,10 +3606,6 @@ public class KafkaAssemblyOperator extends AbstractAssemblyOperator<KubernetesCl
             return withVoid(Future.succeededFuture());
         }
 
-    }
-
-    public boolean isRolesOnly() {
-        return isRolesOnly;
     }
 
     /* test */ Date dateSupplier() {

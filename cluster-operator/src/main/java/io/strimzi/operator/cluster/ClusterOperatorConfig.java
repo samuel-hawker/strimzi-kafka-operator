@@ -40,12 +40,10 @@ public class ClusterOperatorConfig {
     public static final String STRIMZI_IMAGE_PULL_SECRETS = "STRIMZI_IMAGE_PULL_SECRETS";
 
     // Feature Flags
-    public static final String STRIMZI_ROLES_ONLY = "STRIMZI_ROLES_ONLY";
-    public static final boolean DEFAULT_STRIMZI_ROLES_ONLY = false;
+    public static final String STRIMZI_PERMISSIONS_MODE = "STRIMZI_PERMISSIONS_MODE";
+    public static final PermissionsMode DEFAULT_STRIMZI_PERMISSIONS_MODE = PermissionsMode.CLUSTER;
     public static final String STRIMZI_CREATE_CLUSTER_ROLES = "STRIMZI_CREATE_CLUSTER_ROLES";
     public static final boolean DEFAULT_CREATE_CLUSTER_ROLES = false;
-
-
 
     // Env vars for configuring images
     public static final String STRIMZI_KAFKA_IMAGES = "STRIMZI_KAFKA_IMAGES";
@@ -73,7 +71,7 @@ public class ClusterOperatorConfig {
     private final KafkaVersion.Lookup versions;
     private final ImagePullPolicy imagePullPolicy;
     private final List<LocalObjectReference> imagePullSecrets;
-    private final boolean rolesOnly;
+    private final PermissionsMode permissionsMode;
 
     /**
      * Constructor
@@ -85,9 +83,9 @@ public class ClusterOperatorConfig {
      * @param versions The configured Kafka versions
      * @param imagePullPolicy Image pull policy configured by the user
      * @param imagePullSecrets Set of secrets for pulling container images from secured repositories
-     * @param rolesOnly true to use Roles where possible instead of ClusterRoles
+     * @param permissionsMode true to use Roles where possible instead of ClusterRoles
      */
-    public ClusterOperatorConfig(Set<String> namespaces, long reconciliationIntervalMs, long operationTimeoutMs, boolean createClusterRoles, KafkaVersion.Lookup versions, ImagePullPolicy imagePullPolicy, List<LocalObjectReference> imagePullSecrets, boolean rolesOnly) {
+    public ClusterOperatorConfig(Set<String> namespaces, long reconciliationIntervalMs, long operationTimeoutMs, boolean createClusterRoles, KafkaVersion.Lookup versions, ImagePullPolicy imagePullPolicy, List<LocalObjectReference> imagePullSecrets, PermissionsMode permissionsMode) {
         this.namespaces = unmodifiableSet(new HashSet<>(namespaces));
         this.reconciliationIntervalMs = reconciliationIntervalMs;
         this.operationTimeoutMs = operationTimeoutMs;
@@ -95,7 +93,7 @@ public class ClusterOperatorConfig {
         this.versions = versions;
         this.imagePullPolicy = imagePullPolicy;
         this.imagePullSecrets = imagePullSecrets;
-        this.rolesOnly = rolesOnly;
+        this.permissionsMode = permissionsMode;
     }
 
     /**
@@ -132,14 +130,14 @@ public class ClusterOperatorConfig {
      */
     public static ClusterOperatorConfig fromMap(Map<String, String> map, KafkaVersion.Lookup lookup) {
         Set<String> namespaces = parseNamespaceList(map.get(STRIMZI_NAMESPACE));
-        long reconciliationInterval = parseReconciliationInerval(map.get(STRIMZI_FULL_RECONCILIATION_INTERVAL_MS));
+        long reconciliationInterval = parseReconciliationInterval(map.get(STRIMZI_FULL_RECONCILIATION_INTERVAL_MS));
         long operationTimeout = parseOperationTimeout(map.get(STRIMZI_OPERATION_TIMEOUT_MS));
         boolean createClusterRoles = parseCreateClusterRoles(map.get(STRIMZI_CREATE_CLUSTER_ROLES));
         ImagePullPolicy imagePullPolicy = parseImagePullPolicy(map.get(STRIMZI_IMAGE_PULL_POLICY));
         List<LocalObjectReference> imagePullSecrets = parseImagePullSecrets(map.get(STRIMZI_IMAGE_PULL_SECRETS));
-        boolean rolesOnly = parseRolesOnly(map.get(STRIMZI_ROLES_ONLY));
+        PermissionsMode permissionsMode = parsePermissionsMode(map.get(STRIMZI_PERMISSIONS_MODE));
 
-        return new ClusterOperatorConfig(namespaces, reconciliationInterval, operationTimeout, createClusterRoles, lookup, imagePullPolicy, imagePullSecrets, rolesOnly);
+        return new ClusterOperatorConfig(namespaces, reconciliationInterval, operationTimeout, createClusterRoles, lookup, imagePullPolicy, imagePullSecrets, permissionsMode);
     }
 
     private static Set<String> parseNamespaceList(String namespacesList)   {
@@ -161,7 +159,7 @@ public class ClusterOperatorConfig {
         return namespaces;
     }
 
-    private static long parseReconciliationInerval(String reconciliationIntervalEnvVar) {
+    private static long parseReconciliationInterval(String reconciliationIntervalEnvVar) {
         long reconciliationInterval = DEFAULT_FULL_RECONCILIATION_INTERVAL_MS;
 
         if (reconciliationIntervalEnvVar != null) {
@@ -191,14 +189,45 @@ public class ClusterOperatorConfig {
         return createClusterRoles;
     }
 
-    private static boolean parseRolesOnly(String rolesOnlyEnvVar) {
-        boolean rolesOnly = DEFAULT_STRIMZI_ROLES_ONLY;
+    /**
+     * enum to represent the various permission modes the cluster operator can be set to
+     *
+     * CLUSTER is the default and uses ClusterRoles to set permissions
+     * NAMESPACE allows for the use of Roles where possible instead of ClusterRoles
+     */
+    public enum PermissionsMode {
+        CLUSTER("cluster"),
+        NAMESPACE("namespace");
 
-        if (rolesOnlyEnvVar != null) {
-            rolesOnly = Boolean.parseBoolean(rolesOnlyEnvVar);
+        private String mode;
+
+        PermissionsMode(String mode) {
+            this.mode = mode;
         }
 
-        return rolesOnly;
+        public boolean canUseClusterRoles() {
+            return this.equals(PermissionsMode.CLUSTER);
+        }
+
+        public boolean canUseRoles() {
+            return this.equals(PermissionsMode.NAMESPACE);
+        }
+    }
+
+    private static PermissionsMode parsePermissionsMode(String permissionsModeEnvVar) {
+        PermissionsMode permissionsMode = DEFAULT_STRIMZI_PERMISSIONS_MODE;
+
+        if (permissionsModeEnvVar != null) {
+            try {
+                permissionsMode = PermissionsMode.valueOf(permissionsModeEnvVar);
+            } catch (IllegalArgumentException e) {
+                throw new InvalidConfigurationException(permissionsModeEnvVar
+                        + " is not a valid " + ClusterOperatorConfig.STRIMZI_PERMISSIONS_MODE + " value. " +
+                        ClusterOperatorConfig.STRIMZI_PERMISSIONS_MODE + " can have one of the following values: cluster, namespace.");
+            }
+        }
+
+        return permissionsMode;
     }
 
     private static ImagePullPolicy parseImagePullPolicy(String imagePullPolicyEnvVar) {
@@ -324,10 +353,10 @@ public class ClusterOperatorConfig {
     }
 
     /**
-     * @return whether the operator is installed to use Roles instead of ClusterRoles where-ever possible.
+     * @return permissions mode for the operator, whether to use Roles instead of ClusterRoles wherever possible.
      */
-    public boolean getRolesOnly() {
-        return rolesOnly;
+    public PermissionsMode getPermissionsMode() {
+        return permissionsMode;
     }
 
     @Override
@@ -340,7 +369,7 @@ public class ClusterOperatorConfig {
                 ",versions=" + versions +
                 ",imagePullPolicy=" + imagePullPolicy +
                 ",imagePullSecrets=" + imagePullSecrets +
-                ",rolesOnly=" + rolesOnly +
+                ",rolesOnly=" + permissionsMode +
                 ")";
     }
 }

@@ -362,7 +362,7 @@ public class EntityOperator extends AbstractModel {
     }
 
     @Override
-    protected String getRoleName() {
+    protected String getServiceAccountRoleName() {
         return getRoleName(cluster);
     }
 
