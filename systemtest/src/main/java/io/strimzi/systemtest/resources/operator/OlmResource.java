@@ -94,7 +94,7 @@ public class OlmResource {
                 .replace("${OLM_OPERATOR_VERSION}", Environment.OLM_OPERATOR_VERSION)
                 .replace("${STRIMZI_FULL_RECONCILIATION_INTERVAL_MS}", Long.toString(reconciliationInterval))
                 .replace("${STRIMZI_OPERATION_TIMEOUT_MS}", Long.toString(operationTimeout))
-                .replace("${STRIMZI_ROLES_ONLY}", Environment.STRIMZI_ROLES_ONLY));
+                .replace("${STRIMZI_PERMISSIONS_MODE}", Environment.STRIMZI_PERMISSIONS_MODE));
 
         ResourceManager.cmdKubeClient().apply(subscriptionFile);
 

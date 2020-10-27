@@ -49,7 +49,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(VertxExtension.class)
-public class KafkaAssemblyOperatorRolesOnlyTest {
+public class KafkaAssemblyOperatorPermissionsModeTest {
     private final KubernetesVersion kubernetesVersion = KubernetesVersion.V1_11;
     private final MockCertManager certManager = new MockCertManager();
     private final PasswordGenerator passwordGenerator = new PasswordGenerator(10, "a", "a");
@@ -71,7 +71,7 @@ public class KafkaAssemblyOperatorRolesOnlyTest {
     }
 
     /**
-     * Override KafkaAssemblyOperator to only run reconciliation steps that concern the STRIMZI_ROLES_ONLY feature
+     * Override KafkaAssemblyOperator to only run reconciliation steps that concern the STRIMZI_PERMISSIONS_MODE feature
      */
     class KafkaAssemblyOperatorRolesSubset extends KafkaAssemblyOperator {
         public KafkaAssemblyOperatorRolesSubset(Vertx vertx, PlatformFeaturesAvailability pfa, CertManager certManager, PasswordGenerator passwordGenerator, ResourceOperatorSupplier supplier, ClusterOperatorConfig config) {
@@ -93,11 +93,11 @@ public class KafkaAssemblyOperatorRolesOnlyTest {
     }
 
     /**
-     * This test checks that when STRIMZI_ROLES_ONLY feature is set to true, the cluster operator only
+     * This test checks that when STRIMZI_PERMISSIONS_MODE feature is set to 'namespace', the cluster operator only
      * deploys and binds to Roles
      */
     @Test
-    public void testRolesDeployedWhenRolesOnlyMode(VertxTestContext context) {
+    public void testRolesDeployedWhenPermissionsModeNamespace(VertxTestContext context) {
         Kafka kafka = new KafkaBuilder()
                 .withNewMetadata()
                     .withName(clusterName)
@@ -178,11 +178,11 @@ public class KafkaAssemblyOperatorRolesOnlyTest {
     }
 
     /**
-     * This test checks that when STRIMZI_ROLES_ONLY feature is set to false, the cluster operator
+     * This test checks that when STRIMZI_PERMISSIONS_MODE feature is set to 'cluster', the cluster operator
      * binds to ClusterRoles
      */
     @Test
-    public void testRoleBindingToClusterRoleDeployedWhenRolesOnlyModeDisabled(VertxTestContext context) {
+    public void testRoleBindingToClusterRoleDeployedWhenPermissionsModeCluster(VertxTestContext context) {
         Kafka kafka = new KafkaBuilder()
                 .withNewMetadata()
                     .withName(clusterName)
@@ -263,11 +263,11 @@ public class KafkaAssemblyOperatorRolesOnlyTest {
     }
 
     /**
-     * This test checks that when STRIMZI_ROLES_ONLY feature is set to true, the cluster operator
+     * This test checks that when STRIMZI_PERMISSIONS_MODE feature is set to 'namespace', the cluster operator
      * binds to ClusterRoles when it can't use Roles due to cross namespace permissions
      */
     @Test
-    public void testRoleBindingToClusterRoleDeployedWhenRolesOnlyModeEnabledAndMultiWatchNamespace(VertxTestContext context) {
+    public void testRoleBindingToClusterRoleDeployedWhenPermissionsModeNamespaceAndMultiWatchNamespace(VertxTestContext context) {
         Kafka kafka = new KafkaBuilder()
                 .withNewMetadata()
                     .withName(clusterName)
