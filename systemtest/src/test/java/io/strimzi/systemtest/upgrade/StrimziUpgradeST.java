@@ -193,7 +193,7 @@ public class StrimziUpgradeST extends AbstractUpgradeST {
         Map<String, String> eoSnapshot = DeploymentUtils.depSnapshot(KafkaResources.entityOperatorDeploymentName(CLUSTER_NAME));
 
         // Update CRDs, CRB, etc.
-        cluster.applyClusterOperatorInstallFiles();
+        applyClusterOperatorInstallFiles(NAMESPACE);
         applyBindings(NAMESPACE);
 
         kubeClient().getClient().apps().deployments().inNamespace(NAMESPACE).withName(ResourceManager.getCoDeploymentName()).delete();

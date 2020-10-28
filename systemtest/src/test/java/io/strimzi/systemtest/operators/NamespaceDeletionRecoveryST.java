@@ -230,7 +230,7 @@ class NamespaceDeletionRecoveryST extends AbstractST {
 
     private void recreateClusterOperator() {
         // Recreate CO
-        cluster.applyClusterOperatorInstallFiles();
+        applyClusterOperatorInstallFiles(NAMESPACE);
         applyBindings(NAMESPACE);
         // 060-Deployment
         BundleResource.clusterOperator(NAMESPACE).done();
