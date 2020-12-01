@@ -82,22 +82,6 @@ public class OlmResource {
             approveNonUsedInstallPlan();
         }
 
-        File subscriptionFile = File.createTempFile("subscription", ".yaml");
-        InputStream subscriptionInputStream = OlmResource.class.getClassLoader().getResourceAsStream("olm/subscription.yaml");
-        String subscription = TestUtils.readResource(subscriptionInputStream);
-        TestUtils.writeFile(subscriptionFile.getAbsolutePath(),
-                subscription.replace("${OPERATOR_NAMESPACE}", namespace)
-                .replace("${OLM_OPERATOR_NAME}", Environment.OLM_OPERATOR_NAME)
-                .replace("${OLM_SOURCE_NAME}", Environment.OLM_SOURCE_NAME)
-                .replace("${OLM_SOURCE_NAMESPACE}", ResourceManager.cmdKubeClient().defaultOlmNamespace())
-                .replace("${OLM_APP_BUNDLE_PREFIX}", Environment.OLM_APP_BUNDLE_PREFIX)
-                .replace("${OLM_OPERATOR_VERSION}", Environment.OLM_OPERATOR_VERSION)
-                .replace("${STRIMZI_FULL_RECONCILIATION_INTERVAL_MS}", Long.toString(reconciliationInterval))
-                .replace("${STRIMZI_OPERATION_TIMEOUT_MS}", Long.toString(operationTimeout))
-                .replace("${STRIMZI_PERMISSIONS_MODE}", Environment.STRIMZI_PERMISSIONS_MODE));
-
-        ResourceManager.cmdKubeClient().apply(subscriptionFile);
-
         // Make sure that operator will be deleted
         TestUtils.waitFor("Cluster Operator deployment creation", Constants.GLOBAL_POLL_INTERVAL, CR_CREATION_TIMEOUT,
             () -> ResourceManager.kubeClient().getDeploymentNameByPrefix(Environment.OLM_OPERATOR_DEPLOYMENT_NAME) != null);
@@ -256,7 +240,9 @@ public class OlmResource {
                     .replace("${OLM_OPERATOR_VERSION}", version)
                     .replace("${OLM_INSTALL_PLAN_APPROVAL}", installationStrategy.toString())
                     .replace("${STRIMZI_FULL_RECONCILIATION_INTERVAL_MS}", Long.toString(reconciliationInterval))
-                    .replace("${STRIMZI_OPERATION_TIMEOUT_MS}", Long.toString(operationTimeout)));
+                    .replace("${STRIMZI_OPERATION_TIMEOUT_MS}", Long.toString(operationTimeout))
+                    .replace("${STRIMZI_RBAC_SCOPE}", Environment.STRIMZI_RBAC_SCOPE));
+
 
             ResourceManager.cmdKubeClient().apply(subscriptionFile);
         }  catch (IOException e) {

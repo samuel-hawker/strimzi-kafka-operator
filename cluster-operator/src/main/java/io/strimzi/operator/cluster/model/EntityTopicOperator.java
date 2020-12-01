@@ -174,7 +174,7 @@ public class EntityTopicOperator extends AbstractModel {
      * @param cluster The cluster name.
      * @return The name of the role binding.
      */
-    public static String clusterRoleRoleBindingName(String cluster) {
+    public static String roleBindingForClusterRoleName(String cluster) {
         return "strimzi-" + cluster + "-entity-topic-operator";
     }
 
@@ -183,8 +183,8 @@ public class EntityTopicOperator extends AbstractModel {
      * @param cluster The cluster name.
      * @return The name of the role binding.
      */
-    public static String roleRoleBindingName(String cluster) {
-        return "strimzi-" + cluster + "-entity-topic-operator-role";
+    public static String roleBindingForRoleName(String cluster) {
+        return cluster + "-entity-topic-operator-role";
     }
 
     @Override
@@ -307,7 +307,7 @@ public class EntityTopicOperator extends AbstractModel {
 
         RoleBinding rb = new RoleBindingBuilder()
                 .withNewMetadata()
-                    .withName(clusterRoleRoleBindingName(cluster))
+                    .withName(roleBindingForClusterRoleName(cluster))
                     .withNamespace(watchedNamespace)
                     .withOwnerReferences(createOwnerReference())
                     .withLabels(labels.toMap())
@@ -320,7 +320,7 @@ public class EntityTopicOperator extends AbstractModel {
     }
 
     @Override
-    protected String getServiceAccountRoleName() {
+    protected String getRoleName() {
         return EntityOperator.getRoleName(cluster);
     }
 
@@ -332,14 +332,14 @@ public class EntityTopicOperator extends AbstractModel {
                 .build();
 
         RoleRef roleRef = new RoleRefBuilder()
-                .withName(getServiceAccountRoleName())
+                .withName(getRoleName())
                 .withApiGroup("rbac.authorization.k8s.io")
                 .withKind("Role")
                 .build();
 
         RoleBinding rb = new RoleBindingBuilder()
                 .withNewMetadata()
-                .withName(roleRoleBindingName(cluster))
+                .withName(roleBindingForRoleName(cluster))
                 .withNamespace(watchedNamespace)
                 .withOwnerReferences(createOwnerReference())
                 .withLabels(labels.toMap())

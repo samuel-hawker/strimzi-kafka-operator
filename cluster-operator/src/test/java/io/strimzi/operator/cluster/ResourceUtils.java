@@ -797,7 +797,7 @@ public class ResourceUtils {
                 versions,
                 null,
                 null,
-                ClusterOperatorConfig.PermissionsMode.CLUSTER);
+                ClusterOperatorConfig.RbacScope.CLUSTER);
     }
 
     public static ClusterOperatorConfig dummyClusterOperatorConfigRolesOnly(KafkaVersion.Lookup versions, long operationTimeoutMs) {
@@ -809,7 +809,7 @@ public class ResourceUtils {
                 versions,
                 null,
                 null,
-                ClusterOperatorConfig.PermissionsMode.NAMESPACE);
+                ClusterOperatorConfig.RbacScope.NAMESPACE);
     }
 
     public static ClusterOperatorConfig dummyClusterOperatorConfig(KafkaVersion.Lookup versions) {

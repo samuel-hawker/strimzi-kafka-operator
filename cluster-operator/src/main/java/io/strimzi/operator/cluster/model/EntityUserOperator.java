@@ -190,7 +190,7 @@ public class EntityUserOperator extends AbstractModel {
      * @param cluster The cluster name.
      * @return The name of the role binding.
      */
-    public static String clusterRoleRoleBindingName(String cluster) {
+    public static String roleBindingForClusterRoleName(String cluster) {
         return "strimzi-" + cluster + "-entity-user-operator";
     }
 
@@ -199,8 +199,8 @@ public class EntityUserOperator extends AbstractModel {
      * @param cluster The cluster name.
      * @return The name of the role binding.
      */
-    public static String roleRoleBindingName(String cluster) {
-        return "strimzi-" + cluster + "-entity-user-operator-role";
+    public static String roleBindingForRoleName(String cluster) {
+        return cluster + "-entity-user-operator-role";
     }
 
     @Override
@@ -339,7 +339,7 @@ public class EntityUserOperator extends AbstractModel {
 
         RoleBinding rb = new RoleBindingBuilder()
                 .withNewMetadata()
-                    .withName(clusterRoleRoleBindingName(cluster))
+                    .withName(roleBindingForClusterRoleName(cluster))
                     .withNamespace(watchedNamespace)
                     .withOwnerReferences(createOwnerReference())
                     .withLabels(labels.toMap())
@@ -352,7 +352,7 @@ public class EntityUserOperator extends AbstractModel {
     }
 
     @Override
-    protected String getServiceAccountRoleName() {
+    protected String getRoleName() {
         return EntityOperator.getRoleName(cluster);
     }
 
@@ -364,7 +364,7 @@ public class EntityUserOperator extends AbstractModel {
                 .build();
 
         RoleRef roleRef = new RoleRefBuilder()
-                .withName(getServiceAccountRoleName())
+                .withName(getRoleName())
                 .withApiGroup("rbac.authorization.k8s.io")
                 .withKind("Role")
                 .build();
@@ -372,7 +372,7 @@ public class EntityUserOperator extends AbstractModel {
 
         RoleBinding rb = new RoleBindingBuilder()
                 .withNewMetadata()
-                .withName(roleRoleBindingName(cluster))
+                .withName(roleBindingForRoleName(cluster))
                 .withNamespace(watchedNamespace)
                 .withOwnerReferences(createOwnerReference())
                 .withLabels(labels.toMap())

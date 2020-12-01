@@ -665,7 +665,7 @@ public abstract class AbstractModel {
     /**
      * @return the name of the role used by the service account for the deployed cluster for Kubernetes API operations.
      */
-    protected String getServiceAccountRoleName() {
+    protected String getRoleName() {
         return null;
     }
 
@@ -1321,7 +1321,7 @@ public abstract class AbstractModel {
     public Role generateRole(List<PolicyRule> rules) {
         return new RoleBuilder()
                 .withNewMetadata()
-                    .withName(getServiceAccountRoleName())
+                    .withName(getRoleName())
                     .withNamespace(namespace)
                     .withOwnerReferences(createOwnerReference())
                     .addToLabels(labels.toMap())
@@ -1405,12 +1405,5 @@ public abstract class AbstractModel {
                     .withType("Recreate")
                     .build();
         }
-    }
-
-    // Placeholder for the proper env which will signify that this operator is namespace scoped and should use
-    // roles and rolebindings
-    public static boolean isClusterScoped() {
-        // Make this mockable
-        return NAMESPACED == null;
     }
 }

@@ -49,7 +49,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(VertxExtension.class)
-public class KafkaAssemblyOperatorPermissionsModeTest {
+public class KafkaAssemblyOperatorRbacScopeTest {
     private final KubernetesVersion kubernetesVersion = KubernetesVersion.V1_11;
     private final MockCertManager certManager = new MockCertManager();
     private final PasswordGenerator passwordGenerator = new PasswordGenerator(10, "a", "a");
@@ -71,7 +71,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
     }
 
     /**
-     * Override KafkaAssemblyOperator to only run reconciliation steps that concern the STRIMZI_PERMISSIONS_MODE feature
+     * Override KafkaAssemblyOperator to only run reconciliation steps that concern the STRIMZI_RBAC_SCOPE feature
      */
     class KafkaAssemblyOperatorRolesSubset extends KafkaAssemblyOperator {
         public KafkaAssemblyOperatorRolesSubset(Vertx vertx, PlatformFeaturesAvailability pfa, CertManager certManager, PasswordGenerator passwordGenerator, ResourceOperatorSupplier supplier, ClusterOperatorConfig config) {
@@ -83,21 +83,21 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
             return reconcileState.getEntityOperatorDescription()
                     .compose(state -> state.entityOperatorRole())
                     .compose(state -> state.entityOperatorServiceAccount())
-                    .compose(state -> state.entityOperatorTopicOpRoleRoleBinding())
-                    .compose(state -> state.entityOperatorTopicOpClusterRoleRoleBinding())
-                    .compose(state -> state.entityOperatorUserOpRoleRoleBinding())
-                    .compose(state -> state.entityOperatorUserOpClusterRoleRoleBinding())
+                    .compose(state -> state.entityOperatorTopicOpRoleBindingForRole())
+                    .compose(state -> state.entityOperatorTopicOpRoleBindingForClusterRole())
+                    .compose(state -> state.entityOperatorUserOpRoleBindingForRole())
+                    .compose(state -> state.entityOperatorUserOpRoleBindingForClusterRole())
                     .map((Void) null);
         }
 
     }
 
     /**
-     * This test checks that when STRIMZI_PERMISSIONS_MODE feature is set to 'namespace', the cluster operator only
+     * This test checks that when STRIMZI_RBAC_SCOPE feature is set to 'namespace', the cluster operator only
      * deploys and binds to Roles
      */
     @Test
-    public void testRolesDeployedWhenPermissionsModeNamespace(VertxTestContext context) {
+    public void testRolesDeployedWhenNamespaceRbacScope(VertxTestContext context) {
         Kafka kafka = new KafkaBuilder()
                 .withNewMetadata()
                     .withName(clusterName)
@@ -153,7 +153,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
                     assertThat(roleBindings, hasSize(4));
 
                     // Check all RoleBindings, easier to index by order applied
-                    assertThat(roleBindingNames.get(0), is("strimzi-test-instance-entity-topic-operator-role"));
+                    assertThat(roleBindingNames.get(0), is("test-instance-entity-topic-operator-role"));
                     assertThat(roleBindings.get(0), hasRoleRef(new RoleRefBuilder()
                             .withApiGroup("rbac.authorization.k8s.io")
                             .withKind("Role")
@@ -163,7 +163,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
                     assertThat(roleBindingNames.get(1), is("strimzi-test-instance-entity-topic-operator"));
                     assertThat(roleBindings.get(1), is(nullValue()));
 
-                    assertThat(roleBindingNames.get(2), is("strimzi-test-instance-entity-user-operator-role"));
+                    assertThat(roleBindingNames.get(2), is("test-instance-entity-user-operator-role"));
                     assertThat(roleBindings.get(2), hasRoleRef(new RoleRefBuilder()
                             .withApiGroup("rbac.authorization.k8s.io")
                             .withKind("Role")
@@ -178,11 +178,11 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
     }
 
     /**
-     * This test checks that when STRIMZI_PERMISSIONS_MODE feature is set to 'cluster', the cluster operator
+     * This test checks that when STRIMZI_RBAC_SCOPE feature is set to 'cluster', the cluster operator
      * binds to ClusterRoles
      */
     @Test
-    public void testRoleBindingToClusterRoleDeployedWhenPermissionsModeCluster(VertxTestContext context) {
+    public void testRoleBindingForClusterRoleDeployedWhenClusterRbacScope(VertxTestContext context) {
         Kafka kafka = new KafkaBuilder()
                 .withNewMetadata()
                     .withName(clusterName)
@@ -238,7 +238,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
                     assertThat(roleBindings, hasSize(4));
 
                     // Check all RoleBindings, easier to index by order applied
-                    assertThat(roleBindingNames.get(0), is("strimzi-test-instance-entity-topic-operator-role"));
+                    assertThat(roleBindingNames.get(0), is("test-instance-entity-topic-operator-role"));
                     assertThat(roleBindings.get(0), is(nullValue()));
 
                     assertThat(roleBindingNames.get(1), is("strimzi-test-instance-entity-topic-operator"));
@@ -248,7 +248,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
                             .withName(EntityOperator.EO_CLUSTER_ROLE_NAME)
                             .build()));
 
-                    assertThat(roleBindingNames.get(2), is("strimzi-test-instance-entity-user-operator-role"));
+                    assertThat(roleBindingNames.get(2), is("test-instance-entity-user-operator-role"));
                     assertThat(roleBindings.get(2), is(nullValue()));
 
                     assertThat(roleBindingNames.get(3), is("strimzi-test-instance-entity-user-operator"));
@@ -263,11 +263,11 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
     }
 
     /**
-     * This test checks that when STRIMZI_PERMISSIONS_MODE feature is set to 'namespace', the cluster operator
+     * This test checks that when STRIMZI_RBAC_SCOPE feature is set to 'namespace', the cluster operator
      * binds to ClusterRoles when it can't use Roles due to cross namespace permissions
      */
     @Test
-    public void testRoleBindingToClusterRoleDeployedWhenPermissionsModeNamespaceAndMultiWatchNamespace(VertxTestContext context) {
+    public void testRoleBindingForClusterRoleDeployedWhenNamespaceRbacScopeAndMultiWatchNamespace(VertxTestContext context) {
         Kafka kafka = new KafkaBuilder()
                 .withNewMetadata()
                     .withName(clusterName)
@@ -326,7 +326,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
 
 
                     // Check all RoleBindings, easier to index by order applied
-                    assertThat(roleBindingNames.get(0), is("strimzi-test-instance-entity-topic-operator-role"));
+                    assertThat(roleBindingNames.get(0), is("test-instance-entity-topic-operator-role"));
                     assertThat(roleBindings.get(0), is(nullValue()));
 
                     assertThat(roleBindingNames.get(1), is("strimzi-test-instance-entity-topic-operator"));
@@ -337,7 +337,7 @@ public class KafkaAssemblyOperatorPermissionsModeTest {
                             .build()));
                     assertThat(roleBindings.get(1).getMetadata().getNamespace(), is("other-ns"));
 
-                    assertThat(roleBindingNames.get(2), is("strimzi-test-instance-entity-user-operator-role"));
+                    assertThat(roleBindingNames.get(2), is("test-instance-entity-user-operator-role"));
                     assertThat(roleBindings.get(2), is(nullValue()));
 
                     assertThat(roleBindingNames.get(3), is("strimzi-test-instance-entity-user-operator"));

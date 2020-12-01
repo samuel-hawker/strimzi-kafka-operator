@@ -22,16 +22,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @Tag(REGRESSION)
-class RolesOnlyOperatorST extends AbstractST {
+class NamespacedPermissonsModeOperatorST extends AbstractST {
 
     static final String NAMESPACE = "roles-only-cluster-test";
     static final String CLUSTER_NAME = "roles-only-cluster";
 
-    private static final Logger LOGGER = LogManager.getLogger(RolesOnlyOperatorST.class);
+    private static final Logger LOGGER = LogManager.getLogger(NamespacedPermissonsModeOperatorST.class);
 
     @Test
-    void testRolesOnlyDeploysRoles() {
-        assumeTrue(Environment.isRolesOnly());
+    void testNamespacedRbacScopeDeploysRoles() {
+        assumeTrue(Environment.isNamespaceRbacScope());
         prepareEnvironment();
 
         KafkaResource.kafkaEphemeral(CLUSTER_NAME, 3, 3).done();

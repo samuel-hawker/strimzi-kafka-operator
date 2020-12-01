@@ -132,7 +132,7 @@ public abstract class AbstractST implements TestSeparator {
         } else {
             LOGGER.info("Going to install ClusterOperator via Yaml bundle");
             prepareEnvForOperator(namespace, bindingsNamespaces);
-            if (Environment.isRolesOnly()) {
+            if (Environment.isNamespaceRbacScope()) {
                 // if roles only, only deploy the rolebindings
                 applyRoleBindings(namespace, namespace);
             } else {
@@ -170,7 +170,7 @@ public abstract class AbstractST implements TestSeparator {
                     (x, y) -> x, LinkedHashMap::new));
         for (Map.Entry<File, String> entry : operatorFiles.entrySet()) {
             LOGGER.info("Applying configuration file: {}", entry.getKey());
-            if (Environment.isRolesOnly()) {
+            if (Environment.isNamespaceRbacScope()) {
                 switchClusterRolesToRoles(entry.getValue());
             }
             clusterOperatorConfigs.push(entry.getKey().getPath());
@@ -294,6 +294,8 @@ public abstract class AbstractST implements TestSeparator {
         KubernetesResource.clusterRoleBinding(TestUtils.USER_PATH + "/../install/cluster-operator/021-ClusterRoleBinding-strimzi-cluster-operator.yaml", namespace);
         // 030-ClusterRoleBinding
         KubernetesResource.clusterRoleBinding(TestUtils.USER_PATH + "/../install/cluster-operator/030-ClusterRoleBinding-strimzi-cluster-operator-kafka-broker-delegation.yaml", namespace);
+        // 033-ClusterRoleBinding
+        KubernetesResource.clusterRoleBinding(TestUtils.USER_PATH + "/../install/cluster-operator/033-ClusterRoleBinding-strimzi-cluster-operator-kafka-client-delegation.yaml", namespace);
     }
 
     private static void applyRoleBindings(String namespace, String bindingsNamespace) {
