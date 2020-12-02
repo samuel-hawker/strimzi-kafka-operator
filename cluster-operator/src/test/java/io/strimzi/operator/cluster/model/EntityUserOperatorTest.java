@@ -298,10 +298,24 @@ public class EntityUserOperatorTest {
     }
 
     @Test
-    public void testRoleBinding()   {
-        RoleBinding binding = entityUserOperator.generateRoleBinding(namespace, uoWatchedNamespace);
+    public void testRoleBindingForClusterRole()   {
+        RoleBinding binding = entityUserOperator.generateRoleBindingForClusterRole(namespace, uoWatchedNamespace);
 
         assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
         assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));
+
+        assertThat(binding.getRoleRef().getKind(), is("ClusterRole"));
+        assertThat(binding.getRoleRef().getName(), is("strimzi-entity-operator"));
+    }
+
+    @Test
+    public void testRoleBindingForRole()   {
+        RoleBinding binding = entityUserOperator.generateRoleBindingForRole(namespace, uoWatchedNamespace);
+
+        assertThat(binding.getSubjects().get(0).getNamespace(), is(namespace));
+        assertThat(binding.getMetadata().getNamespace(), is(uoWatchedNamespace));
+
+        assertThat(binding.getRoleRef().getKind(), is("Role"));
+        assertThat(binding.getRoleRef().getName(), is("foo-entity-operator"));
     }
 }
