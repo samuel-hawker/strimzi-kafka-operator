@@ -189,25 +189,20 @@ public class KafkaConnectAssemblyOperator extends AbstractConnectOperator<Kubern
      */
     Future<ReconcileResult<ClusterRoleBinding>> connectInitClusterRoleBinding(String namespace, String name, KafkaConnectCluster connectCluster) {
         ClusterRoleBinding desired = connectCluster.generateClusterRoleBinding();
-        Future<ReconcileResult<ClusterRoleBinding>> fut = clusterRoleBindingOperations.reconcile(
-                KafkaConnectResources.initContainerClusterRoleBindingName(name, namespace), desired);
-
-        Promise<ReconcileResult<ClusterRoleBinding>> replacementPromise = Promise.promise();
-
-        fut.onComplete(res -> {
-            if (res.failed()) {
-                if (desired == null && res.cause() != null && res.cause().getMessage() != null &&
-                        res.cause().getMessage().contains("Message: Forbidden!")) {
-                    log.debug("Ignoring forbidden access to ClusterRoleBindings which seems not needed while Kafka Connect rack awareness is disabled.");
-                    replacementPromise.complete();
-                } else {
-                    replacementPromise.fail(res.cause());
-                }
-            } else {
-                replacementPromise.complete(res.result());
-            }
-        });
-
-        return replacementPromise.future();
+        return clusterRoleBindingOperations.reconcile(
+                    KafkaConnectResources.initContainerClusterRoleBindingName(name, namespace),
+                    desired)
+                .compose(
+                    rr -> Future.succeededFuture(),
+                    e -> {
+                        if (desired == null
+                                && e.getMessage() != null
+                                && e.getMessage().contains("Message: Forbidden!")) {
+                            log.debug("Ignoring forbidden access to ClusterRoleBindings which seems not needed while Kafka Connect rack awareness is disabled.");
+                            return Future.succeededFuture();
+                        }
+                        return Future.failedFuture(e.getMessage());
+                    }
+                );
     }
 }
