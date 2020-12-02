@@ -387,6 +387,12 @@ public class EntityOperator extends AbstractModel {
                 .build();
     }
 
+    /**
+     * Read the entity operator ClusterRole, and use the rules to create a new Role.
+     * This is done to avoid duplication of the rules set defined in source code.
+     *
+     * @return role for the entity operator
+     */
     public Role generateRole() {
 
         List<PolicyRule> rules;

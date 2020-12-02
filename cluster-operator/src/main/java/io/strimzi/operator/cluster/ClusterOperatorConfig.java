@@ -150,7 +150,7 @@ public class ClusterOperatorConfig {
             } else if (namespacesList.matches("(\\s*[a-z0-9.-]+\\s*,)*\\s*[a-z0-9.-]+\\s*")) {
                 namespaces = new HashSet<>(asList(namespacesList.trim().split("\\s*,+\\s*")));
             } else {
-                throw new InvalidConfigurationException(ClusterOperatorConfig.STRIMZI_NAMESPACE
+                throw new InvalidConfigurationException(STRIMZI_NAMESPACE
                         + " is not a valid list of namespaces nor the 'any namespace' wildcard "
                         + AbstractWatchableResourceOperator.ANY_NAMESPACE);
             }
@@ -222,8 +222,8 @@ public class ClusterOperatorConfig {
                 rbacScope = RbacScope.valueOf(rbacScopeEnvVar);
             } catch (IllegalArgumentException e) {
                 throw new InvalidConfigurationException(rbacScopeEnvVar
-                        + " is not a valid " + ClusterOperatorConfig.STRIMZI_RBAC_SCOPE + " value. " +
-                        ClusterOperatorConfig.STRIMZI_RBAC_SCOPE + " can have one of the following values: cluster, namespace.");
+                        + " is not a valid " + STRIMZI_RBAC_SCOPE + " value. " +
+                        STRIMZI_RBAC_SCOPE + " can have one of the following values: cluster, namespace.");
             }
         }
 
@@ -246,8 +246,8 @@ public class ClusterOperatorConfig {
                     break;
                 default:
                     throw new InvalidConfigurationException(imagePullPolicyEnvVar
-                            + " is not a valid " + ClusterOperatorConfig.STRIMZI_IMAGE_PULL_POLICY + " value. " +
-                            ClusterOperatorConfig.STRIMZI_IMAGE_PULL_POLICY + " can have one of the following values: Always, IfNotPresent, Never.");
+                            + " is not a valid " + STRIMZI_IMAGE_PULL_POLICY + " value. " +
+                            STRIMZI_IMAGE_PULL_POLICY + " can have one of the following values: Always, IfNotPresent, Never.");
             }
         }
 
@@ -298,7 +298,7 @@ public class ClusterOperatorConfig {
             if (imagePullSecretList.matches("(\\s*[a-z0-9.-]+\\s*,)*\\s*[a-z0-9.-]+\\s*")) {
                 imagePullSecrets = Arrays.stream(imagePullSecretList.trim().split("\\s*,+\\s*")).map(secret -> new LocalObjectReferenceBuilder().withName(secret).build()).collect(Collectors.toList());
             } else {
-                throw new InvalidConfigurationException(ClusterOperatorConfig.STRIMZI_IMAGE_PULL_SECRETS
+                throw new InvalidConfigurationException(STRIMZI_IMAGE_PULL_SECRETS
                         + " is not a valid list of secret names");
             }
         }
